@@ -101,12 +101,42 @@ const CITY_COORDS: Record<string, [number, number]> = {
   'regio rotterdam':  [51.9244, 4.4777],
 };
 
-function geocode(location: string): [number, number] | null {
+const geocodeCache: Record<string, [number, number] | null> = {};
+
+function geocodeLocal(location: string): [number, number] | null {
   const loc = location.toLowerCase().trim();
   for (const [city, coords] of Object.entries(CITY_COORDS)) {
     if (loc.includes(city)) return coords;
   }
-  return null; // unknown city — don't place on map rather than wrong coords
+  return null;
+}
+
+async function geocode(location: string): Promise<[number, number] | null> {
+  const key = location.toLowerCase().trim();
+  if (key in geocodeCache) return geocodeCache[key];
+
+  const local = geocodeLocal(location);
+  if (local) { geocodeCache[key] = local; return local; }
+
+  // Nominatim fallback — free OSM geocoder, no API key needed
+  try {
+    const q = encodeURIComponent(location);
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${q}&countrycodes=nl&format=json&limit=1`,
+      { headers: { 'User-Agent': 'neighborhood-piper/1.0 (hackathon project)' } }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (data[0]) {
+        const coords: [number, number] = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+        geocodeCache[key] = coords;
+        return coords;
+      }
+    }
+  } catch { /* ignore, return null */ }
+
+  geocodeCache[key] = null;
+  return null;
 }
 
 function extractSalary(text: string): string {
@@ -190,8 +220,10 @@ export async function GET(req: NextRequest) {
       for (let i = 0; i < listings.length; i += 3) {
         const batch = listings.slice(i, i + 3);
         const detailed = await Promise.all(batch.map(async (job) => {
-          const detail = await scrapeDetail(job.slug);
-          const coords = geocode(job.location);
+          const [detail, coords] = await Promise.all([
+            scrapeDetail(job.slug),
+            geocode(job.location),
+          ]);
           return {
             id: job.id,
             title: job.title,
