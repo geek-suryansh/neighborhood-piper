@@ -754,7 +754,7 @@ function CVTab({ data }: { data: AppData }) {
           <div>
             <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, letterSpacing: "-0.01em" }}>{data.name || "Anoniem Profiel"}</h3>
             <p style={{ color: COLORS.textDim, fontSize: 13, margin: 0 }}>
-              {data.age} jaar • {data.neighborhood ? `${NEIGHBORHOODS.find(n => n.slug === data.neighborhood)?.label ?? "Amsterdam"}, ` : ""}Amsterdam{data.email && ` • ${data.email}`}
+              {data.age} jaar • {data.neighborhood ? `${data.neighborhood}, ` : ""}Amsterdam{data.email && ` • ${data.email}`}
             </p>
           </div>
         </div>
