@@ -9,6 +9,7 @@ export type AppData = {
   name?: string;
   email?: string;
   location?: Location;
+  neighborhood?: string | null;
   school?: string;
   eduLevel?: string;
   eduYear?: string;
