@@ -116,6 +116,6 @@ export async function POST() {
     return NextResponse.json({ message: 'Jobs refreshed', count: jobs.length });
   } catch (err) {
     console.error('Refresh failed:', err);
-    return NextResponse.json({ error: 'Refresh failed', detail: String(err) }, { status: 500 });
+    return NextResponse.json({ error: 'Refresh failed', detail: err instanceof Error ? err.message : JSON.stringify(err) }, { status: 500 });
   }
 }
