@@ -37,18 +37,20 @@ export async function POST(req: NextRequest) {
 
   let processed = 0;
   let failed = 0;
+  let lastError = '';
 
   for (const job of jobs) {
     try {
       const text = [job.title, job.category, job.description].filter(Boolean).join(' — ');
       const embedding = await embedText(text);
       const vectorLiteral = `[${embedding.join(',')}]`;
-      await getSupabase().from('jobs').update({ embedding: vectorLiteral }).eq('id', job.id);
+      const { error: updateError } = await getSupabase().from('jobs').update({ embedding: vectorLiteral }).eq('id', job.id);
+      if (updateError) throw new Error(`Supabase: ${updateError.message}`);
       processed++;
-    } catch {
+    } catch (err) {
       failed++;
+      lastError = err instanceof Error ? err.message : String(err);
     }
-    // Small delay to respect OpenAI rate limits (3500 RPM on free tier)
     await new Promise(r => setTimeout(r, 20));
   }
 
@@ -57,5 +59,5 @@ export async function POST(req: NextRequest) {
     .select('*', { count: 'exact', head: true })
     .is('embedding', null);
 
-  return NextResponse.json({ processed, failed, remaining: count ?? 0 });
+  return NextResponse.json({ processed, failed, remaining: count ?? 0, lastError: lastError || undefined });
 }
