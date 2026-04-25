@@ -44,7 +44,7 @@ export default function Home() {
             Jobs map
           </Link>
           <Link
-            href="/stap"
+            href="/app"
             className="bg-orange-500 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-orange-400 transition-colors"
           >
             Find my job →
@@ -74,7 +74,7 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row gap-3 mb-10">
             <Link
-              href="/stap"
+              href="/app"
               className="bg-orange-500 hover:bg-orange-400 text-white px-7 py-3.5 rounded-full font-semibold text-base transition-colors text-center"
             >
               Start — it&apos;s free
@@ -204,7 +204,7 @@ export default function Home() {
           Let&apos;s go find it.
         </p>
         <Link
-          href="/stap"
+          href="/app"
           className="inline-block bg-white hover:bg-orange-50 text-orange-500 px-10 py-4 rounded-full text-lg font-bold transition-colors"
         >
           Start the 5-minute quiz →
