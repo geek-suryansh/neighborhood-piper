@@ -1,4 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
+import type { CandidateProfile } from './profile';
+
+export interface ProfileRow {
+  id: string;
+  email: string | null;
+  display_name: string | null;
+  age_range: string | null;
+  profile: CandidateProfile;
+  created_at?: string;
+}
 
 export interface JobRow {
   id: string;

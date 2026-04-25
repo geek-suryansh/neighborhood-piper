@@ -6,6 +6,7 @@ import {
   type AppData,
 } from "@/lib/stap-data";
 import { toProfile } from "@/lib/profile";
+import { getSupabase } from "@/lib/supabase";
 
 const COLORS = {
   bg: "#0a0a0f",
@@ -519,15 +520,20 @@ function DreamScreen({ data, setData, onNext }: { data: AppData; setData: (d: Ap
 function LoadingScreen({ onDone }: { onDone: () => void }) {
   const [progress, setProgress] = useState(0);
   const msgs = ["Profiel analyseren...", "Banen matchen...", "CV opbouwen...", "Klaar!"];
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 100) { clearInterval(interval); setTimeout(onDone, 400); return 100; }
-        return p + 2;
-      });
+      setProgress((p) => (p >= 100 ? 100 : p + 2));
     }, 60);
     return () => clearInterval(interval);
-  }, [onDone]);
+  }, []);
+
+  useEffect(() => {
+    if (progress < 100) return;
+    const t = setTimeout(onDone, 400);
+    return () => clearTimeout(t);
+  }, [progress, onDone]);
+
   const msgIdx = Math.min(Math.floor(progress / 25), 3);
   return (
     <div style={{ ...styles.container, paddingTop: 120, textAlign: "center" }}>
@@ -806,7 +812,21 @@ export default function StapPage() {
       case "skills":       return <SkillsScreen data={data} setData={setData} onNext={() => setScreen("availability")} />;
       case "availability": return <AvailabilityScreen data={data} setData={setData} onNext={() => setScreen("dream")} />;
       case "dream":        return <DreamScreen data={data} setData={setData} onNext={() => setScreen("loading")} />;
-      case "loading":      return <LoadingScreen onDone={() => setScreen("results")} />;
+      case "loading":      return <LoadingScreen onDone={() => {
+        setScreen("results");
+        const profile = toProfile(data);
+        void (async () => {
+          try {
+            await getSupabase().from("profiles").insert({
+              id: profile.profileId,
+              email: profile.identity.contactEmail,
+              display_name: profile.identity.displayName,
+              age_range: profile.demographics.ageRange,
+              profile,
+            });
+          } catch { /* silent fail */ }
+        })();
+      }} />;
       case "results":      return <ResultsScreen data={data} onTab={setResultTab} activeTab={resultTab} />;
       default:             return null;
     }
