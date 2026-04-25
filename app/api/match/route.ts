@@ -34,7 +34,16 @@ function buildProfileText(profile: any): string {
   }
 
   if (profile.education?.levelLabel) {
-    parts.push(`Education: ${profile.education.levelLabel}`);
+    let edu = `Education: ${profile.education.levelLabel}`;
+    if (profile.education?.institution) edu += ` at ${profile.education.institution}`;
+    if (profile.education?.graduationYear) {
+      edu += ` (${profile.education.inProgress ? 'graduating' : 'graduated'} ${profile.education.graduationYear})`;
+    }
+    parts.push(edu);
+  }
+
+  if (profile.derived?.interestIds?.length) {
+    parts.push(`Job domains: ${profile.derived.interestIds.join(', ')}`);
   }
 
   if (profile.aspiration?.dreamText) {
