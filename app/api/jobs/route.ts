@@ -2,6 +2,12 @@ import { NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
 import { getSupabase, type JobRow } from '@/lib/supabase';
 
+const YC_BASE = 'https://www.youngcapital.nl';
+const HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+  'Accept-Language': 'nl-NL,nl;q=0.9',
+};
+
 const NEIGHBORHOOD_COORDS: Record<string, [number, number]> = {
   'centrum':       [52.3702, 4.8952],
   'jordaan':       [52.3748, 4.8806],
@@ -55,17 +61,25 @@ function mapEmployment(raw: string): string {
   return 'Flexible';
 }
 
+async function fetchDescription(href: string): Promise<string> {
+  try {
+    const res = await fetch(`${YC_BASE}${href}`, { headers: HEADERS });
+    if (!res.ok) return '';
+    const $ = cheerio.load(await res.text());
+    $('script, style, nav, header, footer').remove();
+    const text = $('main, .job-opening-detail, article').first().text().replace(/\s+/g, ' ').trim();
+    return text.slice(0, 2000);
+  } catch {
+    return '';
+  }
+}
+
 async function scrapeYoungCapital(): Promise<JobRow[]> {
-  const res = await fetch('https://www.youngcapital.nl/vacatures-in/amsterdam', {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
-      'Accept-Language': 'nl-NL,nl;q=0.9',
-    },
-  });
+  const res = await fetch(`${YC_BASE}/vacatures-in/amsterdam`, { headers: HEADERS });
   if (!res.ok) throw new Error(`YoungCapital returned ${res.status}`);
 
   const $ = cheerio.load(await res.text());
-  const jobs: JobRow[] = [];
+  const listings: (JobRow & { href: string })[] = [];
 
   $('a.job-opening__item').each((_, el) => {
     const $el = $(el);
@@ -79,8 +93,20 @@ async function scrapeYoungCapital(): Promise<JobRow[]> {
     const locationText = $el.find('.nyc-icon-location').parent().find('span:last-child').text().trim() || 'Amsterdam';
     if (!id || !title) return;
     const [lat, lng] = geocode(title, locationText);
-    jobs.push({ id, title, category, type: mapEmployment(employment.split(',')[0]), salary: formatSalary(salaryMin, salaryMax), location: locationText, url: `https://www.youngcapital.nl${href}`, lat, lng });
+    listings.push({ id, title, category, type: mapEmployment(employment.split(',')[0]), salary: formatSalary(salaryMin, salaryMax), location: locationText, url: `${YC_BASE}${href}`, lat, lng, href, source: 'youngcapital' });
   });
+
+  // Fetch descriptions 3 at a time
+  const jobs: JobRow[] = [];
+  for (let i = 0; i < listings.length; i += 3) {
+    const batch = listings.slice(i, i + 3);
+    const withDesc = await Promise.all(batch.map(async ({ href, ...job }) => ({
+      ...job,
+      description: await fetchDescription(href),
+    })));
+    jobs.push(...withDesc);
+    await new Promise(r => setTimeout(r, 150));
+  }
 
   return jobs;
 }
@@ -96,10 +122,10 @@ export async function GET() {
     return NextResponse.json({ jobs: data, source: 'supabase', count: data.length });
   }
 
-  // Table empty or error — scrape and seed
   try {
     const jobs = await scrapeYoungCapital();
-    await getSupabase().from('jobs').upsert(jobs, { onConflict: 'id' });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await getSupabase().from('jobs').upsert(jobs as any[], { onConflict: 'id' });
     return NextResponse.json({ jobs, source: 'scraped', count: jobs.length });
   } catch (err) {
     console.error('Scrape failed:', err);
@@ -107,11 +133,12 @@ export async function GET() {
   }
 }
 
-// POST /api/jobs — force re-scrape and upsert (called by cron or manually)
+// POST /api/jobs — force re-scrape with descriptions and upsert
 export async function POST() {
   try {
     const jobs = await scrapeYoungCapital();
-    const { error } = await getSupabase().from('jobs').upsert(jobs, { onConflict: 'id' });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await getSupabase().from('jobs').upsert(jobs as any[], { onConflict: 'id' });
     if (error) throw error;
     return NextResponse.json({ message: 'Jobs refreshed', count: jobs.length });
   } catch (err) {
