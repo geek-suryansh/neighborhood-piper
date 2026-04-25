@@ -658,34 +658,68 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
 
 // ── Result tabs ──
 
-function JobsTab() {
+interface MatchedJob {
+  id: string;
+  title: string;
+  type: string;
+  salary: string;
+  location: string;
+  url: string;
+  similarity?: number;
+}
+
+function JobsTab({ profileId }: { profileId: string }) {
+  const [jobs, setJobs] = useState<MatchedJob[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetch('/api/match', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileId }),
+    })
+      .then(r => r.json())
+      .then(d => { setJobs(d.jobs || []); setLoading(false); })
+      .catch(() => { setError('Kon banen niet laden'); setLoading(false); });
+  }, [profileId]);
+
+  if (loading) return (
+    <div style={{ textAlign: 'center', padding: '40px 0', color: COLORS.textDim }}>
+      <div style={{ fontSize: 28, marginBottom: 12 }}>⚡</div>
+      <p style={{ margin: 0, fontSize: 14 }}>Banen zoeken die bij jou passen…</p>
+    </div>
+  );
+
+  if (error) return <p style={{ color: COLORS.orange, fontSize: 14 }}>{error}</p>;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, paddingBottom: 32 }}>
-      <p style={{ color: COLORS.textDim, fontSize: 14, margin: "0 0 8px" }}>{MOCK_JOBS.length} banen gevonden bij jou in de buurt</p>
-      {MOCK_JOBS.map((job, i) => (
-        <div key={i} style={{ padding: 18, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-            <div>
-              <h3 style={{ fontSize: 17, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.01em" }}>{job.title}</h3>
-              <p style={{ color: COLORS.textDim, fontSize: 13, margin: 0 }}>{job.company}</p>
+      <p style={{ color: COLORS.textDim, fontSize: 14, margin: "0 0 8px" }}>{jobs.length} banen gevonden bij jou in de buurt</p>
+      {jobs.map((job) => {
+        const pct = job.similarity ? Math.round(job.similarity * 100) : null;
+        return (
+          <div key={job.id} style={{ padding: 18, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+              <div style={{ flex: 1, minWidth: 0, marginRight: 12 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.01em", lineHeight: 1.3 }}>{job.title}</h3>
+                <p style={{ color: COLORS.textDim, fontSize: 13, margin: 0 }}>{job.location}</p>
+              </div>
+              {pct && (
+                <div style={{ background: `linear-gradient(135deg, ${COLORS.accent}, #00c087)`, color: COLORS.bg, fontSize: 13, fontWeight: 800, padding: "4px 10px", borderRadius: 8, flexShrink: 0 }}>
+                  {pct}%
+                </div>
+              )}
             </div>
-            <div style={{ background: `linear-gradient(135deg, ${COLORS.accent}, #00c087)`, color: COLORS.bg, fontSize: 13, fontWeight: 800, padding: "4px 10px", borderRadius: 8 }}>
-              {job.match}%
+            <div style={{ display: "flex", gap: 16, fontSize: 13, color: COLORS.textDim, marginBottom: 10, flexWrap: "wrap" }}>
+              <span>⏰ {job.type}</span><span>💶 {job.salary}</span>
             </div>
+            <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 12, width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${COLORS.accent}`, background: "transparent", color: COLORS.accent, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONTS, textAlign: "center", textDecoration: "none" }}>
+              Anoniem solliciteren →
+            </a>
           </div>
-          <div style={{ display: "flex", gap: 16, fontSize: 13, color: COLORS.textDim, marginBottom: 10 }}>
-            <span>📍 {job.distance}</span><span>⏰ {job.hours}</span><span>💶 {job.wage}</span>
-          </div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {job.tags.map((tag) => (
-              <span key={tag} style={{ padding: "4px 10px", borderRadius: 6, background: COLORS.purpleDim, color: COLORS.purple, fontSize: 11, fontWeight: 600 }}>{tag}</span>
-            ))}
-          </div>
-          <button style={{ marginTop: 12, width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${COLORS.accent}`, background: "transparent", color: COLORS.accent, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONTS }}>
-            Anoniem solliciteren →
-          </button>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -806,7 +840,7 @@ function CVTab({ data }: { data: AppData }) {
 }
 
 
-function ResultsScreen({ data, onTab, activeTab }: { data: AppData; onTab: (tab: string) => void; activeTab: string }) {
+function ResultsScreen({ data, onTab, activeTab, profileId }: { data: AppData; onTab: (tab: string) => void; activeTab: string; profileId: string }) {
   return (
     <div style={styles.container}>
       <div style={{ paddingTop: 24, paddingBottom: 16 }}>
@@ -828,7 +862,7 @@ function ResultsScreen({ data, onTab, activeTab }: { data: AppData; onTab: (tab:
           </button>
         ))}
       </div>
-      {activeTab === "jobs" && <JobsTab />}
+      {activeTab === "jobs" && <JobsTab profileId={profileId} />}
       {activeTab === "cv" && <CVTab data={data} />}
     </div>
   );
@@ -900,6 +934,7 @@ export default function StapPage() {
   const [data, setData] = useState<AppData>({ interests: [], skills: [], days: [], languages: [] });
   const [resultTab, setResultTab] = useState("jobs");
   const [showDashboard, setShowDashboard] = useState(false);
+  const [profileId, setProfileId] = useState("");
 
   if (showDashboard) {
     return (
@@ -923,8 +958,9 @@ export default function StapPage() {
       case "availability": return <AvailabilityScreen data={data} setData={setData} onNext={() => setScreen("dream")} />;
       case "dream":        return <DreamScreen data={data} setData={setData} onNext={() => setScreen("loading")} />;
       case "loading":      return <LoadingScreen onDone={() => {
-        setScreen("results");
         const profile = toProfile(data);
+        setProfileId(profile.profileId);
+        setScreen("results");
         void (async () => {
           try {
             await getSupabase().from("profiles").insert({
@@ -937,7 +973,7 @@ export default function StapPage() {
           } catch { /* silent fail */ }
         })();
       }} />;
-      case "results":      return <ResultsScreen data={data} onTab={setResultTab} activeTab={resultTab} />;
+      case "results":      return <ResultsScreen data={data} onTab={setResultTab} activeTab={resultTab} profileId={profileId} />;
       default:             return null;
     }
   };
