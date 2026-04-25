@@ -52,6 +52,18 @@ function buildProfileText(profile: any): string {
     parts.push(`Location: ${profile.demographics.city}`);
   }
 
+  if (profile.demographics?.ageRange) {
+    parts.push(`Age: ${profile.demographics.ageRange}`);
+  }
+
+  if (profile.derived?.canWorkWeekends === false) {
+    parts.push('Not available on weekends');
+  }
+
+  if (profile.derived?.isEligibleForMinimumWage === false) {
+    parts.push('Youth worker, part-time student job');
+  }
+
   return parts.join('. ');
 }
 
