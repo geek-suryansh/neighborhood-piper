@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
 import { getSupabase, type JobRow } from '@/lib/supabase';
 
@@ -29,6 +29,7 @@ const NEIGHBORHOOD_COORDS: Record<string, [number, number]> = {
   'zaandam':       [52.4380, 4.8130],
   'haarlem':       [52.3874, 4.6462],
   'diemen':        [52.3397, 4.9603],
+  'schiphol':      [52.3105, 4.7683],
 };
 
 function geocode(title: string, location: string): [number, number] {
@@ -74,12 +75,16 @@ async function fetchDescription(href: string): Promise<string> {
   }
 }
 
-async function scrapeYoungCapital(): Promise<JobRow[]> {
-  const res = await fetch(`${YC_BASE}/vacatures-in/amsterdam`, { headers: HEADERS });
-  if (!res.ok) throw new Error(`YoungCapital returned ${res.status}`);
+async function scrapeListingPage(page: number): Promise<{ listing: Omit<JobRow, 'description'>; href: string }[]> {
+  const url = page === 1
+    ? `${YC_BASE}/vacatures-in/amsterdam`
+    : `${YC_BASE}/vacatures-in/amsterdam?page=${page}`;
+
+  const res = await fetch(url, { headers: HEADERS });
+  if (!res.ok) throw new Error(`YoungCapital page ${page} returned ${res.status}`);
 
   const $ = cheerio.load(await res.text());
-  const listings: (JobRow & { href: string })[] = [];
+  const results: { listing: Omit<JobRow, 'description'>; href: string }[] = [];
 
   $('a.job-opening__item').each((_, el) => {
     const $el = $(el);
@@ -93,22 +98,51 @@ async function scrapeYoungCapital(): Promise<JobRow[]> {
     const locationText = $el.find('.nyc-icon-location').parent().find('span:last-child').text().trim() || 'Amsterdam';
     if (!id || !title) return;
     const [lat, lng] = geocode(title, locationText);
-    listings.push({ id, title, category, type: mapEmployment(employment.split(',')[0]), salary: formatSalary(salaryMin, salaryMax), location: locationText, url: `${YC_BASE}${href}`, lat, lng, href, source: 'youngcapital' });
+    results.push({
+      href,
+      listing: {
+        id,
+        title,
+        category,
+        type: mapEmployment(employment.split(',')[0]),
+        salary: formatSalary(salaryMin, salaryMax),
+        location: locationText,
+        url: `${YC_BASE}${href}`,
+        lat,
+        lng,
+        source: 'youngcapital',
+      },
+    });
   });
 
-  // Fetch descriptions 3 at a time
-  const jobs: JobRow[] = [];
-  for (let i = 0; i < listings.length; i += 3) {
-    const batch = listings.slice(i, i + 3);
-    const withDesc = await Promise.all(batch.map(async ({ href, ...job }) => ({
-      ...job,
-      description: await fetchDescription(href),
-    })));
-    jobs.push(...withDesc);
-    await new Promise(r => setTimeout(r, 150));
+  return results;
+}
+
+async function scrapeYoungCapital(maxPages = 27): Promise<JobRow[]> {
+  const allJobs: JobRow[] = [];
+
+  for (let page = 1; page <= maxPages; page++) {
+    try {
+      const listings = await scrapeListingPage(page);
+      if (listings.length === 0) break;
+
+      // Fetch descriptions 3 at a time
+      for (let i = 0; i < listings.length; i += 3) {
+        const batch = listings.slice(i, i + 3);
+        const withDesc = await Promise.all(batch.map(async ({ href, listing }) => ({
+          ...listing,
+          description: await fetchDescription(href),
+        })));
+        allJobs.push(...withDesc);
+        await new Promise(r => setTimeout(r, 150));
+      }
+    } catch (err) {
+      console.error(`YC page ${page} failed:`, err);
+      break;
+    }
   }
 
-  return jobs;
+  return allJobs;
 }
 
 // GET /api/jobs — return stored jobs, scrape+store if table is empty
@@ -133,14 +167,15 @@ export async function GET() {
   }
 }
 
-// POST /api/jobs — force re-scrape with descriptions and upsert
-export async function POST() {
+// POST /api/jobs?pages=N — force re-scrape all pages with descriptions
+export async function POST(req: NextRequest) {
   try {
-    const jobs = await scrapeYoungCapital();
+    const maxPages = Math.min(parseInt(req.nextUrl.searchParams.get('pages') || '27'), 27);
+    const jobs = await scrapeYoungCapital(maxPages);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await getSupabase().from('jobs').upsert(jobs as any[], { onConflict: 'id' });
     if (error) throw error;
-    return NextResponse.json({ message: 'Jobs refreshed', count: jobs.length });
+    return NextResponse.json({ message: 'YoungCapital jobs refreshed', pages_scraped: maxPages, count: jobs.length });
   } catch (err) {
     console.error('Refresh failed:', err);
     return NextResponse.json({ error: 'Refresh failed', detail: err instanceof Error ? err.message : JSON.stringify(err) }, { status: 500 });
