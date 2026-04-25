@@ -1,15 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef } from "react";
-import dynamic from "next/dynamic";
+import { useState, useEffect } from "react";
 import {
   INTERESTS, SKILLS_OPTIONS, LANGUAGES, EDU_LEVELS, EDU_YEARS,
   type AppData,
 } from "@/lib/stap-data";
 import { toProfile, type CandidateProfile } from "@/lib/profile";
 import { getSupabase } from "@/lib/supabase";
-
-const MatchMap = dynamic(() => import("@/components/MatchMap"), { ssr: false });
 
 const COLORS = {
   bg: "#0a0a0f",
@@ -676,9 +673,6 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
   const [jobs, setJobs] = useState<MatchedJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [view, setView] = useState<'list' | 'map'>('list');
-  const [selected, setSelected] = useState<MatchedJob | null>(null);
-  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     fetch('/api/match', {
@@ -691,11 +685,6 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
       .catch(() => { setError('Kon banen niet laden'); setLoading(false); });
   }, [profile]);
 
-  useEffect(() => {
-    if (!selected) return;
-    cardRefs.current[selected.id]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, [selected]);
-
   if (loading) return (
     <div style={{ textAlign: 'center', padding: '40px 0', color: COLORS.textDim }}>
       <div style={{ fontSize: 28, marginBottom: 12 }}>⚡</div>
@@ -707,61 +696,14 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, paddingBottom: 32 }}>
-
-      {/* View toggle */}
-      <div style={{ display: "flex", gap: 4, background: COLORS.card, borderRadius: 10, padding: 4 }}>
-        {([['list', '📋 Lijst'], ['map', '🗺️ Kaart']] as const).map(([id, label]) => (
-          <button key={id} onClick={() => setView(id)} style={{
-            flex: 1, padding: "8px 12px", borderRadius: 8, border: "none",
-            background: view === id ? COLORS.accentDim : "transparent",
-            color: view === id ? COLORS.accent : COLORS.textDim,
-            fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: FONTS,
-            transition: "all 0.2s ease",
-          }}>{label}</button>
-        ))}
-      </div>
-
-      <p style={{ color: COLORS.textDim, fontSize: 14, margin: 0 }}>{jobs.length} banen gevonden die bij jou passen</p>
-
-      {/* Map container */}
-      {view === 'map' && (
-        <>
-          <div style={{ borderRadius: 16, overflow: "hidden", height: 340, border: `1px solid ${COLORS.border}` }}>
-            <MatchMap jobs={jobs} selected={selected} onSelect={j => setSelected(prev => prev?.id === j.id ? null : j)} />
-          </div>
-          {/* Legend */}
-          <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "8px 12px", borderRadius: 10, background: COLORS.card, border: `1px solid ${COLORS.border}`, fontSize: 12, flexWrap: "wrap" }}>
-            <span style={{ color: COLORS.textDim, fontWeight: 600, marginRight: 4 }}>Match:</span>
-            {([['#00e5a0', '70%+'], ['#f59e0b', '55–70%'], ['#ff6b35', '<55%']] as const).map(([color, label]) => (
-              <span key={label} style={{ display: "flex", alignItems: "center", gap: 5, color: COLORS.textDim }}>
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: color, display: "inline-block", flexShrink: 0 }} />
-                {label}
-              </span>
-            ))}
-            <span style={{ color: COLORS.textDim, marginLeft: "auto", fontSize: 11 }}>Klik pin of kaart voor details</span>
-          </div>
-        </>
-      )}
-
-      {/* Job cards */}
+      <p style={{ color: COLORS.textDim, fontSize: 14, margin: "0 0 8px" }}>{jobs.length} banen gevonden die bij jou passen</p>
       {jobs.map((job, idx) => {
         const score = job.score ?? job.similarity ?? 0;
         const pct = score ? Math.round(score * 100) : null;
         const color = scoreColor(score);
         const rank = idx + 1;
-        const isSelected = selected?.id === job.id;
         return (
-          <div
-            key={job.id}
-            ref={el => { cardRefs.current[job.id] = el; }}
-            onClick={() => setSelected(prev => prev?.id === job.id ? null : job)}
-            style={{
-              padding: 18, borderRadius: 16, cursor: "pointer",
-              border: `1.5px solid ${isSelected ? color : COLORS.border}`,
-              background: isSelected ? `${color}12` : COLORS.card,
-              transition: "border-color 0.2s ease, background 0.2s ease",
-            }}
-          >
+          <div key={job.id} style={{ padding: 18, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
               <div style={{ flex: 1, minWidth: 0, marginRight: 12 }}>
                 <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.01em", lineHeight: 1.3 }}>{job.title}</h3>
@@ -781,18 +723,7 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
             <div style={{ display: "flex", gap: 16, fontSize: 13, color: COLORS.textDim, flexWrap: "wrap" }}>
               <span>⏰ {job.type}</span><span>💶 {job.salary}</span>
             </div>
-            <a
-              href={job.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
-              style={{
-                display: "block", marginTop: 12, width: "100%", padding: "10px",
-                borderRadius: 10, border: `1.5px solid ${color}`,
-                background: "transparent", color, fontSize: 13, fontWeight: 700,
-                cursor: "pointer", fontFamily: FONTS, textAlign: "center", textDecoration: "none",
-              }}
-            >
+            <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 12, width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${color}`, background: "transparent", color, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONTS, textAlign: "center", textDecoration: "none" }}>
               Anoniem solliciteren →
             </a>
           </div>
