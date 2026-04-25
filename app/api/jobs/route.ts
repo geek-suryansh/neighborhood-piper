@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
+import { getSupabase, type JobRow } from '@/lib/supabase';
 
-// Amsterdam neighborhood coords for rough geocoding
 const NEIGHBORHOOD_COORDS: Record<string, [number, number]> = {
   'centrum':       [52.3702, 4.8952],
   'jordaan':       [52.3748, 4.8806],
@@ -30,7 +30,6 @@ function geocode(title: string, location: string): [number, number] {
   for (const [name, coords] of Object.entries(NEIGHBORHOOD_COORDS)) {
     if (text.includes(name)) return coords;
   }
-  // Default: scatter around Amsterdam center
   const jitter = () => (Math.random() - 0.5) * 0.06;
   return [52.3702 + jitter(), 4.8952 + jitter()];
 }
@@ -50,62 +49,73 @@ function mapEmployment(raw: string): string {
   if (r.includes('fulltime')) return 'Full-time';
   if (r.includes('parttime')) return 'Part-time';
   if (r.includes('weekend')) return 'Weekend';
-  if (r.includes('avond') || r.includes('evening')) return 'Evening';
+  if (r.includes('avond')) return 'Evening';
   if (r.includes('trainee')) return 'Traineeship';
-  if (r.includes('vakantie') || r.includes('tijdelijk')) return 'Temporary';
+  if (r.includes('tijdelijk') || r.includes('vakantie')) return 'Temporary';
   return 'Flexible';
 }
 
+async function scrapeYoungCapital(): Promise<JobRow[]> {
+  const res = await fetch('https://www.youngcapital.nl/vacatures-in/amsterdam', {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+      'Accept-Language': 'nl-NL,nl;q=0.9',
+    },
+  });
+  if (!res.ok) throw new Error(`YoungCapital returned ${res.status}`);
+
+  const $ = cheerio.load(await res.text());
+  const jobs: JobRow[] = [];
+
+  $('a.job-opening__item').each((_, el) => {
+    const $el = $(el);
+    const id = $el.attr('data-job-opening-id');
+    const title = $el.attr('data-job-opening-title') || $el.find('h3').text().trim();
+    const category = $el.attr('data-job-opening-item-category') || '';
+    const employment = $el.attr('data-job-opening-employment') || '';
+    const salaryMin = $el.attr('data-job-opening-salary-min') || '';
+    const salaryMax = $el.attr('data-job-opening-salary-max') || '';
+    const href = $el.attr('href') || '';
+    const locationText = $el.find('.nyc-icon-location').parent().find('span:last-child').text().trim() || 'Amsterdam';
+    if (!id || !title) return;
+    const [lat, lng] = geocode(title, locationText);
+    jobs.push({ id, title, category, type: mapEmployment(employment.split(',')[0]), salary: formatSalary(salaryMin, salaryMax), location: locationText, url: `https://www.youngcapital.nl${href}`, lat, lng });
+  });
+
+  return jobs;
+}
+
+// GET /api/jobs — return stored jobs, scrape+store if table is empty
 export async function GET() {
+  const { data, error } = await getSupabase()
+    .from('jobs')
+    .select('*')
+    .order('scraped_at', { ascending: false });
+
+  if (!error && data && data.length > 0) {
+    return NextResponse.json({ jobs: data, source: 'supabase', count: data.length });
+  }
+
+  // Table empty or error — scrape and seed
   try {
-    const res = await fetch('https://www.youngcapital.nl/vacatures-in/amsterdam', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept-Language': 'nl-NL,nl;q=0.9,en;q=0.8',
-        'Accept': 'text/html,application/xhtml+xml',
-      },
-      next: { revalidate: 3600 }, // cache 1 hour
-    });
-
-    if (!res.ok) throw new Error(`YoungCapital returned ${res.status}`);
-
-    const html = await res.text();
-    const $ = cheerio.load(html);
-    const jobs: object[] = [];
-
-    $('a.job-opening__item').each((_, el) => {
-      const $el = $(el);
-      const id = $el.attr('data-job-opening-id');
-      const title = $el.attr('data-job-opening-title') || $el.find('h3').text().trim();
-      const category = $el.attr('data-job-opening-item-category') || '';
-      const employment = $el.attr('data-job-opening-employment') || '';
-      const salaryMin = $el.attr('data-job-opening-salary-min') || '';
-      const salaryMax = $el.attr('data-job-opening-salary-max') || '';
-      const href = $el.attr('href') || '';
-
-      // Location from icon row
-      const locationText = $el.find('.nyc-icon-location').parent().find('span:last-child').text().trim() || 'Amsterdam';
-
-      if (!id || !title) return;
-
-      const [lat, lng] = geocode(title, locationText);
-
-      jobs.push({
-        id,
-        title,
-        category,
-        type: mapEmployment(employment.split(',')[0]),
-        salary: formatSalary(salaryMin, salaryMax),
-        location: locationText,
-        url: `https://www.youngcapital.nl${href}`,
-        lat,
-        lng,
-      });
-    });
-
-    return NextResponse.json({ jobs, source: 'YoungCapital', count: jobs.length });
+    const jobs = await scrapeYoungCapital();
+    await getSupabase().from('jobs').upsert(jobs, { onConflict: 'id' });
+    return NextResponse.json({ jobs, source: 'scraped', count: jobs.length });
   } catch (err) {
-    console.error('YoungCapital scrape failed:', err);
+    console.error('Scrape failed:', err);
     return NextResponse.json({ error: 'Failed to fetch jobs', jobs: [] }, { status: 500 });
+  }
+}
+
+// POST /api/jobs — force re-scrape and upsert (called by cron or manually)
+export async function POST() {
+  try {
+    const jobs = await scrapeYoungCapital();
+    const { error } = await getSupabase().from('jobs').upsert(jobs, { onConflict: 'id' });
+    if (error) throw error;
+    return NextResponse.json({ message: 'Jobs refreshed', count: jobs.length });
+  } catch (err) {
+    console.error('Refresh failed:', err);
+    return NextResponse.json({ error: 'Refresh failed' }, { status: 500 });
   }
 }
