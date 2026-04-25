@@ -89,7 +89,11 @@ export async function POST(req: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let rawProfile: any = null;
 
-  if (body.profileId) {
+  if (body.profile && typeof body.profile === 'object') {
+    // Direct profile object — no DB lookup needed, avoids race condition
+    rawProfile = body.profile;
+    resumeText = buildProfileText(rawProfile);
+  } else if (body.profileId) {
     const { data, error } = await getSupabase()
       .from('profiles')
       .select('profile')

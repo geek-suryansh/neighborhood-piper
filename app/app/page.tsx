@@ -5,7 +5,7 @@ import {
   INTERESTS, SKILLS_OPTIONS, LANGUAGES, EDU_LEVELS, EDU_YEARS,
   type AppData,
 } from "@/lib/stap-data";
-import { toProfile } from "@/lib/profile";
+import { toProfile, type CandidateProfile } from "@/lib/profile";
 import { getSupabase } from "@/lib/supabase";
 
 const COLORS = {
@@ -23,14 +23,6 @@ const COLORS = {
 
 const FONTS = `'Segoe UI', system-ui, sans-serif`;
 const TOTAL_STEPS = 9;
-
-const MOCK_JOBS = [
-  { title: "Vakkenvuller", company: "Albert Heijn Bijlmer", distance: "1.2 km", hours: "8-12 uur/week", wage: "€6,73/uur", match: 94, tags: ["Flexibel", "Geen ervaring nodig"] },
-  { title: "Junior Barista", company: "Coffee Company Oost", distance: "3.1 km", hours: "10-16 uur/week", wage: "€7,82/uur", match: 87, tags: ["Gezellig", "Koffie korting"] },
-  { title: "Fiets Bezorger", company: "Thuisbezorgd", distance: "0 km (thuis starten)", hours: "Flexibel", wage: "€8,50/uur + fooien", match: 82, tags: ["Buiten", "Eigen tempo"] },
-  { title: "Hulp bij Huiswerk", company: "Stichting Leren & Groeien", distance: "2.0 km", hours: "4-6 uur/week", wage: "€9,00/uur", match: 79, tags: ["Ervaring opdoen", "Impact maken"] },
-  { title: "Magazijnmedewerker", company: "Bol.com Fulfillment", distance: "5.8 km", hours: "12-20 uur/week", wage: "€7,82/uur", match: 75, tags: ["Avondwerk", "Bonus mogelijk"] },
-];
 
 
 const styles = {
@@ -665,10 +657,11 @@ interface MatchedJob {
   salary: string;
   location: string;
   url: string;
+  score?: number;
   similarity?: number;
 }
 
-function JobsTab({ profileId }: { profileId: string }) {
+function JobsTab({ profile }: { profile: CandidateProfile }) {
   const [jobs, setJobs] = useState<MatchedJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -677,12 +670,12 @@ function JobsTab({ profileId }: { profileId: string }) {
     fetch('/api/match', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ profileId }),
+      body: JSON.stringify({ profile }), // send directly — no DB lookup, no race condition
     })
       .then(r => r.json())
       .then(d => { setJobs(d.jobs || []); setLoading(false); })
       .catch(() => { setError('Kon banen niet laden'); setLoading(false); });
-  }, [profileId]);
+  }, [profile]);
 
   if (loading) return (
     <div style={{ textAlign: 'center', padding: '40px 0', color: COLORS.textDim }}>
@@ -697,7 +690,7 @@ function JobsTab({ profileId }: { profileId: string }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 12, paddingBottom: 32 }}>
       <p style={{ color: COLORS.textDim, fontSize: 14, margin: "0 0 8px" }}>{jobs.length} banen gevonden bij jou in de buurt</p>
       {jobs.map((job) => {
-        const pct = job.similarity ? Math.round(job.similarity * 100) : null;
+        const pct = (job.score ?? job.similarity) ? Math.round((job.score ?? job.similarity ?? 0) * 100) : null;
         return (
           <div key={job.id} style={{ padding: 18, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
@@ -840,7 +833,7 @@ function CVTab({ data }: { data: AppData }) {
 }
 
 
-function ResultsScreen({ data, onTab, activeTab, profileId }: { data: AppData; onTab: (tab: string) => void; activeTab: string; profileId: string }) {
+function ResultsScreen({ data, onTab, activeTab, profile }: { data: AppData; onTab: (tab: string) => void; activeTab: string; profile: CandidateProfile }) {
   return (
     <div style={styles.container}>
       <div style={{ paddingTop: 24, paddingBottom: 16 }}>
@@ -862,7 +855,7 @@ function ResultsScreen({ data, onTab, activeTab, profileId }: { data: AppData; o
           </button>
         ))}
       </div>
-      {activeTab === "jobs" && <JobsTab profileId={profileId} />}
+      {activeTab === "jobs" && <JobsTab profile={profile} />}
       {activeTab === "cv" && <CVTab data={data} />}
     </div>
   );
@@ -874,8 +867,7 @@ export default function StapPage() {
   const [screen, setScreen] = useState("welcome");
   const [data, setData] = useState<AppData>({ interests: [], skills: [], days: [], languages: [] });
   const [resultTab, setResultTab] = useState("jobs");
-  // const [showDashboard, setShowDashboard] = useState(false);
-  const [profileId, setProfileId] = useState("");
+  const [profile, setProfile] = useState<CandidateProfile | null>(null);
 
   // if (showDashboard) {
   //   return (
@@ -899,22 +891,21 @@ export default function StapPage() {
       case "availability": return <AvailabilityScreen data={data} setData={setData} onNext={() => setScreen("dream")} />;
       case "dream": return <DreamScreen data={data} setData={setData} onNext={() => setScreen("loading")} />;
       case "loading": return <LoadingScreen onDone={() => {
-        const profile = toProfile(data);
-        setProfileId(profile.profileId);
+        const built = toProfile(data);
+        setProfile(built);
         setScreen("results");
-        void (async () => {
-          try {
-            await getSupabase().from("profiles").insert({
-              id: profile.profileId,
-              email: profile.identity.contactEmail,
-              display_name: profile.identity.displayName,
-              age_range: profile.demographics.ageRange,
-              profile,
-            });
-          } catch { /* silent fail */ }
-        })();
+        // Save to DB in background for record-keeping — matching no longer depends on this
+        void getSupabase().from("profiles").insert({
+          id: built.profileId,
+          email: built.identity.contactEmail,
+          display_name: built.identity.displayName,
+          age_range: built.demographics.ageRange,
+          profile: built,
+        });
       }} />;
-      case "results": return <ResultsScreen data={data} onTab={setResultTab} activeTab={resultTab} profileId={profileId} />;
+      case "results": return profile
+        ? <ResultsScreen data={data} onTab={setResultTab} activeTab={resultTab} profile={profile} />
+        : null;
       default: return null;
     }
   };
