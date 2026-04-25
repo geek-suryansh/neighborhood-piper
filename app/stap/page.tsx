@@ -22,7 +22,7 @@ const COLORS = {
 };
 
 const FONTS = `'Segoe UI', system-ui, sans-serif`;
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 const MOCK_JOBS = [
   { title: "Vakkenvuller", company: "Albert Heijn Bijlmer", distance: "1.2 km", hours: "8-12 uur/week", wage: "€6,73/uur", match: 94, tags: ["Flexibel", "Geen ervaring nodig"] },
@@ -196,18 +196,18 @@ function generateCVHTML(data: AppData): string {
   <div class="header">
     <div>
       <h1>${data.name || "Anoniem"}</h1>
-      <div class="sub">${data.age} jaar &nbsp;·&nbsp; Amsterdam</div>
+      <div class="sub">${data.age} jaar &nbsp;·&nbsp; ${data.location ? `${data.location.name}, Amsterdam` : "Amsterdam"}</div>
       <span class="badge">⚡ Op zoek naar bijbaan</span>
     </div>
     <div class="contact">
       ${data.email ? `<div>${data.email}</div>` : ""}
-      <div>Amsterdam, Nederland</div>
+      <div>${data.location ? `${data.location.name}, ` : ""}Amsterdam, Nederland</div>
     </div>
   </div>
 
   <div class="section">
     <h2>Profiel</h2>
-    <p>Gemotiveerde jongere van ${data.age} jaar, woonachtig in Amsterdam, op zoek naar een bijbaan.${data.dream ? ` Toekomstdroom: <em>${data.dream}</em>.` : ""} Beschikbaar op ${fullDays.join(", ")}${data.hours ? ` voor ${data.hours} per week` : ""}.</p>
+    <p>Gemotiveerde jongere van ${data.age} jaar, woonachtig in ${data.location ? `${data.location.name}, ` : ""}Amsterdam, op zoek naar een bijbaan.${data.dream ? ` Toekomstdroom: <em>${data.dream}</em>.` : ""} Beschikbaar op ${fullDays.join(", ")}${data.hours ? ` voor ${data.hours} per week` : ""}.</p>
   </div>
 
   ${(data.school || data.eduLevel) ? `
@@ -334,10 +334,119 @@ function NameScreen({ data, setData, onNext }: { data: AppData; setData: (d: App
   );
 }
 
-function EducationScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+const PDOK_BASE = "https://api.pdok.nl/bzk/locatieserver/search/v3_1";
+
+type PdokDoc = { id: string; weergavenaam: string; type: string };
+
+function parseCentroide(wkt: string): { lat: number; lng: number } | null {
+  const m = wkt.match(/POINT\(([^ ]+) ([^ )]+)\)/);
+  if (!m) return null;
+  return { lng: parseFloat(m[1]), lat: parseFloat(m[2]) };
+}
+
+function LocationScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<PdokDoc[]>([]);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(async () => {
+      if (query.length < 2) { setSuggestions([]); return; }
+      setSearching(true);
+      try {
+        const params = new URLSearchParams({
+          q: query,
+          fq: "type:(buurt OR wijk OR woonplaats OR gemeente)",
+          rows: "8",
+          fl: "id weergavenaam type score",
+        });
+        const res = await fetch(`${PDOK_BASE}/suggest?${params}`);
+        const json = await res.json();
+        setSuggestions(json.response?.docs ?? []);
+      } catch { setSuggestions([]); }
+      setSearching(false);
+    }, query.length < 2 ? 0 : 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  const pick = async (doc: PdokDoc) => {
+    setSuggestions([]);
+    setQuery("");
+    try {
+      const params = new URLSearchParams({ id: doc.id, fl: "id weergavenaam centroide_ll" });
+      const res = await fetch(`${PDOK_BASE}/lookup?${params}`);
+      const json = await res.json();
+      const detail = json.response?.docs?.[0];
+      const coords = detail?.centroide_ll ? parseCentroide(detail.centroide_ll) : null;
+      setData({ ...data, location: { name: detail?.weergavenaam ?? doc.weergavenaam, ...(coords ?? { lat: 0, lng: 0 }) } });
+    } catch {
+      setData({ ...data, location: { name: doc.weergavenaam, lat: 0, lng: 0 } });
+    }
+  };
+
+  const typeLabel: Record<string, string> = { buurt: "Buurt", wijk: "Wijk", woonplaats: "Stad", gemeente: "Gemeente" };
+
   return (
     <div style={styles.container}>
       <ProgressBar step={2} total={TOTAL_STEPS} />
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Waar woon je?</h2>
+      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
+        Zoek je buurt, wijk of stad. We gebruiken dit om banen bij jou in de buurt te vinden.
+      </p>
+
+      {data.location ? (
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ padding: "16px 18px", borderRadius: 14, border: `1.5px solid ${COLORS.accent}`, background: COLORS.accentDim, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 16 }}>📍 {data.location.name}</div>
+              <div style={{ color: COLORS.textDim, fontSize: 12, marginTop: 2 }}>{data.location.lat.toFixed(4)}, {data.location.lng.toFixed(4)}</div>
+            </div>
+            <button onClick={() => setData({ ...data, location: undefined })} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.border}`, background: "transparent", color: COLORS.textDim, fontSize: 12, cursor: "pointer", fontFamily: FONTS }}>
+              Wijzigen
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div style={{ position: "relative", marginBottom: 32 }}>
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Typ je buurt, wijk of stad…"
+            autoFocus
+            style={{ ...inputStyle, marginBottom: 0, paddingRight: searching ? 48 : 16 }}
+          />
+          {searching && (
+            <div style={{ position: "absolute", right: 14, top: 16, color: COLORS.textDim, fontSize: 13 }}>…</div>
+          )}
+          {suggestions.length > 0 && (
+            <div style={{ marginTop: 4, borderRadius: 12, border: `1px solid ${COLORS.border}`, background: COLORS.card, overflow: "hidden" }}>
+              {suggestions.map((doc) => (
+                <button key={doc.id} onClick={() => pick(doc)} style={{
+                  width: "100%", padding: "12px 16px", border: "none", borderBottom: `1px solid ${COLORS.border}`,
+                  background: "transparent", color: COLORS.text, fontSize: 14, cursor: "pointer",
+                  fontFamily: FONTS, textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center",
+                }}>
+                  <span>{doc.weergavenaam}</span>
+                  <span style={{ fontSize: 11, color: COLORS.textDim, marginLeft: 8, flexShrink: 0 }}>{typeLabel[doc.type] ?? doc.type}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <BigButton onClick={onNext} disabled={!data.location}>Volgende →</BigButton>
+      <div style={{ marginTop: 12 }}>
+        <BigButton onClick={onNext} secondary>Overslaan</BigButton>
+      </div>
+    </div>
+  );
+}
+
+function EducationScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  return (
+    <div style={styles.container}>
+      <ProgressBar step={3} total={TOTAL_STEPS} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Jouw opleiding</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Helpt werkgevers jouw achtergrond begrijpen.</p>
       <label style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 6, display: "block" }}>School of instelling</label>
@@ -378,7 +487,7 @@ function LanguagesScreen({ data, setData, onNext }: { data: AppData; setData: (d
   };
   return (
     <div style={styles.container}>
-      <ProgressBar step={3} total={TOTAL_STEPS} />
+      <ProgressBar step={4} total={TOTAL_STEPS} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Welke talen spreek je?</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Kies alle talen die je spreekt, verstaat of leert.</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 32 }}>
@@ -400,7 +509,7 @@ function InterestsScreen({ data, setData, onNext }: { data: AppData; setData: (d
   };
   return (
     <div style={styles.container}>
-      <ProgressBar step={4} total={TOTAL_STEPS} />
+      <ProgressBar step={5} total={TOTAL_STEPS} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Waar word je blij van?</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Kies er minimaal 2. Dit helpt ons banen te vinden die bij je passen.</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
@@ -435,7 +544,7 @@ function SkillsScreen({ data, setData, onNext }: { data: AppData; setData: (d: A
   };
   return (
     <div style={styles.container}>
-      <ProgressBar step={5} total={TOTAL_STEPS} />
+      <ProgressBar step={6} total={TOTAL_STEPS} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Waar ben je goed in?</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Wees eerlijk — er zijn geen foute antwoorden.</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
@@ -458,7 +567,7 @@ function AvailabilityScreen({ data, setData, onNext }: { data: AppData; setData:
   };
   return (
     <div style={styles.container}>
-      <ProgressBar step={6} total={TOTAL_STEPS} />
+      <ProgressBar step={7} total={TOTAL_STEPS} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Wanneer kun je werken?</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Tik de dagen aan waarop je beschikbaar bent.</p>
       <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
@@ -494,7 +603,7 @@ function AvailabilityScreen({ data, setData, onNext }: { data: AppData; setData:
 function DreamScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
   return (
     <div style={styles.container}>
-      <ProgressBar step={7} total={TOTAL_STEPS} />
+      <ProgressBar step={8} total={TOTAL_STEPS} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Laatste vraag ✨</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
         Als je alles kon worden, wat zou je dan doen? Typ gewoon wat je denkt.
@@ -611,7 +720,7 @@ function CVTab({ data }: { data: AppData }) {
           <div>
             <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, letterSpacing: "-0.01em" }}>{data.name || "Anoniem Profiel"}</h3>
             <p style={{ color: COLORS.textDim, fontSize: 13, margin: 0 }}>
-              {data.age} jaar • Amsterdam{data.email && ` • ${data.email}`}
+              {data.age} jaar • {data.neighborhood ? `${NEIGHBORHOODS.find(n => n.slug === data.neighborhood)?.label ?? "Amsterdam"}, ` : ""}Amsterdam{data.email && ` • ${data.email}`}
             </p>
           </div>
         </div>
@@ -805,7 +914,8 @@ export default function StapPage() {
     switch (screen) {
       case "welcome":      return <WelcomeScreen onStart={() => setScreen("age")} />;
       case "age":          return <AgeScreen data={data} setData={setData} onNext={() => setScreen("name")} />;
-      case "name":         return <NameScreen data={data} setData={setData} onNext={() => setScreen("education")} />;
+      case "name":         return <NameScreen data={data} setData={setData} onNext={() => setScreen("location")} />;
+      case "location":     return <LocationScreen data={data} setData={setData} onNext={() => setScreen("education")} />;
       case "education":    return <EducationScreen data={data} setData={setData} onNext={() => setScreen("languages")} />;
       case "languages":    return <LanguagesScreen data={data} setData={setData} onNext={() => setScreen("interests")} />;
       case "interests":    return <InterestsScreen data={data} setData={setData} onNext={() => setScreen("skills")} />;
