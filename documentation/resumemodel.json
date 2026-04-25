@@ -1,0 +1,87 @@
+{
+    "profileId": "a3f7c2d1-8e4b-4f9a-b6c3-12d5e8f0a1b2",
+    "schemaVersion": "1.0",
+    "createdAt": "2026-04-25T14:32:07.841Z",
+    "identity": {
+        "displayName": "Omar",
+        "contactEmail": "omar@gmail.com",
+        "isAnonymous": false
+    },
+    "demographics": {
+        "ageRange": "16-17",
+        "ageMin": 16,
+        "ageMax": 17,
+        "city": "Amsterdam"
+    },
+    "education": {
+        "institution": "ROC Amsterdam",
+        "levelLabel": "MBO niveau 3–4",
+        "levelCode": "mbo_3_4",
+        "graduationYear": 2027,
+        "inProgress": true
+    },
+    "languages": [
+        {
+            "label": "Nederlands",
+            "isoCode": "nl"
+        },
+        {
+            "label": "Arabisch",
+            "isoCode": "ar"
+        },
+        {
+            "label": "Engels",
+            "isoCode": "en"
+        }
+    ],
+    "skills": [
+        "Goed met mensen praten",
+        "Snel leren",
+        "Goed in teamwork"
+    ],
+    "interests": [
+        {
+            "id": "food",
+            "label": "Eten & Horeca"
+        },
+        {
+            "id": "sport",
+            "label": "Sport & Bewegen"
+        },
+        {
+            "id": "people",
+            "label": "Mensen helpen"
+        }
+    ],
+    "availability": {
+        "days": [
+            {
+                "short": "Za",
+                "full": "Zaterdag",
+                "isoWeekday": 6
+            },
+            {
+                "short": "Zo",
+                "full": "Zondag",
+                "isoWeekday": 7
+            }
+        ],
+        "hoursPerWeekLabel": "8-16 uur",
+        "hoursMin": 8,
+        "hoursMax": 16
+    },
+    "aspiration": {
+        "dreamText": "Iets met mensen, misschien eigen restaurant later"
+    },
+    "derived": {
+        "isEligibleForMinimumWage": false,
+        "canWorkWeekends": true,
+        "languageCount": 3,
+        "skillCount": 3,
+        "interestIds": [
+            "food",
+            "sport",
+            "people"
+        ]
+    }
+}
