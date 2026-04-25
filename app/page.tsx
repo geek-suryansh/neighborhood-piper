@@ -7,12 +7,20 @@ export default function Home() {
           <span className="text-2xl">🪈</span>
           <span className="font-bold text-xl text-gray-900">neighborhood-piper</span>
         </div>
-        <a
-          href="#get-started"
-          className="bg-orange-500 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-orange-600 transition-colors"
-        >
-          Get Started
-        </a>
+        <div className="flex items-center gap-3">
+          <a
+            href="/jobs"
+            className="text-gray-600 text-sm font-medium hover:text-orange-500 transition-colors"
+          >
+            🗺️ Jobs Map
+          </a>
+          <a
+            href="#get-started"
+            className="bg-orange-500 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-orange-600 transition-colors"
+          >
+            Get Started
+          </a>
+        </div>
       </nav>
 
       {/* Hero */}
@@ -55,6 +63,7 @@ export default function Home() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
+              { emoji: "💼", title: "Jobs Near You", desc: "Browse local job listings on an interactive map. Filter by neighborhood and type.", link: "/jobs" },
               { emoji: "🏠", title: "Housing", desc: "Find shelters, temp housing, and social housing registrations near you." },
               { emoji: "🥗", title: "Food & Groceries", desc: "Food banks, halal markets, community kitchens, and cheap supermarkets." },
               { emoji: "🏥", title: "Healthcare", desc: "GP registration, mental health support, dental care, and pharmacies." },
@@ -64,11 +73,20 @@ export default function Home() {
               { emoji: "👥", title: "Community", desc: "Meet your neighbors. Find cultural associations and social events." },
               { emoji: "📞", title: "Emergency Contacts", desc: "Crisis lines, police, ambulance, and refugee support hotlines." },
             ].map((f) => (
-              <div key={f.title} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div className="text-3xl mb-4">{f.emoji}</div>
-                <h3 className="font-semibold text-gray-900 mb-2">{f.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
-              </div>
+              f.link ? (
+                <a key={f.title} href={f.link} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-orange-200 border border-transparent transition-all group">
+                  <div className="text-3xl mb-4">{f.emoji}</div>
+                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-orange-500 transition-colors">{f.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+                  <p className="text-xs text-orange-500 font-semibold mt-3">Open map →</p>
+                </a>
+              ) : (
+                <div key={f.title} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="text-3xl mb-4">{f.emoji}</div>
+                  <h3 className="font-semibold text-gray-900 mb-2">{f.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+                </div>
+              )
             ))}
           </div>
         </div>
