@@ -42,7 +42,8 @@ export async function POST(req: NextRequest) {
     try {
       const text = [job.title, job.category, job.description].filter(Boolean).join(' — ');
       const embedding = await embedText(text);
-      await getSupabase().from('jobs').update({ embedding }).eq('id', job.id);
+      const vectorLiteral = `[${embedding.join(',')}]`;
+      await getSupabase().from('jobs').update({ embedding: vectorLiteral }).eq('id', job.id);
       processed++;
     } catch {
       failed++;
