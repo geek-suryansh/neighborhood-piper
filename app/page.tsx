@@ -8,11 +8,11 @@ export default function Home() {
           <span className="font-bold text-xl text-gray-900">neighborhood-piper</span>
         </div>
         <div className="flex items-center gap-3">
-          <a
-            href="/jobs"
-            className="text-gray-600 text-sm font-medium hover:text-orange-500 transition-colors"
-          >
+          <a href="/jobs" className="text-gray-600 text-sm font-medium hover:text-orange-500 transition-colors">
             🗺️ Jobs Map
+          </a>
+          <a href="/match" className="text-gray-600 text-sm font-medium hover:text-orange-500 transition-colors">
+            🎯 Match Me
           </a>
           <a
             href="/stap"
