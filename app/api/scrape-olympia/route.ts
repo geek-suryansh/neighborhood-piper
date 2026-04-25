@@ -9,33 +9,104 @@ const HEADERS = {
 };
 
 const CITY_COORDS: Record<string, [number, number]> = {
-  'amsterdam':  [52.3702, 4.8952],
-  'rotterdam':  [51.9244, 4.4777],
-  'den haag':   [52.0705, 4.3007],
-  'utrecht':    [52.0907, 5.1214],
-  'eindhoven':  [51.4416, 5.4697],
-  'groningen':  [53.2194, 6.5665],
-  'tilburg':    [51.5555, 5.0913],
-  'almere':     [52.3508, 5.2647],
-  'breda':      [51.5719, 4.7683],
-  'nijmegen':   [51.8426, 5.8546],
-  'zaandam':    [52.4380, 4.8130],
-  'amersfoort': [52.1561, 5.3878],
-  'maastricht': [50.8514, 5.6910],
-  'arnhem':     [51.9851, 5.8987],
-  'haarlem':    [52.3874, 4.6462],
-  'schiphol':   [52.3105, 4.7683],
-  'luchthaven': [52.3105, 4.7683],
-  'airport':    [52.3105, 4.7683],
+  // Amsterdam & surroundings
+  'amsterdam':       [52.3702, 4.8952],
+  'schiphol':        [52.3105, 4.7683],
+  'luchthaven':      [52.3105, 4.7683],
+  'airport':         [52.3105, 4.7683],
+  'hoofddorp':       [52.3058, 4.6972],
+  'amstelveen':      [52.3100, 4.8600],
+  'diemen':          [52.3397, 4.9603],
+  'zaandam':         [52.4380, 4.8130],
+  'zaanstad':        [52.4380, 4.8130],
+  'haarlem':         [52.3874, 4.6462],
+  'almere':          [52.3508, 5.2647],
+  'purmerend':       [52.5026, 4.9600],
+  'hilversum':       [52.2292, 5.1669],
+  'bussum':          [52.2749, 5.1610],
+  // Major NL cities
+  'rotterdam':       [51.9244, 4.4777],
+  'den haag':        [52.0705, 4.3007],
+  'the hague':       [52.0705, 4.3007],
+  'utrecht':         [52.0907, 5.1214],
+  'eindhoven':       [51.4416, 5.4697],
+  'groningen':       [53.2194, 6.5665],
+  'tilburg':         [51.5555, 5.0913],
+  'breda':           [51.5719, 4.7683],
+  'nijmegen':        [51.8426, 5.8546],
+  'amersfoort':      [52.1561, 5.3878],
+  'maastricht':      [50.8514, 5.6910],
+  'arnhem':          [51.9851, 5.8987],
+  'enschede':        [52.2215, 6.8937],
+  'apeldoorn':       [52.2112, 5.9699],
+  'zwolle':          [52.5168, 6.0830],
+  'deventer':        [52.2512, 6.1583],
+  'leeuwarden':      [53.2012, 5.7999],
+  'dordrecht':       [51.8133, 4.6901],
+  'leiden':          [52.1601, 4.4970],
+  'delft':           [52.0116, 4.3571],
+  'alkmaar':         [52.6324, 4.7534],
+  'venlo':           [51.3704, 6.1724],
+  'sittard':         [51.0000, 5.8667],
+  'heerlen':         [50.8880, 5.9797],
+  'roermond':        [51.1936, 5.9875],
+  'weert':           [51.2494, 5.7060],
+  'helmond':         [51.4817, 5.6611],
+  'den bosch':       [51.6978, 5.3037],
+  "'s-hertogenbosch":[51.6978, 5.3037],
+  'hertogenbosch':   [51.6978, 5.3037],
+  'roosendaal':      [51.5308, 4.4628],
+  'bergen op zoom':  [51.4975, 4.2886],
+  'terneuzen':       [51.3358, 3.8295],
+  'goes':            [51.5047, 3.8897],
+  'middelburg':      [51.4988, 3.6136],
+  'vlissingen':      [51.4543, 3.5756],
+  'drachten':        [53.1118, 6.0968],
+  'emmen':           [52.7797, 6.8990],
+  'assen':           [52.9925, 6.5642],
+  'meppel':          [52.6966, 6.1922],
+  'hoogeveen':       [52.7239, 6.4733],
+  'veendam':         [53.1083, 6.8750],
+  'stadskanaal':     [52.9862, 6.9500],
+  'sneek':           [53.0328, 5.6606],
+  'kampen':          [52.5544, 5.9122],
+  'hardenberg':      [52.5750, 6.6175],
+  'oldenzaal':       [52.3119, 6.9275],
+  'hengelo':         [52.2660, 6.7937],
+  'almelo':          [52.3566, 6.6609],
+  // Zuid-Holland
+  'gouda':           [52.0116, 4.7107],
+  'zoetermeer':      [52.0572, 4.4940],
+  'alphen':          [52.1280, 4.6568],
+  'alphen aan den rijn': [52.1280, 4.6568],
+  'westland':        [52.0172, 4.2000],
+  'ridderkerk':      [51.8653, 4.6028],
+  'barendrecht':     [51.8560, 4.5358],
+  'capelle':         [51.9306, 4.5733],
+  'spijkenisse':     [51.8419, 4.3289],
+  // North Brabant extras
+  'waalwijk':        [51.6834, 5.0696],
+  'oss':             [51.7650, 5.5167],
+  'veghel':          [51.6167, 5.5500],
+  'best':            [51.5060, 5.3918],
+  'veldhoven':       [51.4167, 5.4000],
+  'oosterhout':      [51.6417, 4.8611],
+  'klundert':        [51.6667, 4.5167],
+  'drunen':          [51.6833, 5.1333],
+  'waalre':          [51.3833, 5.4500],
+  'born':            [51.0333, 5.8333],
+  // Regio labels
+  'regio amersfoort': [52.1561, 5.3878],
+  'regio amsterdam':  [52.3702, 4.8952],
+  'regio rotterdam':  [51.9244, 4.4777],
 };
 
-function geocode(location: string): [number, number] {
-  const loc = location.toLowerCase();
+function geocode(location: string): [number, number] | null {
+  const loc = location.toLowerCase().trim();
   for (const [city, coords] of Object.entries(CITY_COORDS)) {
     if (loc.includes(city)) return coords;
   }
-  const jitter = () => (Math.random() - 0.5) * 0.1;
-  return [52.3702 + jitter(), 4.8952 + jitter()];
+  return null; // unknown city — don't place on map rather than wrong coords
 }
 
 function extractSalary(text: string): string {
@@ -120,7 +191,7 @@ export async function GET(req: NextRequest) {
         const batch = listings.slice(i, i + 3);
         const detailed = await Promise.all(batch.map(async (job) => {
           const detail = await scrapeDetail(job.slug);
-          const [lat, lng] = geocode(job.location);
+          const coords = geocode(job.location);
           return {
             id: job.id,
             title: job.title,
@@ -129,8 +200,8 @@ export async function GET(req: NextRequest) {
             salary: detail.salary,
             location: job.location,
             url: `${BASE}${job.slug}`,
-            lat,
-            lng,
+            lat: coords ? coords[0] : null,
+            lng: coords ? coords[1] : null,
             description: detail.description,
             source: 'olympia',
           };
