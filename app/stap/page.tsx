@@ -827,13 +827,13 @@ function CVTab({ data }: { data: AppData }) {
 
       <div style={{ display: "flex", gap: 10 }}>
         <BigButton onClick={handleDownload}>📥 Download als PDF</BigButton>
-        <BigButton onClick={async () => {
+        {/* <BigButton onClick={async () => {
           await navigator.clipboard.writeText(JSON.stringify(toProfile(data), null, 2));
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
         }} secondary>
           {copied ? "✓ Gekopieerd!" : "{ } Export JSON"}
-        </BigButton>
+        </BigButton> */}
       </div>
     </div>
   );
@@ -868,96 +868,37 @@ function ResultsScreen({ data, onTab, activeTab, profileId }: { data: AppData; o
   );
 }
 
-function EmployerDashboard({ onBack }: { onBack: () => void }) {
-  const candidates = [
-    { id: "A7x2", age: "16-17", match: 94, skills: ["Goed met mensen praten", "Snel leren"], interests: ["Sport & Bewegen", "Eten & Horeca"], available: "Ma Di Za Zo", hours: "8-16 uur" },
-    { id: "K3m9", age: "18-20", match: 87, skills: ["Creatief denken", "Handig met social media"], interests: ["Muziek", "Mode & Style"], available: "Wo Do Vr Za", hours: "12-20 uur" },
-    { id: "R5p1", age: "16-17", match: 82, skills: ["Teamwork", "Fysiek sterk"], interests: ["Sport & Bewegen", "Bouwen & Maken"], available: "Ma Wo Vr Za Zo", hours: "8-16 uur" },
-    { id: "T8j4", age: "18-20", match: 78, skills: ["Zelfstandig werken", "Goed organiseren"], interests: ["Tech & Computers", "Gaming"], available: "Di Do Za", hours: "16-24 uur" },
-  ];
-  return (
-    <div style={styles.wide}>
-      <div style={{ paddingTop: 24, paddingBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 22 }}>⚡</span>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: COLORS.accent, margin: 0 }}>STAP</h1>
-          <span style={{ color: COLORS.textDim, fontSize: 13, fontWeight: 600, padding: "2px 8px", border: `1px solid ${COLORS.border}`, borderRadius: 6 }}>Werkgever</span>
-        </div>
-        <button onClick={onBack} style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${COLORS.border}`, background: "transparent", color: COLORS.textDim, fontSize: 13, cursor: "pointer", fontFamily: FONTS }}>
-          ← Terug naar app
-        </button>
-      </div>
-      <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
-        {[{ label: "Actieve jongeren", value: "1.247", color: COLORS.accent }, { label: "Gemiddelde match", value: "86%", color: COLORS.purple }, { label: "Ingehuurd deze maand", value: "43", color: COLORS.orange }].map((s, i) => (
-          <div key={i} style={{ flex: "1 1 140px", padding: 18, borderRadius: 14, background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
-            <p style={{ color: COLORS.textDim, fontSize: 12, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.label}</p>
-            <p style={{ color: s.color, fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>{s.value}</p>
-          </div>
-        ))}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, paddingBottom: 32 }}>
-        {candidates.map((c) => (
-          <div key={c.id} style={{ padding: 20, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card, display: "flex", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
-            <div style={{ width: 52, height: 52, borderRadius: 12, background: `linear-gradient(135deg, ${COLORS.accent}44, ${COLORS.purple}44)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, color: COLORS.accent, border: `1.5px solid ${COLORS.accent}44`, flexShrink: 0 }}>
-              #{c.id}
-            </div>
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <div>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 2px" }}>Kandidaat #{c.id}</h3>
-                  <p style={{ color: COLORS.textDim, fontSize: 13, margin: 0 }}>{c.age} jaar • {c.available} • {c.hours}</p>
-                </div>
-                <div style={{ background: c.match >= 90 ? `linear-gradient(135deg, ${COLORS.accent}, #00c087)` : c.match >= 80 ? COLORS.purpleDim : `${COLORS.orange}33`, color: c.match >= 90 ? COLORS.bg : c.match >= 80 ? COLORS.purple : COLORS.orange, fontSize: 14, fontWeight: 800, padding: "4px 12px", borderRadius: 8 }}>
-                  {c.match}% match
-                </div>
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
-                {c.skills.map(s => <span key={s} style={{ padding: "3px 8px", borderRadius: 6, background: COLORS.purpleDim, color: COLORS.purple, fontSize: 11, fontWeight: 600 }}>{s}</span>)}
-                {c.interests.map(i => <span key={i} style={{ padding: "3px 8px", borderRadius: 6, background: COLORS.accentDim, color: COLORS.accent, fontSize: 11, fontWeight: 600 }}>{i}</span>)}
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: COLORS.accent, color: COLORS.bg, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: FONTS }}>Uitnodigen</button>
-                <button style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${COLORS.border}`, background: "transparent", color: COLORS.textDim, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONTS }}>Bewaren</button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ── Main app ──
 
 export default function StapPage() {
   const [screen, setScreen] = useState("welcome");
   const [data, setData] = useState<AppData>({ interests: [], skills: [], days: [], languages: [] });
   const [resultTab, setResultTab] = useState("jobs");
-  const [showDashboard, setShowDashboard] = useState(false);
+  // const [showDashboard, setShowDashboard] = useState(false);
   const [profileId, setProfileId] = useState("");
 
-  if (showDashboard) {
-    return (
-      <div style={styles.app}>
-        <div style={styles.glow} /><div style={styles.glowPurple} />
-        <EmployerDashboard onBack={() => setShowDashboard(false)} />
-      </div>
-    );
-  }
+  // if (showDashboard) {
+  //   return (
+  //     <div style={styles.app}>
+  //       <div style={styles.glow} /><div style={styles.glowPurple} />
+  //       <EmployerDashboard onBack={() => setShowDashboard(false)} />
+  //     </div>
+  //   );
+  // }
 
   const renderScreen = () => {
     switch (screen) {
-      case "welcome":      return <WelcomeScreen onStart={() => setScreen("age")} />;
-      case "age":          return <AgeScreen data={data} setData={setData} onNext={() => setScreen("name")} />;
-      case "name":         return <NameScreen data={data} setData={setData} onNext={() => setScreen("location")} />;
-      case "location":     return <LocationScreen data={data} setData={setData} onNext={() => setScreen("education")} />;
-      case "education":    return <EducationScreen data={data} setData={setData} onNext={() => setScreen("languages")} />;
-      case "languages":    return <LanguagesScreen data={data} setData={setData} onNext={() => setScreen("interests")} />;
-      case "interests":    return <InterestsScreen data={data} setData={setData} onNext={() => setScreen("skills")} />;
-      case "skills":       return <SkillsScreen data={data} setData={setData} onNext={() => setScreen("availability")} />;
+      case "welcome": return <WelcomeScreen onStart={() => setScreen("age")} />;
+      case "age": return <AgeScreen data={data} setData={setData} onNext={() => setScreen("name")} />;
+      case "name": return <NameScreen data={data} setData={setData} onNext={() => setScreen("location")} />;
+      case "location": return <LocationScreen data={data} setData={setData} onNext={() => setScreen("education")} />;
+      case "education": return <EducationScreen data={data} setData={setData} onNext={() => setScreen("languages")} />;
+      case "languages": return <LanguagesScreen data={data} setData={setData} onNext={() => setScreen("interests")} />;
+      case "interests": return <InterestsScreen data={data} setData={setData} onNext={() => setScreen("skills")} />;
+      case "skills": return <SkillsScreen data={data} setData={setData} onNext={() => setScreen("availability")} />;
       case "availability": return <AvailabilityScreen data={data} setData={setData} onNext={() => setScreen("dream")} />;
-      case "dream":        return <DreamScreen data={data} setData={setData} onNext={() => setScreen("loading")} />;
-      case "loading":      return <LoadingScreen onDone={() => {
+      case "dream": return <DreamScreen data={data} setData={setData} onNext={() => setScreen("loading")} />;
+      case "loading": return <LoadingScreen onDone={() => {
         const profile = toProfile(data);
         setProfileId(profile.profileId);
         setScreen("results");
@@ -973,8 +914,8 @@ export default function StapPage() {
           } catch { /* silent fail */ }
         })();
       }} />;
-      case "results":      return <ResultsScreen data={data} onTab={setResultTab} activeTab={resultTab} profileId={profileId} />;
-      default:             return null;
+      case "results": return <ResultsScreen data={data} onTab={setResultTab} activeTab={resultTab} profileId={profileId} />;
+      default: return null;
     }
   };
 
@@ -982,13 +923,7 @@ export default function StapPage() {
     <div style={styles.app}>
       <div style={styles.glow} /><div style={styles.glowPurple} />
       {renderScreen()}
-      {screen === "results" && (
-        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "12px 20px", background: `${COLORS.bg}ee`, borderTop: `1px solid ${COLORS.border}`, backdropFilter: "blur(12px)", zIndex: 10, textAlign: "center" }}>
-          <button onClick={() => setShowDashboard(true)} style={{ padding: "8px 20px", borderRadius: 8, border: `1px solid ${COLORS.border}`, background: "transparent", color: COLORS.textDim, fontSize: 12, cursor: "pointer", fontFamily: FONTS }}>
-            🏢 Bekijk werkgever dashboard →
-          </button>
-        </div>
-      )}
+
     </div>
   );
 }
