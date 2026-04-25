@@ -67,28 +67,16 @@ export async function POST(req: NextRequest) {
   let resumeText: string;
 
   if (body.profileId) {
-    // Fetch STAP profile from Supabase
     const { data, error } = await getSupabase()
       .from('profiles')
-      .select('*')
-      .eq('profileId', body.profileId)
+      .select('profile')
+      .eq('id', body.profileId)
       .single();
 
     if (error || !data) {
-      // Try alternate column names
-      const { data: data2, error: error2 } = await getSupabase()
-        .from('profiles')
-        .select('*')
-        .eq('id', body.profileId)
-        .single();
-
-      if (error2 || !data2) {
-        return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
-      }
-      resumeText = buildProfileText(data2);
-    } else {
-      resumeText = buildProfileText(data);
+      return NextResponse.json({ error: 'Profile not found', detail: error?.message }, { status: 404 });
     }
+    resumeText = buildProfileText(data.profile);
   } else if (body.resumeText && typeof body.resumeText === 'string') {
     resumeText = body.resumeText.slice(0, 8000);
   } else {
