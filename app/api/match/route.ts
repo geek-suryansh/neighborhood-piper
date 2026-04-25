@@ -86,6 +86,8 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
   let resumeText: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let rawProfile: any = null;
 
   if (body.profileId) {
     const { data, error } = await getSupabase()
@@ -97,7 +99,8 @@ export async function POST(req: NextRequest) {
     if (error || !data) {
       return NextResponse.json({ error: 'Profile not found', detail: error?.message }, { status: 404 });
     }
-    resumeText = buildProfileText(data.profile);
+    rawProfile = data.profile;
+    resumeText = buildProfileText(rawProfile);
   } else if (body.resumeText && typeof body.resumeText === 'string') {
     resumeText = body.resumeText.slice(0, 8000);
   } else {
@@ -108,6 +111,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Profile has too little text to match' }, { status: 400 });
   }
 
+  // Extract structured signals for hybrid scoring
+  const userLat: number | null = rawProfile?.demographics?.lat ?? null;
+  const userLng: number | null = rawProfile?.demographics?.lng ?? null;
+  const hoursMax: number | null = rawProfile?.availability?.hoursMax ?? null;
+  const userLanguages: string[] | null = rawProfile?.languages?.length
+    ? rawProfile.languages.map((l: { isoCode: string }) => l.isoCode)
+    : null;
+
   const embedding = await embedText(resumeText);
   const vectorLiteral = `[${embedding.join(',')}]`;
 
@@ -115,6 +126,10 @@ export async function POST(req: NextRequest) {
   const { data: jobs, error } = await (getSupabase() as any).rpc('match_jobs', {
     query_embedding: vectorLiteral,
     match_count: 20,
+    user_lat: userLat,
+    user_lng: userLng,
+    hours_max: hoursMax,
+    user_languages: userLanguages,
   });
 
   if (error) {
@@ -122,7 +137,7 @@ export async function POST(req: NextRequest) {
       .from('jobs')
       .select('id, title, category, type, salary, location, url, lat, lng')
       .limit(20);
-    return NextResponse.json({ jobs: fallback, warning: 'pgvector RPC not available', profileText: resumeText });
+    return NextResponse.json({ jobs: fallback, warning: error.message, profileText: resumeText });
   }
 
   return NextResponse.json({ jobs, profileText: resumeText });
