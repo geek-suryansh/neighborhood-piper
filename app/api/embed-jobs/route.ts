@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       failed++;
       lastError = err instanceof Error ? err.message : String(err);
     }
-    await new Promise(r => setTimeout(r, 50));
+    await new Promise(r => setTimeout(r, 100));
   }
 
   const { count } = await getSupabase()
