@@ -10,6 +10,8 @@ export interface JobRow {
   url: string;
   lat: number;
   lng: number;
+  description?: string;
+  source?: string;
   scraped_at?: string;
 }
 
