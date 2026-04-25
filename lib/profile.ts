@@ -23,6 +23,9 @@ export type CandidateProfile = {
     ageMin: number | null;
     ageMax: number | null;
     city: string;
+    neighborhood: string | null;
+    lat: number | null;
+    lng: number | null;
   };
 
   education: {
@@ -171,6 +174,9 @@ export function toProfile(data: AppData): CandidateProfile {
       ageMin,
       ageMax,
       city: "Amsterdam",
+      neighborhood: data.location?.name ?? null,
+      lat: data.location?.lat ?? null,
+      lng: data.location?.lng ?? null,
     },
 
     education: {

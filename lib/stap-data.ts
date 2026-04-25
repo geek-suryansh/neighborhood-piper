@@ -1,7 +1,14 @@
+export type Location = {
+  name: string;  // weergavenaam from PDOK
+  lat: number;
+  lng: number;
+};
+
 export type AppData = {
   age?: string;
   name?: string;
   email?: string;
+  location?: Location;
   school?: string;
   eduLevel?: string;
   eduYear?: string;
