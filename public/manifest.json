@@ -1,7 +1,7 @@
 {
-  "name": "Junta — Jobs in Amsterdam",
+  "name": "Junta — Jobs in the Netherlands",
   "short_name": "Junta",
-  "description": "Find your first job in Amsterdam. 5-minute quiz, anonymous, free.",
+  "description": "Find your first job in the Netherlands. 5-minute quiz, anonymous, free.",
   "start_url": "/app",
   "display": "standalone",
   "background_color": "#ffffff",

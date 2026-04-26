@@ -23,8 +23,8 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Junta — Find your first job in Amsterdam",
-  description: "5-minute anonymous quiz that matches you to real local jobs in Amsterdam. No documents, no Dutch required.",
+  title: "Junta — Find your first job in the Netherlands",
+  description: "5-minute anonymous quiz that matches you to real local jobs across the Netherlands. No documents, no Dutch required.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

@@ -9,27 +9,58 @@ const HEADERS = {
 };
 
 const NEIGHBORHOOD_COORDS: Record<string, [number, number]> = {
-  'centrum':       [52.3702, 4.8952],
-  'jordaan':       [52.3748, 4.8806],
-  'de pijp':       [52.3540, 4.8969],
-  'pijp':          [52.3540, 4.8969],
-  'noord':         [52.3953, 4.9088],
-  'oost':          [52.3612, 4.9358],
-  'west':          [52.3700, 4.8650],
-  'nieuw-west':    [52.3598, 4.8268],
-  'zuidoost':      [52.3121, 4.9474],
-  'bijlmer':       [52.3121, 4.9474],
-  'zuidas':        [52.3386, 4.8700],
-  'sloterdijk':    [52.3886, 4.8363],
-  'westpoort':     [52.4012, 4.8201],
-  'oud-west':      [52.3641, 4.8742],
-  'oud west':      [52.3641, 4.8742],
-  'buitenveldert': [52.3350, 4.8750],
-  'amstelveen':    [52.3100, 4.8600],
-  'zaandam':       [52.4380, 4.8130],
-  'haarlem':       [52.3874, 4.6462],
-  'diemen':        [52.3397, 4.9603],
-  'schiphol':      [52.3105, 4.7683],
+  // Amsterdam neighbourhoods
+  'centrum':        [52.3702, 4.8952],
+  'jordaan':        [52.3748, 4.8806],
+  'de pijp':        [52.3540, 4.8969],
+  'pijp':           [52.3540, 4.8969],
+  'noord':          [52.3953, 4.9088],
+  'oost':           [52.3612, 4.9358],
+  'west':           [52.3700, 4.8650],
+  'nieuw-west':     [52.3598, 4.8268],
+  'zuidoost':       [52.3121, 4.9474],
+  'bijlmer':        [52.3121, 4.9474],
+  'zuidas':         [52.3386, 4.8700],
+  'sloterdijk':     [52.3886, 4.8363],
+  'westpoort':      [52.4012, 4.8201],
+  'oud-west':       [52.3641, 4.8742],
+  'buitenveldert':  [52.3350, 4.8750],
+  // Amsterdam metro
+  'amstelveen':     [52.3100, 4.8600],
+  'zaandam':        [52.4380, 4.8130],
+  'haarlem':        [52.3874, 4.6462],
+  'diemen':         [52.3397, 4.9603],
+  'schiphol':       [52.3105, 4.7683],
+  'almere':         [52.3702, 5.2158],
+  // Major Dutch cities
+  'amsterdam':      [52.3702, 4.8952],
+  'rotterdam':      [51.9225, 4.4792],
+  'den haag':       [52.0705, 4.3007],
+  'the hague':      [52.0705, 4.3007],
+  'utrecht':        [52.0907, 5.1214],
+  'eindhoven':      [51.4416, 5.4697],
+  'groningen':      [53.2194, 6.5665],
+  'tilburg':        [51.5555, 5.0913],
+  'almelo':         [52.3567, 6.6603],
+  'breda':          [51.5719, 4.7683],
+  'nijmegen':       [51.8426, 5.8546],
+  'enschede':       [52.2215, 6.8937],
+  'apeldoorn':      [52.2112, 5.9699],
+  'arnhem':         [51.9851, 5.8987],
+  'maastricht':     [50.8514, 5.6910],
+  'leiden':         [52.1601, 4.4970],
+  'dordrecht':      [51.8133, 4.6901],
+  'zoetermeer':     [52.0574, 4.4940],
+  'zwolle':         [52.5168, 6.0830],
+  'deventer':       [52.2550, 6.1551],
+  'delft':          [52.0116, 4.3571],
+  'alkmaar':        [52.6324, 4.7534],
+  'venlo':          [51.3704, 6.1724],
+  'amersfoort':     [52.1561, 5.3878],
+  'leeuwarden':     [53.2012, 5.7999],
+  'middelburg':     [51.4988, 3.6136],
+  'den bosch':      [51.6978, 5.3037],
+  's-hertogenbosch':[51.6978, 5.3037],
 };
 
 function geocode(title: string, location: string): [number, number] {
@@ -37,8 +68,9 @@ function geocode(title: string, location: string): [number, number] {
   for (const [name, coords] of Object.entries(NEIGHBORHOOD_COORDS)) {
     if (text.includes(name)) return coords;
   }
-  const jitter = () => (Math.random() - 0.5) * 0.06;
-  return [52.3702 + jitter(), 4.8952 + jitter()];
+  // Default to geographic centre of the Netherlands
+  const jitter = () => (Math.random() - 0.5) * 0.4;
+  return [52.1326 + jitter(), 5.2913 + jitter()];
 }
 
 function formatSalary(min: string, max: string): string {
@@ -77,8 +109,8 @@ async function fetchDescription(href: string): Promise<string> {
 
 async function scrapeListingPage(page: number): Promise<{ listing: Omit<JobRow, 'description'>; href: string }[]> {
   const url = page === 1
-    ? `${YC_BASE}/vacatures-in/amsterdam`
-    : `${YC_BASE}/vacatures-in/amsterdam?page=${page}`;
+    ? `${YC_BASE}/vacatures`
+    : `${YC_BASE}/vacatures?page=${page}`;
 
   const res = await fetch(url, { headers: HEADERS });
   if (!res.ok) throw new Error(`YoungCapital page ${page} returned ${res.status}`);
@@ -95,7 +127,7 @@ async function scrapeListingPage(page: number): Promise<{ listing: Omit<JobRow, 
     const salaryMin = $el.attr('data-job-opening-salary-min') || '';
     const salaryMax = $el.attr('data-job-opening-salary-max') || '';
     const href = $el.attr('href') || '';
-    const locationText = $el.find('.nyc-icon-location').parent().find('span:last-child').text().trim() || 'Amsterdam';
+    const locationText = $el.find('.nyc-icon-location').parent().find('span:last-child').text().trim() || 'Nederland';
     if (!id || !title) return;
     const [lat, lng] = geocode(title, locationText);
     results.push({

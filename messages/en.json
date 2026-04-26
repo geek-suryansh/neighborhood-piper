@@ -132,7 +132,7 @@
       "postJob": "Post a job"
     },
     "hero": {
-      "line1": "Amsterdam",
+      "line1": "Netherlands",
       "line2": "has your job.",
       "accent": "Let's find it.",
       "desc1": "Answer 5 questions. Get matched to real local jobs near you.",
@@ -141,14 +141,14 @@
       "browse": "Browse the map",
       "badge1": "🔒 Fully anonymous",
       "badge2": "🌍 No Dutch required",
-      "badge3": "📍 Amsterdam only"
+      "badge3": "📍 Anywhere in the Netherlands"
     },
     "howItWorks": {
       "title": "How it works"
     },
     "categories": {
       "title": "What kind of jobs?",
-      "subtitle": "Real listings from Amsterdam employers — updated every week."
+      "subtitle": "Real listings from employers across the Netherlands — updated every week."
     },
     "anonymous": {
       "title": "We never ask who you are.",
@@ -156,17 +156,17 @@
     },
     "employer": {
       "title": "Are you an employer?",
-      "desc": "Post your vacancy and reach motivated young people in Amsterdam — for free.",
+      "desc": "Post your vacancy and reach motivated young people across the Netherlands — for free.",
       "button": "Post a vacancy →"
     },
     "cta": {
       "title": "Your job is out there.",
       "desc": "Let's go find it.",
       "button": "Start the 5-minute quiz →",
-      "note": "Free · Anonymous · Amsterdam"
+      "note": "Free · Anonymous · Netherlands"
     },
     "footer": {
-      "builtBy": "Built with ❤️ in Amsterdam by",
+      "builtBy": "Built with ❤️ in the Netherlands by",
       "team": "Erwin, Jeroen & Suryansh",
       "hackathon": "Hackathon 2026"
     },
@@ -198,13 +198,13 @@
   },
   "match": {
     "title": "Find your best-fit jobs",
-    "subtitle": "Describe your experience and skills in any language — Dutch, Arabic, English, Tigrinya. We'll find matching jobs in Amsterdam.",
+    "subtitle": "Describe your experience and skills in any language — Dutch, Arabic, English, Tigrinya. We'll find matching jobs across the Netherlands.",
     "nameLabel": "Your name (optional)",
     "namePlaceholder": "e.g. Yohannes",
     "resumeLabel": "Tell us about yourself",
     "resumeRequired": "*",
     "resumeHint": "Skills, experience, languages, what kind of work you want. Any language is fine.",
-    "resumePlaceholder": "Example:\nI have 3 years of experience working in restaurants and cafes as a waiter and barista. I speak Arabic, English, and some Dutch. I am hardworking, friendly, and good with customers. I am looking for part-time or full-time work in Amsterdam.",
+    "resumePlaceholder": "Example:\nI have 3 years of experience working in restaurants and cafes as a waiter and barista. I speak Arabic, English, and some Dutch. I am hardworking, friendly, and good with customers. I am looking for part-time or full-time work in the Netherlands.",
     "submit": "Find matching jobs",
     "loading": "Finding matches…",
     "noMatches": "No matches found. Try adding more detail about your experience.",

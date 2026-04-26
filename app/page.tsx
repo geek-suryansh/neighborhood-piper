@@ -10,7 +10,7 @@ const STEPS_EN = [
   {
     n: "02",
     title: "We find your matches",
-    desc: "Our AI reads every job in Amsterdam and finds the ones that fit you — by neighbourhood, by hours, by what you're good at.",
+    desc: "Our AI reads jobs across the Netherlands and finds the ones that fit you — by neighbourhood, by hours, by what you're good at.",
   },
   {
     n: "03",
@@ -28,7 +28,7 @@ const STEPS_NL = [
   {
     n: "02",
     title: "Wij vinden jouw matches",
-    desc: "Onze AI leest elke vacature in Amsterdam en vindt die welke bij jou passen — op buurt, op uren, op wat je goed kunt.",
+    desc: "Onze AI leest vacatures door heel Nederland en vindt die welke bij jou passen — op buurt, op uren, op wat je goed kunt.",
   },
   {
     n: "03",

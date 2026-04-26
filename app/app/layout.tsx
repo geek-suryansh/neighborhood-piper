@@ -3,8 +3,8 @@ import ServiceWorker from '../sw-register'
 
 
 export const metadata: Metadata = {
-  title: 'Junta — Find your first job in Amsterdam',
-  description: 'Find your first job in Amsterdam. 5-minute quiz, anonymous, free.',
+  title: 'Junta — Find your first job in the Netherlands',
+  description: 'Find your first job in the Netherlands. 5-minute quiz, anonymous, free.',
   manifest: '/api/junta/manifest',
   appleWebApp: {
     capable: true,

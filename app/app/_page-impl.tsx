@@ -232,7 +232,7 @@ function generateCVHTML(data: AppData, style: CVStyle = DEFAULT_CV_STYLE): strin
     <div class="s-section">
       <div class="s-heading">Contact</div>
       ${data.email ? `<div class="s-item">✉ ${data.email}</div>` : ""}
-      <div class="s-item">📍 ${data.location ? data.location.name : "Amsterdam"}</div>
+      <div class="s-item">📍 ${data.location ? data.location.name : "Nederland"}</div>
       ${data.age ? `<div class="s-item">🎂 ${data.age} jaar</div>` : ""}
     </div>
 
@@ -265,7 +265,7 @@ function generateCVHTML(data: AppData, style: CVStyle = DEFAULT_CV_STYLE): strin
   <div class="main">
     <div class="m-section">
       <div class="m-heading">Profiel</div>
-      <p class="body-text">${data.profileDescription ?? `Gemotiveerde jongere van ${data.age} jaar, woonachtig in ${data.location ? data.location.name : "Amsterdam"}, op zoek naar een bijbaan.${data.dream ? ` Toekomstdroom: <em>${data.dream}</em>.` : ""} Beschikbaar op ${fullDays.join(", ")}${data.hours ? ` voor ${data.hours} per week` : ""}.`}</p>
+      <p class="body-text">${data.profileDescription ?? `Gemotiveerde jongere van ${data.age} jaar, woonachtig in ${data.location ? data.location.name : "Nederland"}, op zoek naar een bijbaan.${data.dream ? ` Toekomstdroom: <em>${data.dream}</em>.` : ""} Beschikbaar op ${fullDays.join(", ")}${data.hours ? ` voor ${data.hours} per week` : ""}.`}</p>
     </div>
 
     ${(data.school || data.eduLevel) ? `
@@ -1243,7 +1243,7 @@ function CVTab({ data }: { data: AppData }) {
           <div style={{ marginBottom: 14 }}>
             <div style={sidebarHeading}>{t('contact') || "Contact"}</div>
             {data.email && <div style={{ fontSize: 10, color: "#374151", marginBottom: 3, wordBreak: "break-all" as const }}>✉ {data.email}</div>}
-            <div style={{ fontSize: 10, color: "#374151", marginBottom: 3 }}>📍 {data.location ? data.location.name : "Amsterdam"}</div>
+            <div style={{ fontSize: 10, color: "#374151", marginBottom: 3 }}>📍 {data.location ? data.location.name : "Nederland"}</div>
             {data.age && <div style={{ fontSize: 10, color: "#374151" }}>🎂 {data.age} jaar</div>}
           </div>
 

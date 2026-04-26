@@ -103,22 +103,16 @@ const CITY_COORDS: Record<string, [number, number]> = {
 
 const geocodeCache: Record<string, [number, number] | null> = {};
 
-function geocodeLocal(location: string): [number, number] | null {
-  const loc = location.toLowerCase().trim();
-  for (const [city, coords] of Object.entries(CITY_COORDS)) {
-    if (loc.includes(city)) return coords;
-  }
-  return null;
-}
-
-async function geocode(location: string): Promise<[number, number] | null> {
+export async function geocodeLocation(location: string): Promise<[number, number] | null> {
   const key = location.toLowerCase().trim();
   if (key in geocodeCache) return geocodeCache[key];
 
-  const local = geocodeLocal(location);
-  if (local) { geocodeCache[key] = local; return local; }
+  // Fast-path for Amsterdam — avoid a Nominatim round-trip for the most common location
+  if (key.includes('amsterdam')) {
+    geocodeCache[key] = [52.3702, 4.8952];
+    return geocodeCache[key];
+  }
 
-  // Nominatim fallback — free OSM geocoder, no API key needed
   try {
     const q = encodeURIComponent(location);
     const res = await fetch(
@@ -133,10 +127,23 @@ async function geocode(location: string): Promise<[number, number] | null> {
         return coords;
       }
     }
-  } catch { /* ignore, return null */ }
+  } catch { /* ignore */ }
 
   geocodeCache[key] = null;
   return null;
+}
+
+// Keep local table for the YoungCapital scraper (Amsterdam-only, no Nominatim needed)
+function geocodeLocal(location: string): [number, number] {
+  const loc = location.toLowerCase().trim();
+  for (const [city, coords] of Object.entries(CITY_COORDS)) {
+    if (loc.includes(city)) return coords;
+  }
+  return [52.3702, 4.8952]; // default Amsterdam
+}
+
+async function geocode(location: string): Promise<[number, number] | null> {
+  return geocodeLocation(location);
 }
 
 function extractSalary(text: string): string {

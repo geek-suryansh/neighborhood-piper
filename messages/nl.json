@@ -132,7 +132,7 @@
       "postJob": "Vacature plaatsen"
     },
     "hero": {
-      "line1": "Amsterdam",
+      "line1": "Nederland",
       "line2": "heeft jouw baan.",
       "accent": "Laten we hem vinden.",
       "desc1": "Beantwoord 5 vragen. Word gematcht met echte lokale banen bij jou in de buurt.",
@@ -141,14 +141,14 @@
       "browse": "Bekijk de kaart",
       "badge1": "🔒 Volledig anoniem",
       "badge2": "🌍 Geen Nederlands nodig",
-      "badge3": "📍 Alleen Amsterdam"
+      "badge3": "📍 Heel Nederland"
     },
     "howItWorks": {
       "title": "Hoe het werkt"
     },
     "categories": {
       "title": "Wat voor banen?",
-      "subtitle": "Echte vacatures van Amsterdamse werkgevers — elke week bijgewerkt."
+      "subtitle": "Echte vacatures van werkgevers door heel Nederland — elke week bijgewerkt."
     },
     "anonymous": {
       "title": "We vragen nooit wie je bent.",
@@ -156,17 +156,17 @@
     },
     "employer": {
       "title": "Ben je werkgever?",
-      "desc": "Plaats je vacature en bereik gemotiveerde jongeren in Amsterdam — gratis.",
+      "desc": "Plaats je vacature en bereik gemotiveerde jongeren door heel Nederland — gratis.",
       "button": "Vacature plaatsen →"
     },
     "cta": {
       "title": "Jouw baan is er.",
       "desc": "Laten we hem gaan zoeken.",
       "button": "Begin de 5-minuten quiz →",
-      "note": "Gratis · Anoniem · Amsterdam"
+      "note": "Gratis · Anoniem · Nederland"
     },
     "footer": {
-      "builtBy": "Gemaakt met ❤️ in Amsterdam door",
+      "builtBy": "Gemaakt met ❤️ in Nederland door",
       "team": "Erwin, Jeroen & Suryansh",
       "hackathon": "Hackathon 2026"
     },
@@ -198,13 +198,13 @@
   },
   "match": {
     "title": "Vind jouw beste matches",
-    "subtitle": "Beschrijf je ervaring en skills in elke taal — Nederlands, Arabisch, Engels, Tigrinya. Wij vinden passende banen in Amsterdam.",
+    "subtitle": "Beschrijf je ervaring en skills in elke taal — Nederlands, Arabisch, Engels, Tigrinya. Wij vinden passende banen door heel Nederland.",
     "nameLabel": "Jouw naam (optioneel)",
     "namePlaceholder": "bijv. Yohannes",
     "resumeLabel": "Vertel ons over jezelf",
     "resumeRequired": "*",
     "resumeHint": "Skills, ervaring, talen, wat voor werk je zoekt. Elke taal is prima.",
-    "resumePlaceholder": "Voorbeeld:\nIk heb 3 jaar ervaring als ober en barista in restaurants en cafes. Ik spreek Arabisch, Engels en wat Nederlands. Ik ben hardwerkend, vriendelijk en goed met klanten. Ik zoek parttime of fulltime werk in Amsterdam.",
+    "resumePlaceholder": "Voorbeeld:\nIk heb 3 jaar ervaring als ober en barista in restaurants en cafes. Ik spreek Arabisch, Engels en wat Nederlands. Ik ben hardwerkend, vriendelijk en goed met klanten. Ik zoek parttime of fulltime werk in Nederland.",
     "submit": "Vind passende banen",
     "loading": "Matches zoeken…",
     "noMatches": "Geen matches gevonden. Voeg meer details toe over je ervaring.",

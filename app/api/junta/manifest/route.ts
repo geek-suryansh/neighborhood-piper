@@ -2,9 +2,9 @@ export const dynamic = 'force-dynamic'
 
 export function GET() {
   const manifest = {
-    name: 'Junta — Find your first job in Amsterdam',
+    name: 'Junta — Find your first job in the Netherlands',
     short_name: 'Junta',
-    description: 'Find your first job in Amsterdam. 5-minute quiz, anonymous, free.',
+    description: 'Find your first job in the Netherlands. 5-minute quiz, anonymous, free.',
     start_url: '/app',
     scope: '/app',
     display: 'standalone',

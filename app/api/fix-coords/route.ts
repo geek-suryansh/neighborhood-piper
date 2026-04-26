@@ -17,13 +17,12 @@ async function nominatim(location: string): Promise<{ lat: number; lng: number }
 }
 
 // GET /api/fix-coords
-// Re-geocodes every job whose location doesn't contain "amsterdam" via Nominatim.
+// Re-geocodes every job via Nominatim.
 // Safe to run multiple times — skips jobs that already have correct-looking coords.
 export async function GET() {
   const { data: jobs, error } = await getSupabase()
     .from('jobs')
-    .select('id, location, lat, lng')
-    .not('location', 'ilike', '%amsterdam%');
+    .select('id, location, lat, lng');
 
   if (error || !jobs) {
     return NextResponse.json({ error: error?.message }, { status: 500 });
