@@ -9,16 +9,16 @@ import { toProfile, type CandidateProfile } from "@/lib/profile";
 import { getSupabase } from "@/lib/supabase";
 
 const COLORS = {
-  bg: "#F2EDE4",          // oatmeal
-  card: "#FAFAF5",        // warm white
-  accent: "#E85520",      // international orange
-  accentDim: "#E8552018", // orange tint
-  purple: "#1D3B6B",      // navy (structural, previously purple slot)
-  purpleDim: "#1D3B6B18", // navy tint
-  orange: "#E85520",      // same as accent
-  text: "#1D3B6B",        // navy primary text
-  textDim: "#7A8FA8",     // muted blue-grey
-  border: "#D4C9BA",      // warm border
+  bg: "#0a0a0f",
+  card: "#12121a",
+  accent: "#00e5a0",
+  accentDim: "#00e5a033",
+  purple: "#8b5cf6",
+  purpleDim: "#8b5cf633",
+  orange: "#ff6b35",
+  text: "#e8e8f0",
+  textDim: "#8888a0",
+  border: "#22222f",
 };
 
 const FONTS = `'Segoe UI', system-ui, sans-serif`;
@@ -121,8 +121,8 @@ function BigButton({ onClick, children, secondary, disabled }: {
     <button onClick={onClick} disabled={disabled} style={{
       width: "100%", padding: "16px 24px", borderRadius: 14,
       border: secondary ? `1.5px solid ${COLORS.border}` : "none",
-      background: disabled ? COLORS.border : secondary ? "transparent" : COLORS.accent,
-      color: disabled ? COLORS.textDim : secondary ? COLORS.text : "#fff",
+      background: disabled ? COLORS.border : secondary ? "transparent" : `linear-gradient(135deg, ${COLORS.accent}, #00c087)`,
+      color: disabled ? COLORS.textDim : secondary ? COLORS.text : COLORS.bg,
       fontSize: 16, fontWeight: 700,
       cursor: disabled ? "not-allowed" : "pointer",
       transition: "all 0.3s ease", fontFamily: FONTS, letterSpacing: "-0.01em",
@@ -856,9 +856,9 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
 // ── Result tabs ──
 
 function scoreColor(score: number): string {
-  if (score >= 0.70) return '#16a34a';
-  if (score >= 0.55) return '#d97706';
-  return '#7A8FA8';
+  if (score >= 0.70) return '#00e5a0';
+  if (score >= 0.55) return '#f59e0b';
+  return '#ff6b35';
 }
 
 interface MatchedJob {
