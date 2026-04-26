@@ -129,9 +129,40 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+// ── CV Style presets ──
+
+type CVColorId = 'green' | 'blue' | 'orange' | 'purple' | 'rose';
+type CVFontId = 'modern' | 'classic' | 'clean' | 'mono' | 'friendly';
+type CVSectionStyleId = 'line' | 'color' | 'block';
+interface CVColorPreset { id: CVColorId; label: string; accent: string; tagBg: string; tagText: string; tagBorder: string; }
+interface CVFontPreset { id: CVFontId; label: string; stack: string; }
+interface CVSectionPreset { id: CVSectionStyleId; label: string; }
+interface CVStyle { colorId: CVColorId; fontId: CVFontId; sectionStyleId: CVSectionStyleId; }
+
+const CV_COLORS: CVColorPreset[] = [
+  { id: 'green',  label: 'Groen',    accent: '#00c087', tagBg: '#f0faf6', tagText: '#007a55', tagBorder: '#00c08733' },
+  { id: 'blue',   label: 'Blauw',    accent: '#2563eb', tagBg: '#eff6ff', tagText: '#1d4ed8', tagBorder: '#2563eb33' },
+  { id: 'orange', label: 'Oranje',   accent: '#f59e0b', tagBg: '#fffbeb', tagText: '#b45309', tagBorder: '#f59e0b33' },
+  { id: 'purple', label: 'Paars',    accent: '#7c3aed', tagBg: '#f5f3ff', tagText: '#6d28d9', tagBorder: '#7c3aed33' },
+  { id: 'rose',   label: 'Roze',     accent: '#ec4899', tagBg: '#fdf2f8', tagText: '#be185d', tagBorder: '#ec489933' },
+];
+const CV_FONTS: CVFontPreset[] = [
+  { id: 'modern',   label: 'Modern',      stack: "'Segoe UI', system-ui, sans-serif" },
+  { id: 'classic',  label: 'Klassiek',    stack: "Georgia, 'Times New Roman', serif" },
+  { id: 'clean',    label: 'Clean',       stack: "Arial, Helvetica, sans-serif" },
+  { id: 'mono',     label: 'Mono',        stack: "'Courier New', Courier, monospace" },
+  { id: 'friendly', label: 'Vriendelijk', stack: "'Trebuchet MS', Tahoma, sans-serif" },
+];
+const CV_SECTION_STYLES: CVSectionPreset[] = [
+  { id: 'line',  label: 'Lijn' },
+  { id: 'color', label: 'Kleur' },
+  { id: 'block', label: 'Blok' },
+];
+const DEFAULT_CV_STYLE: CVStyle = { colorId: 'green', fontId: 'modern', sectionStyleId: 'line' };
+
 // ── CV PDF generation — always Dutch ──
 
-function generateCVHTML(data: AppData): string {
+function generateCVHTML(data: AppData, style: CVStyle = DEFAULT_CV_STYLE): string {
   const interestLabels = (data.interests || [])
     .map(id => INTERESTS.find(i => i.id === id)?.label)
     .filter(Boolean);
@@ -141,6 +172,20 @@ function generateCVHTML(data: AppData): string {
   };
   const fullDays = (data.days || []).map(d => dayMap[d] || d);
 
+  const colorPreset = CV_COLORS.find(c => c.id === style.colorId) ?? CV_COLORS[0];
+  const fontPreset = CV_FONTS.find(f => f.id === style.fontId) ?? CV_FONTS[0];
+  const { accent, tagBg, tagText, tagBorder } = colorPreset;
+  const fontStack = fontPreset.stack;
+
+  let h2CSS: string;
+  if (style.sectionStyleId === 'color') {
+    h2CSS = `font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: ${accent}; margin-bottom: 10px;`;
+  } else if (style.sectionStyleId === 'block') {
+    h2CSS = `font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: ${tagText}; background: ${tagBg}; border: 1px solid ${tagBorder}; padding: 3px 10px; border-radius: 20px; display: inline-block; margin-bottom: 10px;`;
+  } else {
+    h2CSS = `font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #999; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #eee;`;
+  }
+
   return `<!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -148,18 +193,16 @@ function generateCVHTML(data: AppData): string {
 <title>CV — ${data.name || "Anoniem"}</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; background: white; padding: 48px 52px; font-size: 10.5pt; line-height: 1.55; max-width: 800px; margin: 0 auto; }
-  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2.5px solid #00c087; }
+  body { font-family: ${fontStack}; color: #1a1a1a; background: white; padding: 48px 52px; font-size: 10.5pt; line-height: 1.55; max-width: 800px; margin: 0 auto; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2.5px solid ${accent}; }
   .header h1 { font-size: 26pt; font-weight: 800; letter-spacing: -0.03em; color: #0a0a0f; line-height: 1.1; }
   .header .sub { color: #666; font-size: 11pt; margin-top: 4px; }
-  .badge { display: inline-block; background: #00e5a0; color: #0a0a0f; font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; padding: 3px 10px; border-radius: 20px; margin-top: 8px; }
+  .badge { display: inline-block; background: ${tagBg}; border: 1px solid ${tagBorder}; color: ${tagText}; font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; padding: 3px 10px; border-radius: 20px; margin-top: 8px; }
   .contact { text-align: right; color: #555; font-size: 10pt; line-height: 1.8; }
   .section { margin-bottom: 22px; }
-  .section h2 { font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #999; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #eee; }
+  .section h2 { ${h2CSS} }
   .tags { display: flex; flex-wrap: wrap; gap: 6px; }
-  .tag { background: #f0faf6; border: 1px solid #00e5a033; color: #007a55; padding: 4px 12px; border-radius: 20px; font-size: 9.5pt; }
-  .tag.skill { background: #f5f0ff; border-color: #8b5cf633; color: #6d4ac7; }
-  .tag.lang { background: #fff8f0; border-color: #ff6b3533; color: #cc4a10; }
+  .tag { background: ${tagBg}; border: 1px solid ${tagBorder}; color: ${tagText}; padding: 4px 12px; border-radius: 20px; font-size: 9.5pt; }
   .edu { display: flex; justify-content: space-between; }
   .edu strong { font-size: 11pt; }
   .edu span { display: block; color: #666; font-size: 10pt; }
@@ -168,7 +211,7 @@ function generateCVHTML(data: AppData): string {
   .exp-item strong { font-size: 10.5pt; display: block; }
   .exp-item span { color: #555; font-size: 10pt; }
   .avail { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
-  .avail span { background: #f0faf6; border: 1px solid #00e5a044; color: #007a55; padding: 5px 14px; border-radius: 20px; font-size: 9.5pt; }
+  .avail span { background: ${tagBg}; border: 1px solid ${tagBorder}; color: ${tagText}; padding: 5px 14px; border-radius: 20px; font-size: 9.5pt; }
   .footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #eee; color: #bbb; font-size: 8.5pt; display: flex; justify-content: space-between; }
   @media print { body { padding: 32px 40px; } @page { size: A4; margin: 0; } }
 </style>
@@ -216,13 +259,13 @@ function generateCVHTML(data: AppData): string {
   ${(data.skills || []).length > 0 ? `
   <div class="section">
     <h2>Vaardigheden</h2>
-    <div class="tags">${(data.skills || []).map(s => `<span class="tag skill">${s}</span>`).join("")}</div>
+    <div class="tags">${(data.skills || []).map(s => `<span class="tag">${s}</span>`).join("")}</div>
   </div>` : ""}
 
   ${(data.languages || []).length > 0 ? `
   <div class="section">
     <h2>Talen</h2>
-    <div class="tags">${(data.languages || []).map(l => `<span class="tag lang">${l}</span>`).join("")}</div>
+    <div class="tags">${(data.languages || []).map(l => `<span class="tag">${l}</span>`).join("")}</div>
   </div>` : ""}
 
   ${interestLabels.length > 0 ? `
@@ -972,16 +1015,73 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
   );
 }
 
+function CVStylePicker({ style, onChange }: { style: CVStyle; onChange: (s: CVStyle) => void }) {
+  return (
+    <div style={{ padding: 16, borderRadius: 12, border: `1px solid ${COLORS.border}`, background: COLORS.card, marginBottom: 16 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.textDim, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>
+        Stijl aanpassen
+      </div>
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 12, color: COLORS.textDim, marginBottom: 6 }}>Kleur</div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          {CV_COLORS.map(c => (
+            <button key={c.id} title={c.label} onClick={() => onChange({ ...style, colorId: c.id })} style={{
+              width: 28, height: 28, borderRadius: "50%", background: c.accent,
+              border: style.colorId === c.id ? `3px solid #0D0D0D` : `3px solid transparent`,
+              outline: style.colorId === c.id ? `2px solid ${c.accent}` : "none",
+              outlineOffset: 2, cursor: "pointer", padding: 0,
+            }} />
+          ))}
+        </div>
+      </div>
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 12, color: COLORS.textDim, marginBottom: 6 }}>Lettertype</div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {CV_FONTS.map(f => (
+            <button key={f.id} onClick={() => onChange({ ...style, fontId: f.id })} style={{
+              padding: "4px 10px", borderRadius: 8,
+              border: `1.5px solid ${style.fontId === f.id ? "#0D0D0D" : COLORS.border}`,
+              background: style.fontId === f.id ? "#0D0D0D" : COLORS.bg,
+              color: style.fontId === f.id ? "#FFFFFF" : COLORS.text,
+              fontSize: 13, fontFamily: f.stack, cursor: "pointer",
+            }}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div>
+        <div style={{ fontSize: 12, color: COLORS.textDim, marginBottom: 6 }}>Kopteksten</div>
+        <div style={{ display: "flex", gap: 6 }}>
+          {CV_SECTION_STYLES.map(s => (
+            <button key={s.id} onClick={() => onChange({ ...style, sectionStyleId: s.id })} style={{
+              padding: "4px 12px", borderRadius: 8,
+              border: `1.5px solid ${style.sectionStyleId === s.id ? "#0D0D0D" : COLORS.border}`,
+              background: style.sectionStyleId === s.id ? "#0D0D0D" : COLORS.bg,
+              color: style.sectionStyleId === s.id ? "#FFFFFF" : COLORS.text,
+              fontSize: 13, cursor: "pointer", fontFamily: FONTS,
+            }}>
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CVTab({ data }: { data: AppData }) {
   const t = useTranslations('app.cv');
   const locale = useLocale();
+  const [cvStyle, setCvStyle] = useState<CVStyle>(DEFAULT_CV_STYLE);
+  const selectedColor = CV_COLORS.find(c => c.id === cvStyle.colorId) ?? CV_COLORS[0];
   const interests = (data.interests || []).map(id => {
     const interest = INTERESTS.find(i => i.id === id);
     return locale === 'nl' ? interest?.label : interest?.labelEn;
   }).filter(Boolean);
 
   const handleDownload = () => {
-    const html = generateCVHTML(data);
+    const html = generateCVHTML(data, cvStyle);
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const win = window.open(url, "_blank");
@@ -1060,7 +1160,7 @@ function CVTab({ data }: { data: AppData }) {
           <Section title={t('languages')}>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {(data.languages || []).map(l => (
-                <span key={l} style={{ padding: "4px 10px", borderRadius: 6, background: `${COLORS.orange}22`, color: COLORS.orange, fontSize: 12, fontWeight: 600 }}>{l}</span>
+                <span key={l} style={{ padding: "4px 10px", borderRadius: 6, background: selectedColor.tagBg, border: `1px solid ${selectedColor.tagBorder}`, color: selectedColor.tagText, fontSize: 12, fontWeight: 600 }}>{l}</span>
               ))}
             </div>
           </Section>
@@ -1069,7 +1169,7 @@ function CVTab({ data }: { data: AppData }) {
         <Section title={t('skills')}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {(data.skills || []).map(s => (
-              <span key={s} style={{ padding: "4px 10px", borderRadius: 6, background: COLORS.purpleDim, color: COLORS.purple, fontSize: 12, fontWeight: 600 }}>{s}</span>
+              <span key={s} style={{ padding: "4px 10px", borderRadius: 6, background: selectedColor.tagBg, border: `1px solid ${selectedColor.tagBorder}`, color: selectedColor.tagText, fontSize: 12, fontWeight: 600 }}>{s}</span>
             ))}
           </div>
         </Section>
@@ -1077,7 +1177,7 @@ function CVTab({ data }: { data: AppData }) {
         <Section title={t('interests')}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {interests.map(i => (
-              <span key={i} style={{ padding: "4px 10px", borderRadius: 6, background: `${COLORS.accentDim}`, color: COLORS.accent, fontSize: 12, fontWeight: 600 }}>{i}</span>
+              <span key={i} style={{ padding: "4px 10px", borderRadius: 6, background: selectedColor.tagBg, border: `1px solid ${selectedColor.tagBorder}`, color: selectedColor.tagText, fontSize: 12, fontWeight: 600 }}>{i}</span>
             ))}
           </div>
         </Section>
@@ -1089,9 +1189,9 @@ function CVTab({ data }: { data: AppData }) {
                 width: 36, height: 36, borderRadius: 8,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 11, fontWeight: 600,
-                background: (data.days || []).includes(d) ? COLORS.accentDim : COLORS.bg,
-                color: (data.days || []).includes(d) ? COLORS.accent : COLORS.textDim,
-                border: `1px solid ${(data.days || []).includes(d) ? COLORS.accent : COLORS.border}`,
+                background: (data.days || []).includes(d) ? selectedColor.tagBg : COLORS.bg,
+                color: (data.days || []).includes(d) ? selectedColor.tagText : COLORS.textDim,
+                border: `1px solid ${(data.days || []).includes(d) ? selectedColor.accent : COLORS.border}`,
               }}>
                 {d}
               </div>
@@ -1100,6 +1200,7 @@ function CVTab({ data }: { data: AppData }) {
         </Section>
       </div>
 
+      <CVStylePicker style={cvStyle} onChange={setCvStyle} />
       <BigButton onClick={handleDownload}>{tResults('downloadCV')}</BigButton>
     </div>
   );
