@@ -739,7 +739,8 @@ function JobPicksScreen({ data, setData, onNext }: { data: AppData; setData: (d:
         const [profileJson, expJson] = await Promise.all([profileRes.json(), expRes.json()]);
         setData({
           ...data,
-          profileDescription: profileJson.description || undefined,
+          profileDescription: profileJson.nl || undefined,
+          profileDescriptionEn: profileJson.en || undefined,
           cvExperience: expJson.items?.length ? expJson.items : undefined,
         });
       } catch { /* silently fall back to template text */ }
@@ -1003,7 +1004,7 @@ function CVTab({ data }: { data: AppData }) {
 
         <Section title={t('profile')}>
           <p style={{ color: COLORS.textDim, fontSize: 14, lineHeight: 1.6, margin: 0 }}>
-            {data.profileDescription ?? (
+            {(locale === 'en' ? data.profileDescriptionEn : data.profileDescription) ?? (
               <>
                 {t('profileFallback', { age: data.age ?? '' })}
                 {data.dream && ` ${t('dreamPrefix')} ${data.dream}.`}
@@ -1028,8 +1029,12 @@ function CVTab({ data }: { data: AppData }) {
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {(data.cvExperience || []).map((item, i) => (
                 <div key={i}>
-                  <p style={{ color: COLORS.text, fontSize: 14, fontWeight: 600, margin: 0 }}>{item.title}</p>
-                  <p style={{ color: COLORS.textDim, fontSize: 13, margin: "2px 0 0" }}>{item.description}</p>
+                  <p style={{ color: COLORS.text, fontSize: 14, fontWeight: 600, margin: 0 }}>
+                    {locale === 'en' ? (item.titleEn ?? item.title) : item.title}
+                  </p>
+                  <p style={{ color: COLORS.textDim, fontSize: 13, margin: "2px 0 0" }}>
+                    {locale === 'en' ? (item.descriptionEn ?? item.description) : item.description}
+                  </p>
                 </div>
               ))}
             </div>

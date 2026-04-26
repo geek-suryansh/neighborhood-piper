@@ -26,18 +26,18 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: 'system',
-          content: `Je vertaalt ruwe ervaringsgegevens van een jonge werkzoekende naar nette CV-regels in het Nederlands. Elke regel heeft een korte titel (max 4 woorden, bijv. "Vrijwilligerswerk", "Bijbaan supermarkt", "Stage grafisch ontwerp") en een beknopte beschrijving (max 12 woorden). Laat ervaringen weg die te vaag zijn voor een CV. Geef alleen geldige JSON terug.`,
+          content: `Je vertaalt ruwe ervaringsgegevens van een jonge werkzoekende naar nette CV-regels. Elke regel heeft een korte Nederlandse titel (max 4 woorden), een beknopte Nederlandse beschrijving (max 12 woorden), een korte Engelse titel en een beknopte Engelse beschrijving. Laat ervaringen weg die te vaag zijn. Geef alleen geldige JSON terug.`,
         },
         {
           role: 'user',
           content: `Maak CV-regels van deze ervaringen. Geef terug als JSON:
-{"items":[{"title":"...","description":"..."}]}
+{"items":[{"title":"...","description":"...","titleEn":"...","descriptionEn":"..."}]}
 
 Ervaringen:
 ${input}`,
         },
       ],
-      max_tokens: 300,
+      max_tokens: 500,
       temperature: 0.4,
       response_format: { type: 'json_object' },
     }),

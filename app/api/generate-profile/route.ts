@@ -36,17 +36,16 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: 'system',
-          content: `Je schrijft een korte profieltekst voor een CV van een jonge werkzoekende in Nederland. Schrijf in het Nederlands. Maximaal 60 woorden. Geen clichés als "gedreven" of "enthousiast". Verwerk de gekozen voorkeursbanen subtiel — noem ze niet letterlijk maar gebruik ze om het type werk te omschrijven. Geef alleen de profieltekst terug, geen labels of extra uitleg.`,
+          content: `Je schrijft een korte profieltekst voor een CV van een jonge werkzoekende in Nederland. Geef ALLEEN geldige JSON terug met twee sleutels: "nl" (Nederlandse profieltekst, max 60 woorden, eerste persoon "Ik ben...") en "en" (Engelse vertaling, max 60 woorden, eerste persoon "I am..."). Geen clichés als "gedreven" of "enthousiast". Verwerk de voorkeursbanen subtiel. Geen extra uitleg buiten de JSON.`,
         },
         {
           role: 'user',
-          content: `Schrijf één profieltekst in de eerste persoon ("Ik ben...") voor dit CV:
-
-${profileSummary}`,
+          content: `Schrijf een profieltekst voor dit CV:\n\n${profileSummary}`,
         },
       ],
-      max_tokens: 200,
+      max_tokens: 400,
       temperature: 0.7,
+      response_format: { type: 'json_object' },
     }),
   });
 
@@ -55,7 +54,7 @@ ${profileSummary}`,
   }
 
   const json = await res.json();
-  const description = (json.choices?.[0]?.message?.content ?? '').trim();
+  const parsed = JSON.parse(json.choices?.[0]?.message?.content ?? '{}');
 
-  return NextResponse.json({ description });
+  return NextResponse.json({ nl: parsed.nl ?? '', en: parsed.en ?? '' });
 }

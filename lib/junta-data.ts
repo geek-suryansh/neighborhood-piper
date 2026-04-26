@@ -21,8 +21,9 @@ export type AppData = {
   dream?: string;
   experienceTypes?: string[];
   experienceNote?: string;
-  cvExperience?: Array<{ title: string; description: string }>;
+  cvExperience?: Array<{ title: string; description: string; titleEn?: string; descriptionEn?: string }>;
   profileDescription?: string;
+  profileDescriptionEn?: string;
 };
 
 export const EXPERIENCE_OPTIONS = [
