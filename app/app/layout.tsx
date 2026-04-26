@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import Script from 'next/script'
 import ServiceWorker from '../sw-register'
 import InstallPrompt from '../install-prompt'
 
@@ -27,6 +28,14 @@ export const viewport: Viewport = {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
+      {/* Capture beforeinstallprompt before React hydrates to avoid missing the event */}
+      <Script id="bip-capture" strategy="beforeInteractive">{`
+        window.__juntaBip = null;
+        window.addEventListener('beforeinstallprompt', function(e) {
+          e.preventDefault();
+          window.__juntaBip = e;
+        }, { once: true });
+      `}</Script>
       <ServiceWorker />
       {children}
       <InstallPrompt />
