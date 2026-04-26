@@ -107,6 +107,7 @@
       "jobsLoading": "Banen zoeken die bij jou passen…",
       "jobsError": "Kon banen niet laden",
       "apply": "Anoniem solliciteren →",
+      "applyEmail": "Solliciteer via e-mail →",
       "downloadCV": "📥 Download als PDF"
     },
     "cv": {

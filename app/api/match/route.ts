@@ -139,10 +139,21 @@ export async function POST(req: NextRequest) {
   if (error) {
     const { data: fallback } = await getSupabase()
       .from('jobs')
-      .select('id, title, category, type, salary, location, url, lat, lng')
+      .select('id, title, category, type, salary, location, url, contact_email, lat, lng')
       .limit(20);
     return NextResponse.json({ jobs: fallback, warning: error.message, profileText: resumeText });
   }
 
-  return NextResponse.json({ jobs, profileText: resumeText });
+  // RPC doesn't return contact_email — fetch it for the matched job IDs and merge in
+  const ids: string[] = (jobs as { id: string }[]).map(j => j.id);
+  const { data: emails } = await getSupabase()
+    .from('jobs')
+    .select('id, contact_email')
+    .in('id', ids);
+
+  const emailMap = new Map((emails ?? []).map(e => [e.id, e.contact_email]));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const enriched = (jobs as any[]).map(j => ({ ...j, contact_email: emailMap.get(j.id) ?? null }));
+
+  return NextResponse.json({ jobs: enriched, profileText: resumeText });
 }

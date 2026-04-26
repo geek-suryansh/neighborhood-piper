@@ -107,6 +107,7 @@
       "jobsLoading": "Looking for jobs that match you…",
       "jobsError": "Could not load jobs",
       "apply": "Apply anonymously →",
+      "applyEmail": "Apply via email →",
       "downloadCV": "📥 Download as PDF"
     },
     "cv": {

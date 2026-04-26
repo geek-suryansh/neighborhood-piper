@@ -272,7 +272,7 @@ function AgeScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppD
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>{t('title')}</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 32, fontSize: 15 }}>{t('subtitle')}</p>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {["14-15", "16-17", "18-20", "21-23"].map((age) => (
+        {["14-15", "16-17", "18-20", "21-23", "23+"].map((age) => (
           <button key={age} onClick={() => { setData({ ...data, age }); onNext(); }} style={{
             padding: "18px 20px", borderRadius: 14,
             border: `1.5px solid ${data.age === age ? "#0D0D0D" : COLORS.border}`,
@@ -885,7 +885,8 @@ interface MatchedJob {
   type: string;
   salary: string;
   location: string;
-  url: string;
+  url: string | null;
+  contact_email?: string | null;
   lat?: number | null;
   lng?: number | null;
   score?: number;
@@ -947,9 +948,18 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
             <div style={{ display: "flex", gap: 16, fontSize: 13, color: COLORS.textDim, flexWrap: "wrap" }}>
               <span>⏰ {job.type}</span><span>💶 {job.salary}</span>
             </div>
-            <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 12, width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${color}`, background: "transparent", color, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONTS, textAlign: "center", textDecoration: "none" }}>
-              {t('apply')}
-            </a>
+            {job.contact_email ? (
+              <a
+                href={`mailto:${job.contact_email}?subject=${encodeURIComponent(`Sollicitatie: ${job.title}`)}&body=${encodeURIComponent(`Hallo,\n\nIk solliciteer graag naar de functie ${job.title}.\n\nMet vriendelijke groet,\n${profile.identity.displayName ?? ''}`)}`}
+                style={{ display: "block", marginTop: 12, width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${color}`, background: "transparent", color, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONTS, textAlign: "center", textDecoration: "none" }}
+              >
+                {t('applyEmail')}
+              </a>
+            ) : job.url ? (
+              <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 12, width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${color}`, background: "transparent", color, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONTS, textAlign: "center", textDecoration: "none" }}>
+                {t('apply')}
+              </a>
+            ) : null}
           </div>
         );
       })}
