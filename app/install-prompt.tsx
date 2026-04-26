@@ -10,36 +10,57 @@ export function captureInstallPrompt(e: Event) {
   earlyPrompt = e as BIP
 }
 
-type Platform = 'ios' | 'android' | 'desktop' | 'other'
+type Platform = 'ios-safari' | 'ios-chrome' | 'android-chrome' | 'desktop-chrome' | 'other'
 
 function getPlatform(): Platform {
   const ua = navigator.userAgent
-  if (/iPad|iPhone|iPod/.test(ua)) return 'ios'
-  if (/Android/.test(ua)) return 'android'
-  if (/Chrome|Chromium/.test(ua)) return 'desktop'
+  const isIOS =
+    /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  if (isIOS && /CriOS/.test(ua)) return 'ios-chrome'
+  if (isIOS) return 'ios-safari'
+  if (/Android/.test(ua)) return 'android-chrome'
+  if (/Chrome|Chromium/.test(ua)) return 'desktop-chrome'
   return 'other'
+}
+
+const STEPS: Record<Platform, { icon: string; label: React.ReactNode }[]> = {
+  'ios-safari': [
+    { icon: '📤', label: <>Tap the <strong>Share</strong> button at the bottom of Safari</> },
+    { icon: '➕', label: <>Scroll and tap <strong>Add to Home Screen</strong></> },
+    { icon: '✅', label: <>Tap <strong>Add</strong> in the top-right corner</> },
+  ],
+  'ios-chrome': [
+    { icon: '🌐', label: <>Copy the URL and open it in <strong>Safari</strong> — Chrome on iPhone can&apos;t install apps directly</> },
+    { icon: '📤', label: <>In Safari, tap the <strong>Share</strong> button at the bottom</> },
+    { icon: '➕', label: <>Tap <strong>Add to Home Screen</strong>, then <strong>Add</strong></> },
+  ],
+  'android-chrome': [
+    { icon: '⋮', label: <>Tap the <strong>menu icon</strong> in Chrome&apos;s top-right corner</> },
+    { icon: '📱', label: <>Tap <strong>Add to Home screen</strong></> },
+    { icon: '✅', label: <>Tap <strong>Add</strong> to confirm</> },
+  ],
+  'desktop-chrome': [
+    { icon: '⊕', label: <>Look for the <strong>install icon</strong> at the right end of Chrome&apos;s address bar</> },
+    { icon: '✅', label: <>Click it and select <strong>Install</strong> in the popup</> },
+  ],
+  'other': [
+    { icon: '⊕', label: <>Look for an <strong>install</strong> or <strong>Add to Home Screen</strong> option in your browser menu</> },
+    { icon: '✅', label: <>Follow your browser&apos;s prompts to install</> },
+  ],
+}
+
+const PLATFORM_LABEL: Record<Platform, string> = {
+  'ios-safari':    'Safari on iPhone / iPad',
+  'ios-chrome':    'Chrome on iPhone / iPad',
+  'android-chrome':'Chrome on Android',
+  'desktop-chrome':'Chrome on desktop',
+  'other':         'Your browser',
 }
 
 function InstructionsModal({ onClose }: { onClose: () => void }) {
   const platform = getPlatform()
-
-  const steps: { icon: string; label: React.ReactNode }[] =
-    platform === 'ios'
-      ? [
-          { icon: '📤', label: <>Tap the <strong>Share</strong> button at the bottom of Safari</> },
-          { icon: '➕', label: <>Scroll down and tap <strong>Add to Home Screen</strong></> },
-          { icon: '✅', label: <>Tap <strong>Add</strong> in the top-right corner</> },
-        ]
-      : platform === 'android'
-      ? [
-          { icon: '⋮', label: <>Tap the <strong>menu</strong> icon in Chrome&apos;s top-right corner</> },
-          { icon: '📱', label: <>Tap <strong>Add to Home screen</strong></> },
-          { icon: '✅', label: <>Tap <strong>Add</strong> to confirm</> },
-        ]
-      : [
-          { icon: '⊕', label: <>Click the <strong>install icon</strong> in Chrome&apos;s address bar (right side)</> },
-          { icon: '✅', label: <>Click <strong>Install</strong> in the popup</> },
-        ]
+  const steps = STEPS[platform]
 
   return (
     <div
@@ -58,15 +79,17 @@ function InstructionsModal({ onClose }: { onClose: () => void }) {
         }}
         onClick={e => e.stopPropagation()}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
           <img src="/junta-logo.png" alt="Junta" style={{ height: 46, borderRadius: 10 }} />
           <div>
             <div style={{ fontWeight: 800, fontSize: 17, color: '#1D3B6B' }}>Add to Home Screen</div>
-            <div style={{ fontSize: 13, color: '#7A8FA8', marginTop: 2 }}>Follow these quick steps</div>
+            <div style={{ fontSize: 12, color: '#E85520', fontWeight: 600, marginTop: 2 }}>
+              {PLATFORM_LABEL[platform]}
+            </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 26 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, margin: '22px 0 26px' }}>
           {steps.map((step, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{
@@ -113,22 +136,15 @@ export default function InstallPrompt() {
     // Grab prompt captured before React mounted
     const cached: BIP | null = earlyPrompt
       ?? ((window as Window & { __juntaBip?: BIP }).__juntaBip ?? null)
-    if (cached) {
-      setDeferredPrompt(cached)
-      setShow(true)
-      return
-    }
+    if (cached) setDeferredPrompt(cached)
 
-    // iOS Safari never fires beforeinstallprompt — show banner anyway
-    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-      setShow(true)
-      return
-    }
+    // Show banner for everyone who hasn't installed yet
+    setShow(true)
 
+    // Still listen in case the event fires after mount
     const handler = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BIP)
-      setShow(true)
     }
     window.addEventListener('beforeinstallprompt', handler)
     return () => window.removeEventListener('beforeinstallprompt', handler)
@@ -141,7 +157,6 @@ export default function InstallPrompt() {
 
   async function handleInstall() {
     if (deferredPrompt) {
-      // Chrome / Android — trigger native install dialog directly
       try {
         await deferredPrompt.prompt()
         const { outcome } = await deferredPrompt.userChoice
@@ -152,7 +167,6 @@ export default function InstallPrompt() {
       } catch { /* ignore */ }
       setDeferredPrompt(null)
     } else {
-      // iOS or Chrome without prompt — show step-by-step instructions
       setShowModal(true)
     }
   }
