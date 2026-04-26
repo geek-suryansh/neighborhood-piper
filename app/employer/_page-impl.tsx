@@ -1,32 +1,20 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getSupabase } from '@/lib/supabase';
 
-// ── Set to false to re-enable real Supabase email auth ─────────────────────
-const MOCK_AUTH = true;
+interface EmployerUser { email: string; }
 
-interface EmployerUser { id: string; email: string; }
+const SESSION_KEY = 'junta_employer_session';
 
-const MOCK_SESSION_KEY = 'junta_employer_mock_session';
-const MOCK_IDS_KEY = 'junta_employer_mock_ids'; // email → uuid, never cleared on logout
-
-function idForEmail(email: string): string {
-  try {
-    const map: Record<string, string> = JSON.parse(localStorage.getItem(MOCK_IDS_KEY) ?? '{}');
-    if (!map[email]) { map[email] = crypto.randomUUID(); localStorage.setItem(MOCK_IDS_KEY, JSON.stringify(map)); }
-    return map[email];
-  } catch { return crypto.randomUUID(); }
+function loadSession(): EmployerUser | null {
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY) ?? 'null'); } catch { return null; }
 }
-function loadMockSession(): EmployerUser | null {
-  try { return JSON.parse(localStorage.getItem(MOCK_SESSION_KEY) ?? 'null'); } catch { return null; }
-}
-function saveMockSession(email: string): EmployerUser {
-  const user: EmployerUser = { id: idForEmail(email), email };
-  localStorage.setItem(MOCK_SESSION_KEY, JSON.stringify(user));
+function saveSession(email: string): EmployerUser {
+  const user: EmployerUser = { email };
+  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
   return user;
 }
-function clearMockSession() { localStorage.removeItem(MOCK_SESSION_KEY); }
+function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
 // ── Design tokens (match the rest of the app) ──────────────────────────────
 
@@ -179,11 +167,11 @@ function LocationPicker({ value, onChange }: {
 
 type FormState = {
   title: string; category: string; type: string; salary: string;
-  description: string; url: string; contact_email: string;
+  description: string; url: string;
 };
-const EMPTY_FORM: FormState = { title: '', category: '', type: 'Flexible', salary: '', description: '', url: '', contact_email: '' };
+const EMPTY_FORM: FormState = { title: '', category: '', type: 'Flexible', salary: '', description: '', url: '' };
 
-function PostForm({ userId, onSuccess }: { userId: string; onSuccess: () => void }) {
+function PostForm({ user, onSuccess }: { user: EmployerUser; onSuccess: () => void }) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [location, setLocation] = useState<ResolvedLocation | null>(null);
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
@@ -199,27 +187,27 @@ function PostForm({ userId, onSuccess }: { userId: string; onSuccess: () => void
     setStatus('loading');
     setErrorMsg('');
 
-    const { error } = await getSupabase().from('jobs').insert({
-      id: crypto.randomUUID(),
-      title: form.title.trim(),
-      category: form.category.trim() || null,
-      type: form.type,
-      salary: form.salary.trim() || null,
-      location: location?.name ?? 'Amsterdam',
-      lat: location?.lat ?? 52.3702,
-      lng: location?.lng ?? 4.8952,
-      url: form.url.trim() || null,
-      contact_email: form.contact_email.trim() || null,
-      description: form.description.trim() || null,
-      source: 'posted',
-      employer_id: userId,
+    const res = await fetch('/api/employer/jobs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-employer-email': user.email },
+      body: JSON.stringify({
+        title: form.title.trim(),
+        category: form.category.trim(),
+        type: form.type,
+        salary: form.salary.trim(),
+        location: location?.name ?? 'Amsterdam',
+        lat: location?.lat ?? 52.3702,
+        lng: location?.lng ?? 4.8952,
+        url: form.url.trim(),
+        description: form.description.trim(),
+      }),
     });
 
-    if (error) {
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
       setStatus('error');
-      setErrorMsg(error.message);
+      setErrorMsg(json.error ?? 'Er ging iets mis.');
     } else {
-      fetch('/api/embed-jobs', { method: 'POST' }).catch(() => {});
       setForm(EMPTY_FORM);
       setLocation(null);
       setStatus('idle');
@@ -257,15 +245,9 @@ function PostForm({ userId, onSuccess }: { userId: string; onSuccess: () => void
         <label style={labelStyle}>Omschrijving</label>
         <textarea style={{ ...inputStyle, minHeight: 120, resize: 'vertical' }} placeholder="Taken, vereisten en wat jij biedt…" value={form.description} onChange={e => set('description', e.target.value)} />
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-        <div>
-          <label style={labelStyle}>Vacaturelink</label>
-          <input style={inputStyle} type="url" placeholder="https://…" value={form.url} onChange={e => set('url', e.target.value)} />
-        </div>
-        <div>
-          <label style={labelStyle}>Contact e-mail</label>
-          <input style={inputStyle} type="email" placeholder="sollicitaties@bedrijf.nl" value={form.contact_email} onChange={e => set('contact_email', e.target.value)} />
-        </div>
+      <div>
+        <label style={labelStyle}>Vacaturelink</label>
+        <input style={inputStyle} type="url" placeholder="https://…" value={form.url} onChange={e => set('url', e.target.value)} />
       </div>
       {status === 'error' && <p style={{ color: COLORS.red, fontSize: 13, margin: 0 }}>{errorMsg}</p>}
       <PrimaryButton type="submit" disabled={status === 'loading'}>
@@ -296,32 +278,17 @@ function AuthCard({ children }: { children: React.ReactNode }) {
 
 function LoginScreen({ onLogin }: { onLogin: (user: EmployerUser) => void }) {
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  async function submit() {
+  function submit() {
     if (!email.trim()) return;
-    setLoading(true);
-    setError('');
-
-    if (MOCK_AUTH) {
-      onLogin(saveMockSession(email.trim()));
-      return;
-    }
-
-    const { error: err } = await getSupabase().auth.signInWithOtp({
-      email: email.trim(),
-      options: { shouldCreateUser: true, emailRedirectTo: window.location.origin + '/employer' },
-    });
-    if (err) { setError(err.message); setLoading(false); }
-    // on success the parent handles the "sent" screen
+    onLogin(saveSession(email.trim()));
   }
 
   return (
     <AuthCard>
       <h2 style={{ fontSize: 17, fontWeight: 700, margin: '0 0 6px' }}>Inloggen</h2>
       <p style={{ color: COLORS.textDim, fontSize: 13, margin: '0 0 20px', lineHeight: 1.5 }}>
-        {MOCK_AUTH ? 'Voer je e-mailadres in om direct in te loggen.' : 'Voer je e-mailadres in — we sturen je een inloglink.'}
+        Voer je e-mailadres in om je vacatures te beheren.
       </p>
       <div style={{ marginBottom: 14 }}>
         <label style={labelStyle}>E-mailadres</label>
@@ -335,15 +302,9 @@ function LoginScreen({ onLogin }: { onLogin: (user: EmployerUser) => void }) {
           autoFocus
         />
       </div>
-      {error && <p style={{ color: COLORS.red, fontSize: 13, margin: '0 0 10px' }}>{error}</p>}
-      <PrimaryButton onClick={submit} disabled={loading || !email.trim()}>
-        {loading ? 'Bezig…' : MOCK_AUTH ? 'Inloggen' : 'Stuur inloglink'}
+      <PrimaryButton onClick={submit} disabled={!email.trim()}>
+        Inloggen
       </PrimaryButton>
-      {MOCK_AUTH && (
-        <p style={{ textAlign: 'center', color: COLORS.textDim, fontSize: 11, marginTop: 12 }}>
-          Dev mode — geen e-mail vereist
-        </p>
-      )}
     </AuthCard>
   );
 }
@@ -386,43 +347,32 @@ function DashboardScreen({ user }: { user: EmployerUser }) {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [expandedAppsJobId, setExpandedAppsJobId] = useState<string | null>(null);
 
+  const authHeaders = { 'x-employer-email': user.email };
+
   const fetchJobs = useCallback(async () => {
     setLoadingJobs(true);
-    const { data } = await getSupabase()
-      .from('jobs')
-      .select('id, title, type, salary, location, scraped_at')
-      .eq('employer_id', user.id)
-      .order('scraped_at', { ascending: false });
-    const jobList = (data as PostedJob[]) ?? [];
-    setJobs(jobList);
-
-    if (jobList.length > 0) {
-      const jobIds = jobList.map(j => j.id);
-      const { data: appData } = await getSupabase()
-        .from('applications')
-        .select('id, job_id, candidate_name, candidate_email, message, applied_at')
-        .in('job_id', jobIds)
-        .order('applied_at', { ascending: false });
-      setApplications((appData as Application[]) ?? []);
-    } else {
-      setApplications([]);
-    }
+    const [jobsRes, appsRes] = await Promise.all([
+      fetch('/api/employer/jobs', { headers: { 'x-employer-email': user.email } }),
+      fetch('/api/employer/applications', { headers: { 'x-employer-email': user.email } }),
+    ]);
+    setJobs(jobsRes.ok ? await jobsRes.json() : []);
+    setApplications(appsRes.ok ? await appsRes.json() : []);
     setLoadingJobs(false);
-  }, [user.id]);
+  }, [user.email]);
 
   useEffect(() => { fetchJobs(); }, [fetchJobs]);
 
   async function deleteJob(id: string) {
     setDeleting(id);
-    await getSupabase().from('jobs').delete().eq('id', id).eq('employer_id', user.id);
+    await fetch(`/api/employer/jobs/${id}`, { method: 'DELETE', headers: { 'x-employer-email': user.email } });
     setJobs(prev => prev.filter(j => j.id !== id));
     setApplications(prev => prev.filter(a => a.job_id !== id));
     setDeleting(null);
   }
 
-  async function signOut() {
-    if (MOCK_AUTH) { clearMockSession(); window.location.reload(); return; }
-    await getSupabase().auth.signOut();
+  function signOut() {
+    clearSession();
+    window.location.reload();
   }
 
   return (
@@ -466,7 +416,7 @@ function DashboardScreen({ user }: { user: EmployerUser }) {
           <div style={{ background: COLORS.card, borderRadius: 16, border: `1px solid ${COLORS.border}`, padding: 24, marginBottom: 28 }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 20px' }}>Vacature plaatsen</h3>
             <PostForm
-              userId={user.id}
+              user={user}
               onSuccess={() => { setShowForm(false); fetchJobs(); }}
             />
           </div>
@@ -568,34 +518,9 @@ export default function EmployerApp() {
   const [user, setUser] = useState<EmployerUser | null>(null);
 
   useEffect(() => {
-    if (MOCK_AUTH) {
-      const session = loadMockSession();
-      if (session) { setUser(session); setScreen('dashboard'); }
-      else setScreen('login');
-      return;
-    }
-
-    getSupabase().auth.getSession().then(({ data }) => {
-      if (data.session?.user) {
-        const u = data.session.user;
-        setUser({ id: u.id, email: u.email ?? '' });
-        setScreen('dashboard');
-      } else {
-        setScreen('login');
-      }
-    });
-
-    const { data: { subscription } } = getSupabase().auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        const u = session.user;
-        setUser({ id: u.id, email: u.email ?? '' });
-        setScreen('dashboard');
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setScreen('login');
-      }
-    });
-    return () => subscription.unsubscribe();
+    const session = loadSession();
+    if (session) { setUser(session); setScreen('dashboard'); }
+    else setScreen('login');
   }, []);
 
   if (screen === 'loading') {
