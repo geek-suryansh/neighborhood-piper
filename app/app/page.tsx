@@ -1071,12 +1071,15 @@ function CVTab({ data }: { data: AppData }) {
 }
 
 
-function ResultsScreen({ data, onTab, activeTab, profile }: { data: AppData; onTab: (tab: string) => void; activeTab: string; profile: CandidateProfile }) {
+function ResultsScreen({ data, onTab, activeTab, profile, onReset }: { data: AppData; onTab: (tab: string) => void; activeTab: string; profile: CandidateProfile; onReset: () => void }) {
   return (
     <div style={styles.container}>
       <div style={{ paddingTop: 24, paddingBottom: 16, display: "flex", alignItems: "center", gap: 14 }}>
         <img src="/junta-logo.png" alt="Junta" style={{ height: 48, borderRadius: 10, flexShrink: 0 }} />
-        <p style={{ color: COLORS.textDim, fontSize: 14, margin: 0 }}>Jouw persoonlijke resultaten</p>
+        <p style={{ color: COLORS.textDim, fontSize: 14, margin: 0, flex: 1 }}>Jouw persoonlijke resultaten</p>
+        <button onClick={onReset} style={{ background: "none", border: `1px solid ${COLORS.border}`, borderRadius: 8, color: COLORS.textDim, fontSize: 12, cursor: "pointer", fontFamily: FONTS, padding: "6px 10px", flexShrink: 0 }}>
+          ↩ Opnieuw
+        </button>
       </div>
       <div style={{ display: "flex", gap: 4, marginBottom: 24, background: COLORS.card, borderRadius: 14, padding: 4 }}>
         {[{ id: "jobs", label: "Banen", icon: "💼" }, { id: "cv", label: "CV", icon: "📄" }].map((t) => (
@@ -1098,11 +1101,35 @@ function ResultsScreen({ data, onTab, activeTab, profile }: { data: AppData; onT
 
 // ── Main app ──
 
+const STORAGE_KEY = "stap_resume";
+
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw) as { data: AppData; profile: CandidateProfile };
+  } catch { /* ignore */ }
+  return null;
+}
+
 export default function StapPage() {
-  const [screen, setScreen] = useState("welcome");
-  const [data, setData] = useState<AppData>({ interests: [], skills: [], days: [], languages: [] });
+  const [screen, setScreen] = useState(() => (loadSaved() ? "results" : "welcome"));
+  const [data, setData] = useState<AppData>(() => loadSaved()?.data ?? { interests: [], skills: [], days: [], languages: [] });
   const [resultTab, setResultTab] = useState("jobs");
-  const [profile, setProfile] = useState<CandidateProfile | null>(null);
+  const [profile, setProfile] = useState<CandidateProfile | null>(() => loadSaved()?.profile ?? null);
+
+  const saveToStorage = (savedData: AppData, savedProfile: CandidateProfile) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ data: savedData, profile: savedProfile }));
+    } catch { /* ignore quota errors */ }
+  };
+
+  const resetProfile = () => {
+    try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+    setData({ interests: [], skills: [], days: [], languages: [] });
+    setProfile(null);
+    setResultTab("jobs");
+    setScreen("welcome");
+  };
 
   // if (showDashboard) {
   //   return (
@@ -1130,6 +1157,7 @@ export default function StapPage() {
       case "loading": return <LoadingScreen onDone={() => {
         const built = toProfile(data);
         setProfile(built);
+        saveToStorage(data, built);
         setScreen("results");
         // Save to DB in background for record-keeping — matching no longer depends on this
         void getSupabase().from("profiles").insert({
@@ -1141,7 +1169,7 @@ export default function StapPage() {
         });
       }} />;
       case "results": return profile
-        ? <ResultsScreen data={data} onTab={setResultTab} activeTab={resultTab} profile={profile} />
+        ? <ResultsScreen data={data} onTab={setResultTab} activeTab={resultTab} profile={profile} onReset={resetProfile} />
         : null;
       default: return null;
     }
