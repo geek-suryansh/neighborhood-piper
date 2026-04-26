@@ -795,7 +795,7 @@ function EducationScreen({ data, setData, onNext }: { data: AppData; setData: (d
 
 function LanguagesScreen({ data, setData, onNext, langs }: { data: AppData; setData: (d: AppData) => void; onNext: () => void; langs?: string[] }) {
   const t = useTranslations('app.languages');
-  const list = langs ?? LANGUAGES;
+  const list = langs ?? LANGUAGES_EN;
   const toggle = (lang: string) => {
     const cur = data.languages || [];
     setData({ ...data, languages: cur.includes(lang) ? cur.filter(l => l !== lang) : [...cur, lang] });
