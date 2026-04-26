@@ -29,12 +29,6 @@ function parseCentroide(wkt: string): { lat: number; lng: number } | null {
   return { lng: parseFloat(m[1]), lat: parseFloat(m[2]) };
 }
 
-const CANDIDATES = [
-  { id: "A7x2", age: "16-17", match: 94, skills: ["Goed met mensen praten", "Snel leren"], interests: ["Sport & Bewegen", "Eten & Horeca"], available: "Ma Di Za Zo", hours: "8-16 uur" },
-  { id: "K3m9", age: "18-20", match: 87, skills: ["Creatief denken", "Handig met social media"], interests: ["Muziek", "Mode & Style"], available: "Wo Do Vr Za", hours: "12-20 uur" },
-  { id: "R5p1", age: "16-17", match: 82, skills: ["Teamwork", "Fysiek sterk"], interests: ["Sport & Bewegen", "Bouwen & Maken"], available: "Ma Wo Vr Za Zo", hours: "8-16 uur" },
-  { id: "T8j4", age: "18-20", match: 78, skills: ["Zelfstandig werken", "Goed organiseren"], interests: ["Tech & Computers", "Gaming"], available: "Di Do Za", hours: "16-24 uur" },
-];
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
@@ -190,6 +184,7 @@ export default function PostPage() {
       setStatus("error");
       setErrorMsg(error.message);
     } else {
+      fetch("/api/embed-jobs", { method: "POST" }).catch(() => { });
       setStatus("success");
       setForm(EMPTY_FORM);
       setLocation(null);
@@ -215,7 +210,7 @@ export default function PostPage() {
         </div>
 
         {/* Stats */}
-        <div style={{ display: "flex", gap: 12, marginBottom: 28, flexWrap: "wrap" }}>
+        {/* <div style={{ display: "flex", gap: 12, marginBottom: 28, flexWrap: "wrap" }}>
           {[
             { label: "Actieve jongeren", value: "1.247", color: COLORS.accent },
             { label: "Gemiddelde match", value: "86%", color: COLORS.purple },
@@ -226,13 +221,10 @@ export default function PostPage() {
               <p style={{ color: s.color, fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>{s.value}</p>
             </div>
           ))}
-        </div>
+        </div> */}
 
-        {/* Two-column layout */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, alignItems: "start", paddingBottom: 48 }}>
-          {/* Left: Create job form */}
-          <div>
-            <h2 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 16px", color: COLORS.text }}>Vacature plaatsen</h2>
+        <div style={{ maxWidth: 560, margin: "0 auto", paddingBottom: 48 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 16px", color: COLORS.text }}>Vacature plaatsen</h2>
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
                 <label style={labelStyle}>Vacaturetitel *</label>
@@ -321,40 +313,6 @@ export default function PostPage() {
                 {status === "loading" ? "Opslaan..." : "Vacature plaatsen"}
               </button>
             </form>
-          </div>
-
-          {/* Right: Candidate applications */}
-          <div>
-            <h2 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 16px", color: COLORS.text }}>Aanmeldingen</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {CANDIDATES.map((c) => (
-                <div key={c.id} style={{ padding: 20, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card, display: "flex", gap: 14, alignItems: "flex-start" }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(135deg, ${COLORS.accent}44, ${COLORS.purple}44)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, color: COLORS.accent, border: `1.5px solid ${COLORS.accent}44`, flexShrink: 0 }}>
-                    #{c.id}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                      <div>
-                        <h3 style={{ fontSize: 15, fontWeight: 700, margin: "0 0 2px" }}>Kandidaat #{c.id}</h3>
-                        <p style={{ color: COLORS.textDim, fontSize: 12, margin: 0 }}>{c.age} jaar • {c.available} • {c.hours}</p>
-                      </div>
-                      <div style={{ background: c.match >= 90 ? `linear-gradient(135deg, ${COLORS.accent}, #00c087)` : c.match >= 80 ? COLORS.purpleDim : `${COLORS.orange}33`, color: c.match >= 90 ? COLORS.bg : c.match >= 80 ? COLORS.purple : COLORS.orange, fontSize: 13, fontWeight: 800, padding: "4px 10px", borderRadius: 8, whiteSpace: "nowrap" as const, flexShrink: 0 }}>
-                        {c.match}%
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 10 }}>
-                      {c.skills.map(s => <span key={s} style={{ padding: "3px 7px", borderRadius: 6, background: COLORS.purpleDim, color: COLORS.purple, fontSize: 10, fontWeight: 600 }}>{s}</span>)}
-                      {c.interests.map(i => <span key={i} style={{ padding: "3px 7px", borderRadius: 6, background: COLORS.accentDim, color: COLORS.accent, fontSize: 10, fontWeight: 600 }}>{i}</span>)}
-                    </div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <button style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: COLORS.accent, color: COLORS.bg, fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: FONTS }}>Uitnodigen</button>
-                      <button style={{ padding: "7px 14px", borderRadius: 8, border: `1px solid ${COLORS.border}`, background: "transparent", color: COLORS.textDim, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: FONTS }}>Bewaren</button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
