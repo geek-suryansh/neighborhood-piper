@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslations, useLocale } from 'next-intl';
 import {
   INTERESTS, SKILLS_OPTIONS, SKILLS_OPTIONS_EN,
-  LANGUAGES, EDU_LEVELS, EDU_LEVELS_EN, EDU_YEARS, EDU_YEARS_EN,
+  LANGUAGES, LANGUAGES_EN, EDU_LEVELS, EDU_LEVELS_EN, EDU_YEARS, EDU_YEARS_EN,
   EXPERIENCE_OPTIONS, EXPERIENCE_OPTIONS_EN,
   HOURS_OPTIONS, HOURS_OPTIONS_EN, DAYS_NL, DAYS_EN,
   type AppData, type EscoMatch,
@@ -133,10 +133,10 @@ function RefugeeCheckScreen({ onYes, onNo }: { onYes: () => void; onNo: () => vo
   return (
     <div style={{ ...styles.container, paddingTop: 60 }}>
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>
-        Ben jij een nieuwkomer in Nederland?
+        Are you a newcomer in the Netherlands?
       </h2>
       <p style={{ color: COLORS.textDim, marginBottom: 40, fontSize: 15 }}>
-        Dit helpt ons jouw buitenlandse diploma&apos;s en ervaring op de juiste manier te vertalen.
+        This helps us translate your foreign diplomas and experience correctly.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <button onClick={onYes} style={{
@@ -147,7 +147,7 @@ function RefugeeCheckScreen({ onYes, onNo }: { onYes: () => void; onNo: () => vo
           textAlign: "left", fontFamily: FONTS,
           transition: "all 0.2s ease",
         }}>
-          🌍 Ja, ik ben nieuwkomer
+          🌍 Yes, I am a newcomer
         </button>
         <button onClick={onNo} style={{
           padding: "22px 20px", borderRadius: 16,
@@ -157,7 +157,7 @@ function RefugeeCheckScreen({ onYes, onNo }: { onYes: () => void; onNo: () => vo
           textAlign: "left", fontFamily: FONTS,
           transition: "all 0.2s ease",
         }}>
-          🏠 Nee, ik woon al langer in Nederland
+          🏠 No, I already live in the Netherlands
         </button>
       </div>
     </div>
@@ -168,18 +168,18 @@ function CountryScreen({ data, setData, onNext }: { data: AppData; setData: (d: 
   return (
     <div style={styles.container}>
       <ProgressBar step={0} total={10} />
-      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Uit welk land kom je?</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Which country are you from?</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
-        Dit helpt ons jouw diploma&apos;s in context te plaatsen.
+        This helps us put your qualifications in context.
       </p>
       <input
         value={data.originCountry || ""}
         onChange={e => setData({ ...data, originCountry: e.target.value })}
-        placeholder="Bijv. Syrië, Afghanistan, Eritrea…"
+        placeholder="e.g. Syria, Afghanistan, Eritrea…"
         autoFocus
         style={inputStyle}
       />
-      <BigButton onClick={onNext} disabled={!data.originCountry?.trim()}>Volgende →</BigButton>
+      <BigButton onClick={onNext} disabled={!data.originCountry?.trim()}>Next →</BigButton>
     </div>
   );
 }
@@ -204,16 +204,16 @@ function CredentialInputScreen({ data, setData, onNext }: { data: AppData; setDa
   return (
     <div style={styles.container}>
       <ProgressBar step={2} total={10} />
-      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Welke diploma&apos;s of opleidingen heb je?</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>What diplomas or qualifications do you have?</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
-        Voeg je buitenlandse diploma&apos;s en certificaten toe. Je mag ze in je eigen taal invullen.
+        Add your foreign diplomas and certificates. You can write them in your own language.
       </p>
       <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addCredential(); } }}
-          placeholder="Bijv. 'Verpleegkundige diploma', 'Bachelor Elektrotechniek'…"
+          placeholder="e.g. 'Nursing diploma', 'Bachelor Electrical Engineering'…"
           style={{ ...inputStyle, flex: 1, marginBottom: 0 }}
         />
         <button onClick={addCredential} style={{
@@ -241,10 +241,10 @@ function CredentialInputScreen({ data, setData, onNext }: { data: AppData; setDa
         </div>
       )}
       <BigButton onClick={onNext} disabled={(data.rawCredentials ?? []).length === 0}>
-        Analyseren →
+        Analyse →
       </BigButton>
       <div style={{ marginTop: 12 }}>
-        <BigButton onClick={onNext} secondary>Overslaan</BigButton>
+        <BigButton onClick={onNext} secondary>Skip</BigButton>
       </div>
     </div>
   );
@@ -294,19 +294,19 @@ function CredentialLoadingScreen({ data, setData, onDone }: { data: AppData; set
     <div style={{ ...styles.container, paddingTop: 120, textAlign: "center" }}>
       <div style={{ fontSize: 48, marginBottom: 24 }}>🔍</div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: 8 }}>
-        Diploma&apos;s analyseren…
+        Analysing your qualifications…
       </h2>
       <p style={{ color: COLORS.textDim, fontSize: 15 }}>
-        We zoeken de Nederlandse equivalenten op voor jouw kwalificaties.
+        We are looking up the Dutch and European equivalents for your credentials.
       </p>
     </div>
   );
 }
 
 const CONFIDENCE_LABELS: Array<{ min: number; label: string; color: string }> = [
-  { min: 0.7, label: "Goede match", color: "#059669" },
-  { min: 0.4, label: "Redelijke match", color: "#d97706" },
-  { min: 0,   label: "Onzekere match", color: "#6b7280" },
+  { min: 0.7, label: "Good match", color: "#059669" },
+  { min: 0.4, label: "Moderate match", color: "#d97706" },
+  { min: 0,   label: "Uncertain match", color: "#6b7280" },
 ];
 
 function CredentialMatchScreen({ data, onNext }: { data: AppData; onNext: () => void }) {
@@ -316,10 +316,10 @@ function CredentialMatchScreen({ data, onNext }: { data: AppData; onNext: () => 
     <div style={styles.container}>
       <ProgressBar step={3} total={10} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>
-        Jouw kwalificaties
+        Your qualifications
       </h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
-        We hebben je diploma&apos;s vertaald naar Europese standaarden.
+        We have matched your credentials to European standards.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 32 }}>
         {matches.map((m, i) => {
@@ -332,7 +332,7 @@ function CredentialMatchScreen({ data, onNext }: { data: AppData; onNext: () => 
               border: `1.5px solid ${COLORS.border}`, background: COLORS.card,
             }}>
               <div style={{ fontSize: 12, color: COLORS.textDim, marginBottom: 6 }}>
-                Jouw invoer: <em>{m.input}</em>
+                Your input: <em>{m.input}</em>
               </div>
               {top ? (
                 <>
@@ -362,14 +362,14 @@ function CredentialMatchScreen({ data, onNext }: { data: AppData; onNext: () => 
                 </>
               ) : (
                 <div style={{ color: COLORS.textDim, fontSize: 14 }}>
-                  Geen match gevonden voor dit diploma.
+                  No match found for this credential.
                 </div>
               )}
             </div>
           );
         })}
       </div>
-      <BigButton onClick={onNext}>Doorgaan →</BigButton>
+      <BigButton onClick={onNext}>Continue →</BigButton>
     </div>
   );
 }
@@ -793,8 +793,9 @@ function EducationScreen({ data, setData, onNext }: { data: AppData; setData: (d
   );
 }
 
-function LanguagesScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+function LanguagesScreen({ data, setData, onNext, langs }: { data: AppData; setData: (d: AppData) => void; onNext: () => void; langs?: string[] }) {
   const t = useTranslations('app.languages');
+  const list = langs ?? LANGUAGES;
   const toggle = (lang: string) => {
     const cur = data.languages || [];
     setData({ ...data, languages: cur.includes(lang) ? cur.filter(l => l !== lang) : [...cur, lang] });
@@ -805,7 +806,7 @@ function LanguagesScreen({ data, setData, onNext }: { data: AppData; setData: (d
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>{t('title')}</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>{t('subtitle')}</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 32 }}>
-        {LANGUAGES.map((lang) => (
+        {list.map((lang) => (
           <Chip key={lang} selected={(data.languages || []).includes(lang)} onClick={() => toggle(lang)}>
             {lang}
           </Chip>
@@ -1685,7 +1686,7 @@ export default function JuntaPage() {
         onNo={() => { setData({ ...data, isRefugee: false }); setScreen("age"); }}
       />;
       case "country": return <CountryScreen data={data} setData={setData} onNext={() => setScreen("refugee-languages")} />;
-      case "refugee-languages": return <LanguagesScreen data={data} setData={setData} onNext={() => setScreen("credential-input")} />;
+      case "refugee-languages": return <LanguagesScreen data={data} setData={setData} onNext={() => setScreen("credential-input")} langs={LANGUAGES_EN} />;
       case "credential-input": return <CredentialInputScreen data={data} setData={setData} onNext={() => setScreen("credential-loading")} />;
       case "credential-loading": return <CredentialLoadingScreen data={data} setData={setData} onDone={() => setScreen("credential-match")} />;
       case "credential-match": return <CredentialMatchScreen data={data} onNext={() => setScreen("name")} />;

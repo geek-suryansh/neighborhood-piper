@@ -103,6 +103,12 @@ export const LANGUAGES = [
   "Russisch", "Pools", "Portugees", "Chinees", "Koerdisch",
 ];
 
+export const LANGUAGES_EN = [
+  "Dutch", "English", "Arabic", "Turkish", "French",
+  "Spanish", "Dari/Farsi", "Somali", "Tigrinya", "Berber",
+  "Russian", "Polish", "Portuguese", "Chinese", "Kurdish",
+];
+
 export const EDU_LEVELS = [
   "Basisschool", "VMBO", "HAVO", "VWO",
   "MBO niveau 1–2", "MBO niveau 3–4", "HBO", "WO (Universiteit)",

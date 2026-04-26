@@ -108,6 +108,7 @@ const EDU_LEVEL_CODES: Record<string, EduLevelCode> = {
 };
 
 export const LANGUAGE_ISO: Record<string, string> = {
+  // Dutch labels
   "Nederlands":  "nl",
   "Engels":      "en",
   "Arabisch":    "ar",
@@ -123,6 +124,20 @@ export const LANGUAGE_ISO: Record<string, string> = {
   "Portugees":   "pt",
   "Chinees":     "zh",
   "Koerdisch":   "ku",
+  // English labels (refugee flow)
+  "Dutch":       "nl",
+  "English":     "en",
+  "Arabic":      "ar",
+  "Turkish":     "tr",
+  "French":      "fr",
+  "Spanish":     "es",
+  "Somali":      "so",
+  "Berber":      "ber",
+  "Russian":     "ru",
+  "Polish":      "pl",
+  "Portuguese":  "pt",
+  "Chinese":     "zh",
+  "Kurdish":     "ku",
 };
 
 const DAY_META: Record<string, { full: string; isoWeekday: number }> = {
