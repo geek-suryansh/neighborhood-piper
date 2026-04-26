@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+// Junta identity: International Orange #E85520 · Navy #1D3B6B · Oatmeal #F2EDE4
+
 const STEPS = [
   {
     n: "01",
@@ -31,20 +33,29 @@ const CATEGORIES = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white" style={{ fontFamily: "var(--font-geist-sans, system-ui, sans-serif)" }}>
-
+    <div
+      className="min-h-screen"
+      style={{
+        background: "#F2EDE4",
+        color: "#1D3B6B",
+        fontFamily: "var(--font-geist-sans, system-ui, sans-serif)",
+      }}
+    >
       {/* ── Nav ─────────────────────────────────────────────────── */}
-      <nav className="flex items-center justify-between px-6 py-5 max-w-6xl mx-auto">
-        <div className="flex items-center">
-          <img src="/junta-logo.png" alt="Junta" className="h-10 rounded-lg" />
-        </div>
+      <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
+        <img src="/junta-logo.png" alt="Junta" className="h-11 rounded-lg" />
         <div className="flex items-center gap-2">
-          <Link href="/jobs" className="hidden sm:block text-zinc-400 text-sm font-medium hover:text-white transition-colors px-3 py-2">
+          <Link
+            href="/jobs"
+            className="hidden sm:block text-sm font-semibold px-3 py-2 transition-colors"
+            style={{ color: "#1D3B6B" }}
+          >
             Jobs map
           </Link>
           <Link
             href="/app"
-            className="bg-orange-500 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-orange-400 transition-colors"
+            className="px-5 py-2 rounded-full text-sm font-bold transition-colors text-white"
+            style={{ background: "#E85520" }}
           >
             Find my job →
           </Link>
@@ -52,21 +63,24 @@ export default function Home() {
       </nav>
 
       {/* ── Hero ────────────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-6 pt-16 pb-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <section className="max-w-6xl mx-auto px-6 pt-14 pb-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
         {/* Left */}
         <div>
-          <h1 className="text-5xl sm:text-6xl font-extrabold leading-[1.05] tracking-tight mb-6">
+          <h1
+            className="text-5xl sm:text-6xl font-black leading-[1.05] tracking-tight mb-6"
+            style={{ color: "#1D3B6B" }}
+          >
             Amsterdam<br />
             has your job.<br />
-            <span className="text-orange-400">Let&apos;s find it.</span>
+            <span style={{ color: "#E85520" }}>Let&apos;s find it.</span>
           </h1>
 
-          <p className="text-zinc-400 text-lg leading-relaxed mb-4 max-w-md">
+          <p className="text-lg leading-relaxed mb-4 max-w-md" style={{ color: "#5A6E8A" }}>
             Answer 5 questions. Get matched to real local jobs near you.
           </p>
 
-          <p className="text-zinc-500 text-base leading-relaxed mb-8 max-w-md">
+          <p className="text-base leading-relaxed mb-8 max-w-md" style={{ color: "#7A8FA8" }}>
             No account. No documents. We never ask where you&apos;re from
             or what your status is — just what you&apos;re good at.
           </p>
@@ -74,41 +88,61 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-3 mb-10">
             <Link
               href="/app"
-              className="bg-orange-500 hover:bg-orange-400 text-white px-7 py-3.5 rounded-full font-semibold text-base transition-colors text-center"
+              className="px-7 py-3.5 rounded-full font-bold text-base transition-colors text-center text-white"
+              style={{ background: "#E85520" }}
             >
               Start — it&apos;s free
             </Link>
             <Link
               href="/jobs"
-              className="border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white px-7 py-3.5 rounded-full font-semibold text-base transition-colors text-center"
+              className="px-7 py-3.5 rounded-full font-bold text-base transition-colors text-center"
+              style={{ border: "2px solid #1D3B6B", color: "#1D3B6B" }}
             >
               Browse the map
             </Link>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-500">
-            <span className="flex items-center gap-1.5"><span className="text-zinc-300">🔒</span> Fully anonymous</span>
-            <span className="flex items-center gap-1.5"><span className="text-zinc-300">🌍</span> No Dutch required</span>
-            <span className="flex items-center gap-1.5"><span className="text-zinc-300">📍</span> Amsterdam only</span>
+          <div className="flex flex-wrap items-center gap-5 text-sm" style={{ color: "#7A8FA8" }}>
+            <span className="flex items-center gap-1.5">🔒 Fully anonymous</span>
+            <span className="flex items-center gap-1.5">🌍 No Dutch required</span>
+            <span className="flex items-center gap-1.5">📍 Amsterdam only</span>
           </div>
         </div>
 
         {/* Right — quiz card mock */}
         <div className="flex justify-center lg:justify-end">
-          <div className="w-full max-w-sm bg-zinc-900 rounded-2xl border border-zinc-800 shadow-2xl overflow-hidden">
-            <div className="px-5 pt-5 pb-4 border-b border-zinc-800 flex items-center justify-between">
+          <div
+            className="w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden"
+            style={{ background: "#FAFAF5", border: "1.5px solid #D4C9BA" }}
+          >
+            <div
+              className="px-5 pt-5 pb-4 flex items-center justify-between"
+              style={{ borderBottom: "1.5px solid #D4C9BA" }}
+            >
               <div className="flex items-center gap-2">
-                <span className="text-base">🪈</span>
-                <span className="text-sm font-semibold text-zinc-300">Vind je bijbaan</span>
+                <img src="/junta-logo.png" alt="Junta" className="h-6 rounded" />
+                <span className="text-sm font-bold" style={{ color: "#1D3B6B" }}>Vind je bijbaan</span>
               </div>
-              <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded-full">Stap 2 van 5</span>
+              <span
+                className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                style={{ background: "#EDE8DC", color: "#7A6E63" }}
+              >
+                Stap 2 van 5
+              </span>
             </div>
-            <div className="h-1 bg-zinc-800">
-              <div className="h-1 bg-orange-500 w-[40%]" />
+            <div style={{ height: 4, background: "#EDE8DC" }}>
+              <div style={{ height: 4, background: "#E85520", width: "40%" }} />
             </div>
             <div className="px-5 py-6">
-              <p className="text-xs text-zinc-500 mb-1 font-medium uppercase tracking-wider">Interesses</p>
-              <p className="text-lg font-bold text-white mb-5">Wat vind je leuk om te doen?</p>
+              <p
+                className="text-xs mb-1 font-bold uppercase tracking-widest"
+                style={{ color: "#7A6E63" }}
+              >
+                Interesses
+              </p>
+              <p className="text-lg font-black mb-5" style={{ color: "#1D3B6B" }}>
+                Wat vind je leuk om te doen?
+              </p>
               <div className="grid grid-cols-2 gap-2 mb-5">
                 {[
                   { e: "💻", l: "Tech" },
@@ -120,39 +154,52 @@ export default function Home() {
                 ].map(s => (
                   <div
                     key={s.l}
-                    className={`border rounded-xl px-3 py-2 text-xs text-center transition-colors cursor-pointer ${
+                    className="rounded-xl px-3 py-2 text-xs text-center font-semibold cursor-pointer"
+                    style={
                       s.l === "Eten & Horeca"
-                        ? "bg-orange-500 border-orange-500 text-white font-semibold"
-                        : "bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-zinc-500"
-                    }`}
+                        ? { background: "#E85520", border: "1.5px solid #E85520", color: "#fff" }
+                        : { background: "#EDE8DC", border: "1.5px solid #D4C9BA", color: "#1D3B6B" }
+                    }
                   >
                     {s.e} {s.l}
                   </div>
                 ))}
               </div>
-              <div className="bg-orange-500 rounded-xl py-3 text-center text-sm font-semibold text-white">
+              <div
+                className="rounded-xl py-3 text-center text-sm font-bold text-white"
+                style={{ background: "#E85520" }}
+              >
                 Volgende →
               </div>
             </div>
             <div className="px-5 pb-4 text-center">
-              <p className="text-xs text-zinc-600">Anoniem · Gratis · 5 minuten</p>
+              <p className="text-xs" style={{ color: "#B0A89A" }}>Anoniem · Gratis · 5 minuten</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── How it works ────────────────────────────────────────── */}
-      <section className="border-t border-zinc-800 py-24 px-6" id="how-it-works">
+      <section
+        className="py-24 px-6"
+        id="how-it-works"
+        style={{ background: "#EDE8DC", borderTop: "1.5px solid #D4C9BA", borderBottom: "1.5px solid #D4C9BA" }}
+      >
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-black text-center mb-16" style={{ color: "#1D3B6B" }}>
             How it works
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
             {STEPS.map((s) => (
               <div key={s.n} className="flex flex-col gap-4">
-                <span className="text-6xl font-black text-zinc-800 leading-none">{s.n}</span>
-                <h3 className="text-lg font-bold text-white">{s.title}</h3>
-                <p className="text-zinc-400 leading-relaxed text-sm">{s.desc}</p>
+                <span
+                  className="text-6xl font-black leading-none"
+                  style={{ color: "#E85520", opacity: 0.25 }}
+                >
+                  {s.n}
+                </span>
+                <h3 className="text-lg font-black" style={{ color: "#1D3B6B" }}>{s.title}</h3>
+                <p className="leading-relaxed text-sm" style={{ color: "#5A6E8A" }}>{s.desc}</p>
               </div>
             ))}
           </div>
@@ -160,19 +207,23 @@ export default function Home() {
       </section>
 
       {/* ── Job categories ──────────────────────────────────────── */}
-      <section className="bg-zinc-900 border-y border-zinc-800 py-20 px-6">
+      <section className="py-20 px-6" style={{ background: "#F2EDE4" }}>
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl font-bold text-white text-center mb-3">
+          <h2 className="text-2xl font-black text-center mb-3" style={{ color: "#1D3B6B" }}>
             What kind of jobs?
           </h2>
-          <p className="text-zinc-400 text-center mb-10 max-w-md mx-auto text-sm">
+          <p className="text-center mb-10 max-w-md mx-auto text-sm" style={{ color: "#5A6E8A" }}>
             Real listings from Amsterdam employers — updated every week.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {CATEGORIES.map((c) => (
-              <div key={c.label} className="bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 flex items-center gap-3 hover:border-zinc-600 transition-colors">
+              <div
+                key={c.label}
+                className="rounded-xl px-4 py-4 flex items-center gap-3 transition-colors"
+                style={{ background: "#FAFAF5", border: "1.5px solid #D4C9BA" }}
+              >
                 <span className="text-xl">{c.emoji}</span>
-                <span className="text-sm text-zinc-300 font-medium leading-snug">{c.label}</span>
+                <span className="text-sm font-semibold leading-snug" style={{ color: "#1D3B6B" }}>{c.label}</span>
               </div>
             ))}
           </div>
@@ -180,13 +231,16 @@ export default function Home() {
       </section>
 
       {/* ── Anonymous promise ───────────────────────────────────── */}
-      <section className="py-24 px-6">
+      <section
+        className="py-24 px-6"
+        style={{ background: "#EDE8DC", borderTop: "1.5px solid #D4C9BA" }}
+      >
         <div className="max-w-3xl mx-auto text-center">
           <span className="text-4xl mb-6 block">🔒</span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5">
+          <h2 className="text-3xl sm:text-4xl font-black mb-5" style={{ color: "#1D3B6B" }}>
             We never ask who you are.
           </h2>
-          <p className="text-zinc-400 text-lg leading-relaxed">
+          <p className="text-lg leading-relaxed" style={{ color: "#5A6E8A" }}>
             No name. No address. No documents. No questions about your residency, visa, or background.
             Just tell us what you&apos;re good at and what you&apos;re looking for.
             That&apos;s all we need.
@@ -195,28 +249,35 @@ export default function Home() {
       </section>
 
       {/* ── CTA ─────────────────────────────────────────────────── */}
-      <section className="bg-orange-500 py-24 px-6 text-center">
-        <h2 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight mb-4">
+      <section className="py-24 px-6 text-center" style={{ background: "#E85520" }}>
+        <h2 className="text-4xl sm:text-5xl font-black text-white leading-tight mb-4">
           Your job is out there.
         </h2>
-        <p className="text-orange-100 text-lg mb-10 max-w-md mx-auto">
+        <p className="text-lg mb-10 max-w-md mx-auto" style={{ color: "rgba(255,255,255,0.8)" }}>
           Let&apos;s go find it.
         </p>
         <Link
           href="/app"
-          className="inline-block bg-white hover:bg-orange-50 text-orange-500 px-10 py-4 rounded-full text-lg font-bold transition-colors"
+          className="inline-block px-10 py-4 rounded-full text-lg font-black transition-colors"
+          style={{ background: "#1D3B6B", color: "#fff" }}
         >
           Start the 5-minute quiz →
         </Link>
-        <p className="text-orange-200 text-sm mt-5">Free · Anonymous · Amsterdam</p>
+        <p className="text-sm mt-5" style={{ color: "rgba(255,255,255,0.6)" }}>
+          Free · Anonymous · Amsterdam
+        </p>
       </section>
 
       {/* ── Footer ──────────────────────────────────────────────── */}
-      <footer className="border-t border-zinc-800 py-10 px-6 max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-zinc-600">
-        <div className="flex items-center">
-          <img src="/junta-logo.png" alt="Junta" className="h-8 rounded-md" />
-        </div>
-        <p>Built with ❤️ in Amsterdam by <span className="text-zinc-300 font-medium">Erwin, Jeroen &amp; Suryansh</span></p>
+      <footer
+        className="py-10 px-6 max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm"
+        style={{ borderTop: "1.5px solid #D4C9BA", color: "#7A8FA8" }}
+      >
+        <img src="/junta-logo.png" alt="Junta" className="h-8 rounded-md" />
+        <p>
+          Built with ❤️ in Amsterdam by{" "}
+          <span className="font-bold" style={{ color: "#1D3B6B" }}>Erwin, Jeroen &amp; Suryansh</span>
+        </p>
         <p>Hackathon 2026</p>
       </footer>
     </div>

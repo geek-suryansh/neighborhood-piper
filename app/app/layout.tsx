@@ -3,21 +3,21 @@ import ServiceWorker from '../sw-register'
 import InstallPrompt from '../install-prompt'
 
 export const metadata: Metadata = {
-  title: 'STAP — Jouw eerste baan',
-  description: 'Maak een gratis CV en vind bijbaantjes bij jou in de buurt.',
+  title: 'Junta — Find your first job in Amsterdam',
+  description: 'Find your first job in Amsterdam. 5-minute quiz, anonymous, free.',
   manifest: '/api/stap/manifest',
   appleWebApp: {
     capable: true,
-    title: 'STAP',
-    statusBarStyle: 'black-translucent',
+    title: 'Junta',
+    statusBarStyle: 'default',
   },
   icons: {
-    apple: '/api/icon/180',
+    apple: '/apple-touch-icon.png',
   },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#00e5a0',
+  themeColor: '#E85520',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,

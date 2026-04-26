@@ -63,7 +63,7 @@ export default function InstallPrompt() {
       <div style={{ fontSize: 28, lineHeight: 1 }}>📲</div>
       <div style={{ flex: 1 }}>
         <div style={{ fontWeight: 700, color: '#e8e8f0', marginBottom: 4, fontSize: 15, fontFamily: "'Segoe UI', system-ui, sans-serif" }}>
-          Zet STAP op je startscherm
+          Zet Junta op je startscherm
         </div>
         {isIOS ? (
           <div style={{ color: '#8888a0', fontSize: 13, lineHeight: 1.5, fontFamily: "'Segoe UI', system-ui, sans-serif" }}>
