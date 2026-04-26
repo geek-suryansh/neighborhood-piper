@@ -35,9 +35,8 @@ export default function Home() {
 
       {/* ── Nav ─────────────────────────────────────────────────── */}
       <nav className="flex items-center justify-between px-6 py-5 max-w-6xl mx-auto">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🪈</span>
-          <span className="font-bold text-lg text-white tracking-tight">neighborhood-piper</span>
+        <div className="flex items-center">
+          <img src="/junta-logo.png" alt="Junta" className="h-10 rounded-lg" />
         </div>
         <div className="flex items-center gap-2">
           <Link href="/jobs" className="hidden sm:block text-zinc-400 text-sm font-medium hover:text-white transition-colors px-3 py-2">
@@ -214,9 +213,8 @@ export default function Home() {
 
       {/* ── Footer ──────────────────────────────────────────────── */}
       <footer className="border-t border-zinc-800 py-10 px-6 max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-zinc-600">
-        <div className="flex items-center gap-2">
-          <span>🪈</span>
-          <span className="text-zinc-400 font-medium">neighborhood-piper</span>
+        <div className="flex items-center">
+          <img src="/junta-logo.png" alt="Junta" className="h-8 rounded-md" />
         </div>
         <p>Built with ❤️ in Amsterdam by <span className="text-zinc-300 font-medium">Erwin, Jeroen &amp; Suryansh</span></p>
         <p>Hackathon 2026</p>

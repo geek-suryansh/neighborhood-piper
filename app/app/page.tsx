@@ -253,13 +253,7 @@ function WelcomeScreen({ onStart }: { onStart: () => void }) {
   useEffect(() => { setTimeout(() => setShow(true), 100); }, []);
   return (
     <div style={{ ...styles.container, paddingTop: 80, textAlign: "center", opacity: show ? 1 : 0, transform: show ? "translateY(0)" : "translateY(20px)", transition: "all 0.6s ease" }}>
-      <div style={{ fontSize: 64, marginBottom: 16 }}>⚡</div>
-      <h1 style={{ fontSize: 42, fontWeight: 800, letterSpacing: "-0.03em", margin: "0 0 8px", lineHeight: 1.1 }}>
-        <span style={{ color: COLORS.accent }}>STAP</span>
-      </h1>
-      <p style={{ color: COLORS.textDim, fontSize: 13, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 32 }}>
-        Skills → Talent → Actie → Perspectief
-      </p>
+      <img src="/junta-logo.png" alt="Junta" style={{ height: 120, borderRadius: 16, marginBottom: 32, display: "inline-block" }} />
       <p style={{ color: COLORS.textDim, fontSize: 17, lineHeight: 1.6, maxWidth: 340, margin: "0 auto 48px" }}>
         Ontdek wat bij je past. Vind een baan. Bouw je toekomst.<br />
         <span style={{ color: COLORS.accent }}>In 5 minuten.</span>
@@ -852,11 +846,8 @@ function CVTab({ data }: { data: AppData }) {
 function ResultsScreen({ data, onTab, activeTab, profile }: { data: AppData; onTab: (tab: string) => void; activeTab: string; profile: CandidateProfile }) {
   return (
     <div style={styles.container}>
-      <div style={{ paddingTop: 24, paddingBottom: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
-          <span style={{ fontSize: 28 }}>⚡</span>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: COLORS.accent, letterSpacing: "-0.02em", margin: 0 }}>STAP</h1>
-        </div>
+      <div style={{ paddingTop: 24, paddingBottom: 16, display: "flex", alignItems: "center", gap: 14 }}>
+        <img src="/junta-logo.png" alt="Junta" style={{ height: 48, borderRadius: 10, flexShrink: 0 }} />
         <p style={{ color: COLORS.textDim, fontSize: 14, margin: 0 }}>Jouw persoonlijke resultaten</p>
       </div>
       <div style={{ display: "flex", gap: 4, marginBottom: 24, background: COLORS.card, borderRadius: 14, padding: 4 }}>
