@@ -93,6 +93,13 @@ export default async function Home() {
             {t('nav.jobsMap')}
           </Link>
           <Link
+            href="/employer"
+            className="hidden sm:block text-sm font-semibold px-3 py-2 transition-colors"
+            style={{ color: "#666666" }}
+          >
+            {t('nav.postJob')}
+          </Link>
+          <Link
             href="/app"
             className="px-5 py-2 rounded-full text-sm font-bold transition-colors text-white"
             style={{ background: "#0D0D0D" }}
@@ -353,6 +360,27 @@ export default async function Home() {
           <p className="text-lg leading-relaxed" style={{ color: "#666666" }}>
             {t('anonymous.desc')}
           </p>
+        </div>
+      </section>
+
+      {/* ── Employer CTA ────────────────────────────────────────── */}
+      <section className="py-16 px-6" style={{ background: "#FFFFFF", borderTop: "1.5px solid #E8E8E8" }}>
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-8">
+          <div>
+            <h2 className="text-2xl font-black mb-2" style={{ color: "#0D0D0D" }}>
+              {t('employer.title')}
+            </h2>
+            <p className="text-base max-w-md" style={{ color: "#666666" }}>
+              {t('employer.desc')}
+            </p>
+          </div>
+          <Link
+            href="/employer"
+            className="shrink-0 px-7 py-3.5 rounded-full font-bold text-base transition-colors text-center"
+            style={{ border: "2px solid #eb4d02", color: "#eb4d02", background: "#FFFFFF", whiteSpace: "nowrap" }}
+          >
+            {t('employer.button')}
+          </Link>
         </div>
       </section>
 

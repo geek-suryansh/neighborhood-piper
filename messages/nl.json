@@ -128,7 +128,8 @@
   "landing": {
     "nav": {
       "jobsMap": "Banen kaart",
-      "findMyJob": "Vind mijn baan →"
+      "findMyJob": "Vind mijn baan →",
+      "postJob": "Vacature plaatsen"
     },
     "hero": {
       "line1": "Amsterdam",
@@ -152,6 +153,11 @@
     "anonymous": {
       "title": "We vragen nooit wie je bent.",
       "desc": "Geen naam. Geen adres. Geen documenten. Geen vragen over je verblijf, visum of achtergrond. Vertel ons gewoon wat je goed kunt en wat je zoekt. Dat is alles wat we nodig hebben."
+    },
+    "employer": {
+      "title": "Ben je werkgever?",
+      "desc": "Plaats je vacature en bereik gemotiveerde jongeren in Amsterdam — gratis.",
+      "button": "Vacature plaatsen →"
     },
     "cta": {
       "title": "Jouw baan is er.",

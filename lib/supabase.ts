@@ -39,3 +39,21 @@ export function getSupabase() {
   }
   return _client;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _adminClient: ReturnType<typeof createClient<any>> | null = null;
+
+/** Server-side only — bypasses RLS. Never expose to the browser. */
+export function getSupabaseAdmin() {
+  if (!_adminClient) {
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    _adminClient = createClient<any>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceKey,
+      { auth: { persistSession: false } }
+    );
+  }
+  return _adminClient;
+}

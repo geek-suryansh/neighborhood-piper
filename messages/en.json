@@ -128,7 +128,8 @@
   "landing": {
     "nav": {
       "jobsMap": "Jobs map",
-      "findMyJob": "Find my job →"
+      "findMyJob": "Find my job →",
+      "postJob": "Post a job"
     },
     "hero": {
       "line1": "Amsterdam",
@@ -152,6 +153,11 @@
     "anonymous": {
       "title": "We never ask who you are.",
       "desc": "No name. No address. No documents. No questions about your residency, visa, or background. Just tell us what you're good at and what you're looking for. That's all we need."
+    },
+    "employer": {
+      "title": "Are you an employer?",
+      "desc": "Post your vacancy and reach motivated young people in Amsterdam — for free.",
+      "button": "Post a vacancy →"
     },
     "cta": {
       "title": "Your job is out there.",

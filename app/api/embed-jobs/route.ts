@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabase } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase';
 
 async function embedText(text: string): Promise<number[]> {
   const res = await fetch('https://api.openai.com/v1/embeddings', {
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
   const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '50'), 200);
 
-  const { data: jobs, error } = await getSupabase()
+  const { data: jobs, error } = await getSupabaseAdmin()
     .from('jobs')
     .select('id, title, category, description')
     .is('embedding', null)
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       const text = [job.title, job.category, job.description].filter(Boolean).join(' — ');
       const embedding = await embedText(text);
       const vectorLiteral = `[${embedding.join(',')}]`;
-      const { error: updateError } = await getSupabase().from('jobs').update({ embedding: vectorLiteral }).eq('id', job.id);
+      const { error: updateError } = await getSupabaseAdmin().from('jobs').update({ embedding: vectorLiteral }).eq('id', job.id);
       if (updateError) throw new Error(`Supabase: ${updateError.message}`);
       processed++;
     } catch (err) {
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     await new Promise(r => setTimeout(r, 100));
   }
 
-  const { count } = await getSupabase()
+  const { count } = await getSupabaseAdmin()
     .from('jobs')
     .select('*', { count: 'exact', head: true })
     .is('embedding', null);
