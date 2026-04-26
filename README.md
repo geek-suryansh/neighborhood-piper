@@ -6,6 +6,8 @@
 > Product Url - https://gojunta.vercel.app/
 > 
 > Deck Url - https://gojunta.framer.website/ (Built with Framer fully using Claude)
+>
+> Loom Video - https://www.loom.com/share/40b5c6498f0e44018f6f3b36a62c2f4d
 
 ---
 
