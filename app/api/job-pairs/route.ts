@@ -39,11 +39,11 @@ export async function POST(req: NextRequest) {
 Profiel:
 ${context}
 
-Geef terug als JSON:
-{"pairs":[{"a":"...","b":"..."},{"a":"...","b":"..."},{"a":"...","b":"..."}]}`,
+Geef terug als JSON met voor elke baan ook een Engelse vertaling:
+{"pairs":[{"a":"...","b":"...","aEn":"...","bEn":"..."},{"a":"...","b":"...","aEn":"...","bEn":"..."},{"a":"...","b":"...","aEn":"...","bEn":"..."}]}`,
         },
       ],
-      max_tokens: 200,
+      max_tokens: 600,
       temperature: 0.9,
       response_format: { type: 'json_object' },
     }),
@@ -54,7 +54,10 @@ Geef terug als JSON:
   }
 
   const json = await res.json();
-  const parsed = JSON.parse(json.choices?.[0]?.message?.content ?? '{}');
-
-  return NextResponse.json({ pairs: parsed.pairs ?? [] });
+  try {
+    const parsed = JSON.parse(json.choices?.[0]?.message?.content ?? '{}');
+    return NextResponse.json({ pairs: parsed.pairs ?? [] });
+  } catch {
+    return NextResponse.json({ error: 'Failed to parse pairs' }, { status: 500 });
+  }
 }

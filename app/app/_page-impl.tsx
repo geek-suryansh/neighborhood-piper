@@ -687,7 +687,8 @@ function ExperienceScreen({ data, setData, onNext }: { data: AppData; setData: (
 
 function JobPicksScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
   const t = useTranslations('app.jobPicks');
-  const [pairs, setPairs] = useState<{ a: string; b: string }[]>([]);
+  const locale = useLocale();
+  const [pairs, setPairs] = useState<{ a: string; b: string; aEn?: string; bEn?: string }[]>([]);
   const [picks, setPicks] = useState<string[]>([]);
   const [loadingPairs, setLoadingPairs] = useState(true);
   const [generatingCV, setGeneratingCV] = useState(false);
@@ -794,38 +795,42 @@ function JobPicksScreen({ data, setData, onNext }: { data: AppData; setData: (d:
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {[currentPair.a, currentPair.b].map((job) => (
-          <button
-            key={job}
-            onClick={() => pick(job)}
-            style={{
-              padding: "22px 20px",
-              borderRadius: 16,
-              border: `1.5px solid ${COLORS.border}`,
-              background: COLORS.card,
-              color: COLORS.text,
-              fontSize: 17,
-              fontWeight: 600,
-              cursor: "pointer",
-              textAlign: "left",
-              fontFamily: FONTS,
-              transition: "all 0.15s ease",
-              letterSpacing: "-0.01em",
-            }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = "#0D0D0D";
-              (e.currentTarget as HTMLButtonElement).style.background = "#0D0D0D";
-              (e.currentTarget as HTMLButtonElement).style.color = "#FFFFFF";
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = COLORS.border;
-              (e.currentTarget as HTMLButtonElement).style.background = COLORS.card;
-              (e.currentTarget as HTMLButtonElement).style.color = COLORS.text;
-            }}
-          >
-            {job}
-          </button>
-        ))}
+        {([['a', 'aEn'], ['b', 'bEn']] as const).map(([nlKey, enKey]) => {
+          const job = currentPair[nlKey];
+          const label = locale === 'en' ? (currentPair[enKey] ?? job) : job;
+          return (
+            <button
+              key={job}
+              onClick={() => pick(job)}
+              style={{
+                padding: "22px 20px",
+                borderRadius: 16,
+                border: `1.5px solid ${COLORS.border}`,
+                background: COLORS.card,
+                color: COLORS.text,
+                fontSize: 17,
+                fontWeight: 600,
+                cursor: "pointer",
+                textAlign: "left",
+                fontFamily: FONTS,
+                transition: "all 0.15s ease",
+                letterSpacing: "-0.01em",
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = "#0D0D0D";
+                (e.currentTarget as HTMLButtonElement).style.background = "#0D0D0D";
+                (e.currentTarget as HTMLButtonElement).style.color = "#FFFFFF";
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = COLORS.border;
+                (e.currentTarget as HTMLButtonElement).style.background = COLORS.card;
+                (e.currentTarget as HTMLButtonElement).style.color = COLORS.text;
+              }}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       <div style={{ marginTop: 20, textAlign: "center" }}>
