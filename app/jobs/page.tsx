@@ -178,15 +178,27 @@ export default function JobsPage() {
                       >
                         {job.type}
                       </span>
-                      <a
-                        href={job.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-xs text-orange-500 hover:underline font-medium"
-                      >
-                        View →
-                      </a>
+                      <div className="flex items-center gap-2">
+                        {job.contact_email && (
+                          <a
+                            href={`mailto:${job.contact_email}?subject=${encodeURIComponent(`Sollicitatie: ${job.title}`)}&body=${encodeURIComponent(`Geachte heer/mevrouw,\n\nHierbij solliciteer ik naar de functie van ${job.title} in ${job.location}.\n\nIk ben enthousiast over deze vacature en denk dat ik een waardevolle aanvulling kan zijn voor uw team. In de bijlage vindt u mijn cv.\n\nIk zie uw reactie graag tegemoet.\n\nMet vriendelijke groet,`)}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-xs text-blue-500 hover:underline font-medium"
+                            title="Solliciteer via e-mail (voeg je cv toe als bijlage)"
+                          >
+                            ✉ Mail
+                          </a>
+                        )}
+                        <a
+                          href={job.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-xs text-orange-500 hover:underline font-medium"
+                        >
+                          View →
+                        </a>
+                      </div>
                     </div>
                   </div>
                 );

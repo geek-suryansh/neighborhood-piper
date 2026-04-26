@@ -150,9 +150,10 @@ type FormState = {
   salary: string;
   description: string;
   url: string;
+  contact_email: string;
 };
 
-const EMPTY_FORM: FormState = { title: "", category: "", type: "Flexible", salary: "", description: "", url: "" };
+const EMPTY_FORM: FormState = { title: "", category: "", type: "Flexible", salary: "", description: "", url: "", contact_email: "" };
 
 export default function PostPage() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -180,6 +181,7 @@ export default function PostPage() {
       lat: location?.lat ?? 52.3702,
       lng: location?.lng ?? 4.8952,
       url: form.url.trim() || null,
+      contact_email: form.contact_email.trim() || null,
       description: form.description.trim() || null,
       source: "posted",
     });
@@ -291,6 +293,16 @@ export default function PostPage() {
                   placeholder="https://..."
                   value={form.url}
                   onChange={e => set("url", e.target.value)}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Contact e-mail (voor sollicitaties)</label>
+                <input
+                  style={inputStyle}
+                  type="email"
+                  placeholder="sollicitaties@bedrijf.nl"
+                  value={form.contact_email}
+                  onChange={e => set("contact_email", e.target.value)}
                 />
               </div>
 

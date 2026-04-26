@@ -14,6 +14,7 @@ export interface Job {
   url: string;
   lat: number;
   lng: number;
+  contact_email?: string | null;
 }
 
 const TYPE_COLORS: Record<string, string> = {
