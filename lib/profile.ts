@@ -60,6 +60,19 @@ export type CandidateProfile = {
     dreamText: string | null;
   };
 
+  refugee?: {
+    originCountry: string | null;
+    credentials: Array<{
+      input: string;
+      matchedOccupation: string | null;
+      escoUri: string | null;
+      eqfLevel: number | null;
+      dutchEquivalent: string | null;
+      iscoCode: string | null;
+      confidence: number | null;
+    }>;
+  };
+
   // Pre-computed flags useful for matching queries
   derived: {
     isEligibleForMinimumWage: boolean; // age >= 18 (NL law)
@@ -91,7 +104,7 @@ const EDU_LEVEL_CODES: Record<string, EduLevelCode> = {
   "Buitenlands diploma":"foreign",
 };
 
-const LANGUAGE_ISO: Record<string, string> = {
+export const LANGUAGE_ISO: Record<string, string> = {
   "Nederlands":  "nl",
   "Engels":      "en",
   "Arabisch":    "ar",
@@ -195,6 +208,22 @@ export function toProfile(data: AppData): CandidateProfile {
     aspiration: {
       dreamText: data.dream?.trim() || null,
     },
+
+    refugee: data.isRefugee ? {
+      originCountry: data.originCountry?.trim() || null,
+      credentials: (data.escoMatches ?? []).map(m => {
+        const top = m.lookup?.matches?.[0] ?? null;
+        return {
+          input: m.input,
+          matchedOccupation: top?.preferred_labels?.nl ?? top?.preferred_labels?.en ?? null,
+          escoUri: top?.esco_uri ?? null,
+          eqfLevel: top?.eqf?.level ?? null,
+          dutchEquivalent: top?.eqf?.dutch_equivalent ?? null,
+          iscoCode: top?.isco_code ?? null,
+          confidence: top?.confidence ?? null,
+        };
+      }),
+    } : undefined,
 
     derived: {
       isEligibleForMinimumWage: ageMin != null && ageMin >= 18,

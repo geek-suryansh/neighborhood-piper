@@ -1,3 +1,20 @@
+export type EscoMatch = {
+  input: string;
+  lookup: {
+    matches: Array<{
+      rank: number;
+      esco_uri: string;
+      confidence: number;
+      isco_code: string;
+      isco_label_en: string;
+      preferred_labels: Record<string, string>;
+      eqf: { level: number; range: [number, number]; dutch_equivalent: string } | null;
+      regulated_warning: { warning: string; recognition_body: string } | null;
+    }>;
+  } | null;
+  error?: string;
+};
+
 export type AppData = {
   age?: string;
   name?: string;
@@ -11,6 +28,11 @@ export type AppData = {
   days: string[];
   hours?: string;
   dream?: string;
+  // refugee path
+  isRefugee?: boolean;
+  originCountry?: string;
+  rawCredentials?: string[];
+  escoMatches?: EscoMatch[];
 };
 
 export const INTERESTS = [

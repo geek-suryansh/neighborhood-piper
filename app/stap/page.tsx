@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   INTERESTS, SKILLS_OPTIONS, LANGUAGES, EDU_LEVELS, EDU_YEARS,
-  type AppData,
+  type AppData, type EscoMatch,
 } from "@/lib/stap-data";
-import { toProfile } from "@/lib/profile";
+import { toProfile, LANGUAGE_ISO } from "@/lib/profile";
 import { getSupabase } from "@/lib/supabase";
 
 const COLORS = {
@@ -23,6 +23,7 @@ const COLORS = {
 
 const FONTS = `'Segoe UI', system-ui, sans-serif`;
 const TOTAL_STEPS = 8;
+const TOTAL_STEPS_REFUGEE = 9;
 
 const MOCK_JOBS = [
   { title: "Vakkenvuller", company: "Albert Heijn Bijlmer", distance: "1.2 km", hours: "8-12 uur/week", wage: "€6,73/uur", match: 94, tags: ["Flexibel", "Geen ervaring nodig"] },
@@ -163,6 +164,8 @@ function generateCVHTML(data: AppData): string {
   };
   const fullDays = (data.days || []).map(d => dayMap[d] || d);
 
+  const escoCredentials = (data.escoMatches ?? []).filter(m => m.lookup?.matches?.[0]);
+
   return `<!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -182,10 +185,14 @@ function generateCVHTML(data: AppData): string {
   .tag { background: #f0faf6; border: 1px solid #00e5a033; color: #007a55; padding: 4px 12px; border-radius: 20px; font-size: 9.5pt; }
   .tag.skill { background: #f5f0ff; border-color: #8b5cf633; color: #6d4ac7; }
   .tag.lang { background: #fff8f0; border-color: #ff6b3533; color: #cc4a10; }
-  .edu { display: flex; justify-content: space-between; }
+  .edu { display: flex; justify-content: space-between; margin-bottom: 10px; }
   .edu strong { font-size: 11pt; }
   .edu span { display: block; color: #666; font-size: 10pt; }
   .edu .year { color: #888; font-size: 10pt; white-space: nowrap; }
+  .esco-item { padding: 10px 14px; border-left: 3px solid #00c087; margin-bottom: 10px; background: #f8fffe; }
+  .esco-item .occ { font-size: 11pt; font-weight: 700; color: #0a0a0f; }
+  .esco-item .meta { font-size: 9.5pt; color: #555; margin-top: 3px; }
+  .esco-item .original { font-size: 9pt; color: #999; font-style: italic; margin-top: 2px; }
   .avail { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
   .avail span { background: #f0faf6; border: 1px solid #00e5a044; color: #007a55; padding: 5px 14px; border-radius: 20px; font-size: 9.5pt; }
   .footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #eee; color: #bbb; font-size: 8.5pt; display: flex; justify-content: space-between; }
@@ -196,8 +203,8 @@ function generateCVHTML(data: AppData): string {
   <div class="header">
     <div>
       <h1>${data.name || "Anoniem"}</h1>
-      <div class="sub">${data.age} jaar &nbsp;·&nbsp; Amsterdam</div>
-      <span class="badge">⚡ Op zoek naar bijbaan</span>
+      <div class="sub">${data.age ? `${data.age} jaar &nbsp;·&nbsp; ` : ""}Amsterdam${data.originCountry ? ` &nbsp;·&nbsp; Afkomstig uit ${data.originCountry}` : ""}</div>
+      <span class="badge">⚡ ${data.isRefugee ? "Nieuwkomer" : "Op zoek naar bijbaan"}</span>
     </div>
     <div class="contact">
       ${data.email ? `<div>${data.email}</div>` : ""}
@@ -207,8 +214,29 @@ function generateCVHTML(data: AppData): string {
 
   <div class="section">
     <h2>Profiel</h2>
-    <p>Gemotiveerde jongere van ${data.age} jaar, woonachtig in Amsterdam, op zoek naar een bijbaan.${data.dream ? ` Toekomstdroom: <em>${data.dream}</em>.` : ""} Beschikbaar op ${fullDays.join(", ")}${data.hours ? ` voor ${data.hours} per week` : ""}.</p>
+    <p>${data.isRefugee
+      ? `Nieuwkomer afkomstig uit ${data.originCountry || "het buitenland"}, woonachtig in Amsterdam.${data.dream ? ` Toekomstdroom: <em>${data.dream}</em>.` : ""} Beschikbaar op ${fullDays.join(", ")}${data.hours ? ` voor ${data.hours} per week` : ""}.`
+      : `Gemotiveerde jongere van ${data.age} jaar, woonachtig in Amsterdam, op zoek naar een bijbaan.${data.dream ? ` Toekomstdroom: <em>${data.dream}</em>.` : ""} Beschikbaar op ${fullDays.join(", ")}${data.hours ? ` voor ${data.hours} per week` : ""}.`
+    }</p>
   </div>
+
+  ${escoCredentials.length > 0 ? `
+  <div class="section">
+    <h2>Internationale kwalificaties (EU-equivalent via ESCO)</h2>
+    ${escoCredentials.map(m => {
+      const top = m.lookup!.matches[0];
+      const nlLabel = top.preferred_labels?.nl || top.preferred_labels?.en || "—";
+      const enLabel = top.preferred_labels?.en;
+      return `
+      <div class="esco-item">
+        <div class="occ">${nlLabel}${enLabel && enLabel !== nlLabel ? ` <span style="font-weight:400;color:#555">(${enLabel})</span>` : ""}</div>
+        <div class="meta">${top.isco_label_en || ""}${top.eqf ? ` &nbsp;·&nbsp; EQF ${top.eqf.level} ≈ ${top.eqf.dutch_equivalent}` : ""}</div>
+        <div class="original">Opgegeven als: "${m.input}"</div>
+        ${top.regulated_warning ? `<div style="color:#cc4a10;font-size:9pt;margin-top:4px">⚠ Gereglementeerd beroep — ${top.regulated_warning.recognition_body}</div>` : ""}
+      </div>`;
+    }).join("")}
+    <p style="font-size:8pt;color:#bbb;margin-top:6px">* Indicatieve EU-equivalentie via ESCO v1.2.1. Geen officiële erkenning.</p>
+  </div>` : ""}
 
   ${(data.school || data.eduLevel) ? `
   <div class="section">
@@ -278,6 +306,276 @@ function WelcomeScreen({ onStart }: { onStart: () => void }) {
   );
 }
 
+// ── Refugee path screens ──
+
+function RefugeeCheckScreen({ onRefugee, onNormal }: { onRefugee: () => void; onNormal: () => void }) {
+  return (
+    <div style={styles.container}>
+      <div style={{ paddingTop: 60, textAlign: "center", marginBottom: 40 }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🌍</div>
+        <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 12, letterSpacing: "-0.02em" }}>
+          Welkom!
+        </h2>
+        <p style={{ color: COLORS.textDim, fontSize: 16, lineHeight: 1.6, maxWidth: 340, margin: "0 auto" }}>
+          Ben je een nieuwkomer of vluchteling met buitenlandse diploma&apos;s of werkervaring?
+        </p>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <button onClick={onRefugee} style={{
+          padding: "20px", borderRadius: 16,
+          border: `1.5px solid ${COLORS.accent}`,
+          background: COLORS.accentDim,
+          color: COLORS.text, cursor: "pointer", textAlign: "left",
+          fontFamily: FONTS, display: "flex", alignItems: "center", gap: 14,
+        }}>
+          <span style={{ fontSize: 32 }}>✈️</span>
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 700, color: COLORS.accent }}>Ja, ik ben nieuwkomer</div>
+            <div style={{ fontSize: 13, color: COLORS.textDim, marginTop: 3 }}>
+              Ik heb buitenlandse diploma&apos;s of werkervaring
+            </div>
+          </div>
+        </button>
+
+        <button onClick={onNormal} style={{
+          padding: "20px", borderRadius: 16,
+          border: `1.5px solid ${COLORS.border}`,
+          background: COLORS.card,
+          color: COLORS.text, cursor: "pointer", textAlign: "left",
+          fontFamily: FONTS, display: "flex", alignItems: "center", gap: 14,
+        }}>
+          <span style={{ fontSize: 32 }}>🏠</span>
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 700 }}>Nee, ik woon al in Nederland</div>
+            <div style={{ fontSize: 13, color: COLORS.textDim, marginTop: 3 }}>
+              Ik zoek een bijbaan of mijn eerste baan
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CountryScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  return (
+    <div style={styles.container}>
+      <ProgressBar step={0} total={TOTAL_STEPS_REFUGEE} />
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Waar kom je vandaan?</h2>
+      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
+        Dit helpt ons jouw kwalificaties beter te begrijpen.
+      </p>
+      <input
+        autoFocus
+        value={data.originCountry ?? ""}
+        onChange={e => setData({ ...data, originCountry: e.target.value })}
+        onKeyDown={e => { if (e.key === "Enter" && data.originCountry?.trim()) onNext(); }}
+        placeholder="Bijv. Syrië, Oekraïne, Afghanistan..."
+        style={inputStyle}
+      />
+      <BigButton onClick={onNext} disabled={!data.originCountry?.trim()}>Volgende →</BigButton>
+    </div>
+  );
+}
+
+function CredentialInputScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  const [current, setCurrent] = useState("");
+  const creds = data.rawCredentials ?? [];
+
+  const add = () => {
+    const t = current.trim();
+    if (!t) return;
+    setData({ ...data, rawCredentials: [...creds, t] });
+    setCurrent("");
+  };
+
+  const remove = (i: number) => {
+    setData({ ...data, rawCredentials: creds.filter((_, idx) => idx !== i) });
+  };
+
+  return (
+    <div style={styles.container}>
+      <ProgressBar step={2} total={TOTAL_STEPS_REFUGEE} />
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>
+        Jouw diploma&apos;s en werkervaring
+      </h2>
+      <p style={{ color: COLORS.textDim, marginBottom: 6, fontSize: 15 }}>
+        Beschrijf elk diploma of beroep zo concreet mogelijk. Voeg er meerdere toe.
+      </p>
+      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 13, fontStyle: "italic" }}>
+        Bijv: &quot;verpleegkundige, Damascus, 8 jaar&quot; of &quot;BSc Informatica, Universiteit Kiev&quot;
+      </p>
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        <input
+          value={current}
+          onChange={e => setCurrent(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+          placeholder="Typ een diploma of beroep..."
+          style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
+        />
+        <button onClick={add} disabled={!current.trim()} style={{
+          padding: "0 20px", borderRadius: 12,
+          border: "none",
+          background: current.trim() ? COLORS.accent : COLORS.border,
+          color: current.trim() ? COLORS.bg : COLORS.textDim,
+          fontSize: 24, fontWeight: 700,
+          cursor: current.trim() ? "pointer" : "not-allowed",
+          flexShrink: 0,
+        }}>+</button>
+      </div>
+
+      {creds.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
+          {creds.map((c, i) => (
+            <div key={i} style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "12px 16px", borderRadius: 12,
+              border: `1.5px solid ${COLORS.accent}`,
+              background: COLORS.accentDim,
+            }}>
+              <span style={{ color: COLORS.text, fontSize: 14, flex: 1, marginRight: 8 }}>{c}</span>
+              <button onClick={() => remove(i)} style={{
+                background: "none", border: "none", color: COLORS.textDim,
+                fontSize: 20, cursor: "pointer", padding: "0 4px", lineHeight: 1, flexShrink: 0,
+              }}>×</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <BigButton onClick={onNext} disabled={creds.length === 0}>
+        Zoek EU-equivalent →
+      </BigButton>
+    </div>
+  );
+}
+
+function CredentialLoadingScreen({
+  data, setData, onDone,
+}: { data: AppData; setData: (d: AppData) => void; onDone: () => void }) {
+  const [msg, setMsg] = useState("Kwalificaties analyseren...");
+  const ran = useRef(false);
+
+  useEffect(() => {
+    if (ran.current) return;
+    ran.current = true;
+
+    const run = async () => {
+      const credentials = data.rawCredentials ?? [];
+      const nonNl = (data.languages ?? []).filter(l => l !== "Nederlands");
+      const langHint = nonNl.length === 1 ? (LANGUAGE_ISO[nonNl[0]] ?? null) : null;
+
+      const results: EscoMatch[] = [];
+      for (const cred of credentials) {
+        const preview = cred.length > 35 ? cred.slice(0, 35) + "…" : cred;
+        setMsg(`Zoeken: "${preview}"`);
+        try {
+          const res = await fetch("/api/credential", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: cred, input_lang: langHint }),
+          });
+          const json = await res.json();
+          if (res.ok) {
+            results.push({ input: cred, lookup: json.lookup ?? null });
+          } else {
+            results.push({ input: cred, lookup: null, error: json.error ?? "Fout bij ophalen" });
+          }
+        } catch {
+          results.push({ input: cred, lookup: null, error: "Service niet bereikbaar" });
+        }
+      }
+
+      setData({ ...data, escoMatches: results });
+      setMsg("Klaar!");
+      setTimeout(onDone, 600);
+    };
+
+    run(); // eslint-disable-line @typescript-eslint/no-floating-promises
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div style={{ ...styles.container, paddingTop: 120, textAlign: "center" }}>
+      <div style={{ fontSize: 52, marginBottom: 24 }}>🔍</div>
+      <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16, letterSpacing: "-0.02em" }}>{msg}</h2>
+      <p style={{ color: COLORS.textDim, fontSize: 15 }}>We zoeken het dichtstbijzijnde EU-equivalent...</p>
+    </div>
+  );
+}
+
+function CredentialMatchScreen({ data, onNext }: { data: AppData; onNext: () => void }) {
+  const matches = data.escoMatches ?? [];
+
+  return (
+    <div style={{ ...styles.container, paddingTop: 24 }}>
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Dit vonden we ✓</h2>
+      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
+        Dit zijn de dichtstbijzijnde EU-beroepen. Ze worden op je CV gezet.
+      </p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
+        {matches.map((m, i) => {
+          const top = m.lookup?.matches?.[0] ?? null;
+          const conf = top?.confidence ?? 0;
+          const confColor = conf >= 0.75 ? COLORS.accent : conf >= 0.45 ? COLORS.orange : COLORS.textDim;
+          const confLabel = conf >= 0.75 ? "Goede match" : conf >= 0.45 ? "Redelijke match" : "Onzekere match";
+
+          return (
+            <div key={i} style={{ padding: 18, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card }}>
+              <p style={{ color: COLORS.textDim, fontSize: 12, marginBottom: 10, fontStyle: "italic" }}>
+                Jouw input: &ldquo;{m.input}&rdquo;
+              </p>
+
+              {top ? (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 8 }}>
+                    <h3 style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.01em", margin: 0, flex: 1 }}>
+                      {top.preferred_labels?.nl || top.preferred_labels?.en || "—"}
+                    </h3>
+                    <span style={{ color: confColor, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}>
+                      {confLabel}
+                    </span>
+                  </div>
+
+                  {top.isco_label_en && (
+                    <p style={{ color: COLORS.textDim, fontSize: 13, margin: "0 0 10px" }}>{top.isco_label_en}</p>
+                  )}
+
+                  {top.eqf && (
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 8, background: COLORS.accentDim, marginBottom: top.regulated_warning ? 10 : 0 }}>
+                      <span style={{ color: COLORS.accent, fontSize: 13, fontWeight: 700 }}>EQF {top.eqf.level}</span>
+                      <span style={{ color: COLORS.textDim, fontSize: 12 }}>≈ {top.eqf.dutch_equivalent}</span>
+                    </div>
+                  )}
+
+                  {top.regulated_warning && (
+                    <div style={{ marginTop: 10, padding: "10px 12px", borderRadius: 10, background: `${COLORS.orange}15`, border: `1px solid ${COLORS.orange}33`, color: COLORS.orange, fontSize: 12, lineHeight: 1.5 }}>
+                      ⚠ {top.regulated_warning.warning}
+                      {top.regulated_warning.recognition_body && (
+                        <div style={{ marginTop: 4, color: COLORS.textDim }}>Erkenning via: {top.regulated_warning.recognition_body}</div>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p style={{ color: COLORS.textDim, fontSize: 15 }}>
+                  {m.error ?? "Geen match gevonden. Je kunt dit handmatig invullen op de volgende stap."}
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <BigButton onClick={onNext}>Doorgaan → Maak je profiel af</BigButton>
+    </div>
+  );
+}
+
+// ── Normal path screens ──
+
 function AgeScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
   return (
     <div style={styles.container}>
@@ -302,10 +600,10 @@ function AgeScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppD
   );
 }
 
-function NameScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+function NameScreen({ data, setData, onNext, step, total }: { data: AppData; setData: (d: AppData) => void; onNext: () => void; step: number; total: number }) {
   return (
     <div style={styles.container}>
-      <ProgressBar step={1} total={TOTAL_STEPS} />
+      <ProgressBar step={step} total={total} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Hoe mogen we je noemen?</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
         Dit komt op je CV. Een bijnaam of initialen mag ook.
@@ -334,12 +632,17 @@ function NameScreen({ data, setData, onNext }: { data: AppData; setData: (d: App
   );
 }
 
-function EducationScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+function EducationScreen({ data, setData, onNext, step, total }: { data: AppData; setData: (d: AppData) => void; onNext: () => void; step: number; total: number }) {
   return (
     <div style={styles.container}>
-      <ProgressBar step={2} total={TOTAL_STEPS} />
+      <ProgressBar step={step} total={total} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Jouw opleiding</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Helpt werkgevers jouw achtergrond begrijpen.</p>
+      {data.isRefugee && (
+        <div style={{ padding: "10px 14px", borderRadius: 10, background: COLORS.accentDim, border: `1px solid ${COLORS.accent}44`, color: COLORS.accent, fontSize: 12, marginBottom: 20 }}>
+          💡 Je kwalificaties zijn al opgeslagen. Vul hier eventuele aanvullende opleidingen in.
+        </div>
+      )}
       <label style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 6, display: "block" }}>School of instelling</label>
       <input
         value={data.school || ""}
@@ -371,14 +674,14 @@ function EducationScreen({ data, setData, onNext }: { data: AppData; setData: (d
   );
 }
 
-function LanguagesScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+function LanguagesScreen({ data, setData, onNext, step, total }: { data: AppData; setData: (d: AppData) => void; onNext: () => void; step: number; total: number }) {
   const toggle = (lang: string) => {
     const cur = data.languages || [];
     setData({ ...data, languages: cur.includes(lang) ? cur.filter(l => l !== lang) : [...cur, lang] });
   };
   return (
     <div style={styles.container}>
-      <ProgressBar step={3} total={TOTAL_STEPS} />
+      <ProgressBar step={step} total={total} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Welke talen spreek je?</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Kies alle talen die je spreekt, verstaat of leert.</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 32 }}>
@@ -393,14 +696,14 @@ function LanguagesScreen({ data, setData, onNext }: { data: AppData; setData: (d
   );
 }
 
-function InterestsScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+function InterestsScreen({ data, setData, onNext, step, total }: { data: AppData; setData: (d: AppData) => void; onNext: () => void; step: number; total: number }) {
   const toggle = (id: string) => {
     const cur = data.interests || [];
     setData({ ...data, interests: cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id] });
   };
   return (
     <div style={styles.container}>
-      <ProgressBar step={4} total={TOTAL_STEPS} />
+      <ProgressBar step={step} total={total} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Waar word je blij van?</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Kies er minimaal 2. Dit helpt ons banen te vinden die bij je passen.</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
@@ -428,14 +731,14 @@ function InterestsScreen({ data, setData, onNext }: { data: AppData; setData: (d
   );
 }
 
-function SkillsScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+function SkillsScreen({ data, setData, onNext, step, total }: { data: AppData; setData: (d: AppData) => void; onNext: () => void; step: number; total: number }) {
   const toggle = (s: string) => {
     const cur = data.skills || [];
     setData({ ...data, skills: cur.includes(s) ? cur.filter(x => x !== s) : [...cur, s] });
   };
   return (
     <div style={styles.container}>
-      <ProgressBar step={5} total={TOTAL_STEPS} />
+      <ProgressBar step={step} total={total} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Waar ben je goed in?</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Wees eerlijk — er zijn geen foute antwoorden.</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
@@ -450,7 +753,7 @@ function SkillsScreen({ data, setData, onNext }: { data: AppData; setData: (d: A
   );
 }
 
-function AvailabilityScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+function AvailabilityScreen({ data, setData, onNext, step, total }: { data: AppData; setData: (d: AppData) => void; onNext: () => void; step: number; total: number }) {
   const days = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
   const toggle = (d: string) => {
     const cur = data.days || [];
@@ -458,7 +761,7 @@ function AvailabilityScreen({ data, setData, onNext }: { data: AppData; setData:
   };
   return (
     <div style={styles.container}>
-      <ProgressBar step={6} total={TOTAL_STEPS} />
+      <ProgressBar step={step} total={total} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Wanneer kun je werken?</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Tik de dagen aan waarop je beschikbaar bent.</p>
       <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
@@ -491,10 +794,10 @@ function AvailabilityScreen({ data, setData, onNext }: { data: AppData; setData:
   );
 }
 
-function DreamScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+function DreamScreen({ data, setData, onNext, step, total }: { data: AppData; setData: (d: AppData) => void; onNext: () => void; step: number; total: number }) {
   return (
     <div style={styles.container}>
-      <ProgressBar step={7} total={TOTAL_STEPS} />
+      <ProgressBar step={step} total={total} />
       <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Laatste vraag ✨</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
         Als je alles kon worden, wat zou je dan doen? Typ gewoon wat je denkt.
@@ -584,6 +887,7 @@ function JobsTab() {
 function CVTab({ data }: { data: AppData }) {
   const interests = (data.interests || []).map(id => INTERESTS.find(i => i.id === id)?.label).filter(Boolean);
   const [copied, setCopied] = useState(false);
+  const escoCredentials = (data.escoMatches ?? []).filter(m => m.lookup?.matches?.[0]);
 
   const handleDownload = () => {
     const html = generateCVHTML(data);
@@ -596,7 +900,6 @@ function CVTab({ data }: { data: AppData }) {
 
   return (
     <div style={{ paddingBottom: 32 }}>
-      {/* Preview */}
       <div style={{ padding: 24, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card, marginBottom: 16 }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
@@ -611,7 +914,8 @@ function CVTab({ data }: { data: AppData }) {
           <div>
             <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, letterSpacing: "-0.01em" }}>{data.name || "Anoniem Profiel"}</h3>
             <p style={{ color: COLORS.textDim, fontSize: 13, margin: 0 }}>
-              {data.age} jaar • Amsterdam{data.email && ` • ${data.email}`}
+              {data.age ? `${data.age} jaar • ` : ""}Amsterdam{data.email && ` • ${data.email}`}
+              {data.originCountry && ` • ${data.originCountry}`}
             </p>
           </div>
         </div>
@@ -620,9 +924,38 @@ function CVTab({ data }: { data: AppData }) {
           🔒 Naam en contactinfo worden alleen op jouw CV gezet
         </div>
 
+        {escoCredentials.length > 0 && (
+          <Section title="Internationale kwalificaties (EU-equivalent)">
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {escoCredentials.map((m, i) => {
+                const top = m.lookup!.matches[0];
+                const nlLabel = top.preferred_labels?.nl || top.preferred_labels?.en || "—";
+                const conf = top.confidence ?? 0;
+                const confColor = conf >= 0.75 ? COLORS.accent : conf >= 0.45 ? COLORS.orange : COLORS.textDim;
+                return (
+                  <div key={i} style={{ padding: "10px 14px", borderRadius: 10, borderLeft: `3px solid ${COLORS.accent}`, background: `${COLORS.accentDim}88` }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.text }}>{nlLabel}</div>
+                    <div style={{ fontSize: 12, color: COLORS.textDim, marginTop: 2 }}>{m.input}</div>
+                    {top.eqf && (
+                      <div style={{ fontSize: 12, color: COLORS.accent, marginTop: 4 }}>
+                        EQF {top.eqf.level} · {top.eqf.dutch_equivalent}
+                        <span style={{ color: confColor, marginLeft: 8 }}>
+                          {conf >= 0.75 ? "●" : conf >= 0.45 ? "◑" : "○"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </Section>
+        )}
+
         <Section title="Profiel">
           <p style={{ color: COLORS.textDim, fontSize: 14, lineHeight: 1.6, margin: 0 }}>
-            Gemotiveerde jongere ({data.age} jaar) op zoek naar een bijbaan.
+            {data.isRefugee
+              ? `Nieuwkomer uit ${data.originCountry || "het buitenland"}, op zoek naar werk in Amsterdam.`
+              : `Gemotiveerde jongere (${data.age} jaar) op zoek naar een bijbaan.`}
             {data.dream && ` Droombaan: ${data.dream}.`}
             {" "}Beschikbaar {(data.days || []).join(", ")} ({data.hours}).
           </p>
@@ -801,34 +1134,83 @@ export default function StapPage() {
     );
   }
 
+  const isRef = !!data.isRefugee;
+
   const renderScreen = () => {
     switch (screen) {
-      case "welcome":      return <WelcomeScreen onStart={() => setScreen("age")} />;
-      case "age":          return <AgeScreen data={data} setData={setData} onNext={() => setScreen("name")} />;
-      case "name":         return <NameScreen data={data} setData={setData} onNext={() => setScreen("education")} />;
-      case "education":    return <EducationScreen data={data} setData={setData} onNext={() => setScreen("languages")} />;
-      case "languages":    return <LanguagesScreen data={data} setData={setData} onNext={() => setScreen("interests")} />;
-      case "interests":    return <InterestsScreen data={data} setData={setData} onNext={() => setScreen("skills")} />;
-      case "skills":       return <SkillsScreen data={data} setData={setData} onNext={() => setScreen("availability")} />;
-      case "availability": return <AvailabilityScreen data={data} setData={setData} onNext={() => setScreen("dream")} />;
-      case "dream":        return <DreamScreen data={data} setData={setData} onNext={() => setScreen("loading")} />;
-      case "loading":      return <LoadingScreen onDone={() => {
-        setScreen("results");
-        const profile = toProfile(data);
-        void (async () => {
-          try {
-            await getSupabase().from("profiles").insert({
-              id: profile.profileId,
-              email: profile.identity.contactEmail,
-              display_name: profile.identity.displayName,
-              age_range: profile.demographics.ageRange,
-              profile,
-            });
-          } catch { /* silent fail */ }
-        })();
-      }} />;
-      case "results":      return <ResultsScreen data={data} onTab={setResultTab} activeTab={resultTab} />;
-      default:             return null;
+      case "welcome":
+        return <WelcomeScreen onStart={() => setScreen("refugee-check")} />;
+
+      case "refugee-check":
+        return <RefugeeCheckScreen
+          onRefugee={() => { setData({ ...data, isRefugee: true }); setScreen("country"); }}
+          onNormal={() => { setData({ ...data, isRefugee: false }); setScreen("age"); }}
+        />;
+
+      // ── Refugee path ──
+      case "country":
+        return <CountryScreen data={data} setData={setData} onNext={() => setScreen("refugee-languages")} />;
+
+      case "refugee-languages":
+        return <LanguagesScreen data={data} setData={setData} onNext={() => setScreen("credential-input")} step={1} total={TOTAL_STEPS_REFUGEE} />;
+
+      case "credential-input":
+        return <CredentialInputScreen data={data} setData={setData} onNext={() => setScreen("credential-loading")} />;
+
+      case "credential-loading":
+        return <CredentialLoadingScreen data={data} setData={setData} onDone={() => setScreen("credential-match")} />;
+
+      case "credential-match":
+        return <CredentialMatchScreen data={data} onNext={() => setScreen("name")} />;
+
+      // ── Normal path ──
+      case "age":
+        return <AgeScreen data={data} setData={setData} onNext={() => setScreen("name")} />;
+
+      // ── Shared path ──
+      case "name":
+        return <NameScreen data={data} setData={setData} onNext={() => setScreen("education")} step={isRef ? 3 : 1} total={isRef ? TOTAL_STEPS_REFUGEE : TOTAL_STEPS} />;
+
+      case "education":
+        return <EducationScreen data={data} setData={setData} onNext={() => setScreen(isRef ? "interests" : "languages")} step={isRef ? 4 : 2} total={isRef ? TOTAL_STEPS_REFUGEE : TOTAL_STEPS} />;
+
+      case "languages":
+        return <LanguagesScreen data={data} setData={setData} onNext={() => setScreen("interests")} step={3} total={TOTAL_STEPS} />;
+
+      case "interests":
+        return <InterestsScreen data={data} setData={setData} onNext={() => setScreen("skills")} step={isRef ? 5 : 4} total={isRef ? TOTAL_STEPS_REFUGEE : TOTAL_STEPS} />;
+
+      case "skills":
+        return <SkillsScreen data={data} setData={setData} onNext={() => setScreen("availability")} step={isRef ? 6 : 5} total={isRef ? TOTAL_STEPS_REFUGEE : TOTAL_STEPS} />;
+
+      case "availability":
+        return <AvailabilityScreen data={data} setData={setData} onNext={() => setScreen("dream")} step={isRef ? 7 : 6} total={isRef ? TOTAL_STEPS_REFUGEE : TOTAL_STEPS} />;
+
+      case "dream":
+        return <DreamScreen data={data} setData={setData} onNext={() => setScreen("loading")} step={isRef ? 8 : 7} total={isRef ? TOTAL_STEPS_REFUGEE : TOTAL_STEPS} />;
+
+      case "loading":
+        return <LoadingScreen onDone={() => {
+          setScreen("results");
+          const profile = toProfile(data);
+          void (async () => {
+            try {
+              await getSupabase().from("profiles").insert({
+                id: profile.profileId,
+                email: profile.identity.contactEmail,
+                display_name: profile.identity.displayName,
+                age_range: profile.demographics.ageRange,
+                profile,
+              });
+            } catch { /* silent fail */ }
+          })();
+        }} />;
+
+      case "results":
+        return <ResultsScreen data={data} onTab={setResultTab} activeTab={resultTab} />;
+
+      default:
+        return null;
     }
   };
 
