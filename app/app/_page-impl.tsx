@@ -935,6 +935,7 @@ interface MatchedJob {
   location: string;
   url: string | null;
   contact_email?: string | null;
+  description?: string | null;
   lat?: number | null;
   lng?: number | null;
   score?: number;
@@ -946,6 +947,7 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
   const [jobs, setJobs] = useState<MatchedJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/match', {
@@ -975,39 +977,79 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
         const pct = score ? Math.round(score * 100) : null;
         const color = scoreColor(score);
         const rank = idx + 1;
+        const isExpanded = expandedId === job.id;
         return (
-          <div key={job.id} style={{ padding: 18, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-              <div style={{ flex: 1, minWidth: 0, marginRight: 12 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.01em", lineHeight: 1.3 }}>{job.title}</h3>
-                <p style={{ color: COLORS.textDim, fontSize: 13, margin: 0 }}>{job.location}</p>
-              </div>
-              {pct !== null && (
-                <div style={{
-                  background: `${color}22`, color, border: `1px solid ${color}55`,
-                  fontSize: 13, fontWeight: 800, padding: "4px 10px", borderRadius: 8,
-                  flexShrink: 0, display: "flex", alignItems: "center", gap: 5,
-                }}>
-                  <span style={{ fontSize: 10, opacity: 0.7 }}>#{rank}</span>
-                  {pct}%
+          <div key={job.id} style={{ borderRadius: 16, border: `1px solid ${isExpanded ? color + "66" : COLORS.border}`, background: COLORS.card, boxShadow: "0 1px 4px rgba(0,0,0,0.05)", overflow: "hidden", transition: "border-color 0.2s" }}>
+            {/* Clickable header row */}
+            <button
+              onClick={() => setExpandedId(isExpanded ? null : job.id)}
+              style={{ width: "100%", padding: 18, background: "none", border: "none", cursor: "pointer", textAlign: "left", fontFamily: FONTS }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                <div style={{ flex: 1, minWidth: 0, marginRight: 12 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.01em", lineHeight: 1.3, color: COLORS.text }}>{job.title}</h3>
+                  <p style={{ color: COLORS.textDim, fontSize: 13, margin: 0 }}>{job.location}</p>
                 </div>
-              )}
-            </div>
-            <div style={{ display: "flex", gap: 16, fontSize: 13, color: COLORS.textDim, flexWrap: "wrap" }}>
-              <span>⏰ {job.type}</span><span>💶 {job.salary}</span>
-            </div>
-            {job.contact_email ? (
-              <a
-                href={`mailto:${job.contact_email}?subject=${encodeURIComponent(`Sollicitatie: ${job.title}`)}&body=${encodeURIComponent(`Hallo,\n\nIk solliciteer graag naar de functie ${job.title}.\n\nMet vriendelijke groet,\n${profile.identity.displayName ?? ''}`)}`}
-                style={{ display: "block", marginTop: 12, width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${color}`, background: "transparent", color, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONTS, textAlign: "center", textDecoration: "none" }}
-              >
-                {t('applyEmail')}
-              </a>
-            ) : job.url ? (
-              <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 12, width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${color}`, background: "transparent", color, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONTS, textAlign: "center", textDecoration: "none" }}>
-                {t('apply')}
-              </a>
-            ) : null}
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                  {pct !== null && (
+                    <div style={{
+                      background: `${color}22`, color, border: `1px solid ${color}55`,
+                      fontSize: 13, fontWeight: 800, padding: "4px 10px", borderRadius: 8,
+                      display: "flex", alignItems: "center", gap: 5,
+                    }}>
+                      <span style={{ fontSize: 10, opacity: 0.7 }}>#{rank}</span>
+                      {pct}%
+                    </div>
+                  )}
+                  <span style={{ color: COLORS.textDim, fontSize: 12, lineHeight: 1, transition: "transform 0.2s", display: "inline-block", transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>
+                    ▾
+                  </span>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 16, fontSize: 13, color: COLORS.textDim, flexWrap: "wrap" }}>
+                <span>⏰ {job.type}</span><span>💶 {job.salary}</span>
+              </div>
+            </button>
+
+            {/* Expanded description + apply button */}
+            {isExpanded && (
+              <div style={{ padding: "0 18px 18px", borderTop: `1px solid ${COLORS.border}` }}>
+                {job.description ? (() => {
+                  const MAX = 480;
+                  const trimmed = job.description.trim();
+                  const isTruncated = trimmed.length > MAX;
+                  const excerpt = isTruncated
+                    ? trimmed.slice(0, trimmed.lastIndexOf(' ', MAX)) + '…'
+                    : trimmed;
+                  return (
+                    <p style={{ color: COLORS.textDim, fontSize: 13, lineHeight: 1.7, margin: "14px 0 0" }}>
+                      {excerpt}
+                      {isTruncated && job.url && (
+                        <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 6, color, textDecoration: "none", fontWeight: 600 }}>
+                          Lees meer →
+                        </a>
+                      )}
+                    </p>
+                  );
+                })() : (
+                  <p style={{ color: COLORS.textDim, fontSize: 13, margin: "14px 0 0", fontStyle: "italic" }}>
+                    Geen beschrijving beschikbaar.
+                  </p>
+                )}
+                {job.contact_email ? (
+                  <a
+                    href={`mailto:${job.contact_email}?subject=${encodeURIComponent(`Sollicitatie: ${job.title}`)}&body=${encodeURIComponent(`Hallo,\n\nIk solliciteer graag naar de functie ${job.title}.\n\nMet vriendelijke groet,\n${profile.identity.displayName ?? ''}`)}`}
+                    style={{ display: "block", marginTop: 14, width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${color}`, background: "transparent", color, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONTS, textAlign: "center", textDecoration: "none", boxSizing: "border-box" }}
+                  >
+                    {t('applyEmail')}
+                  </a>
+                ) : job.url ? (
+                  <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 14, width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${color}`, background: "transparent", color, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONTS, textAlign: "center", textDecoration: "none", boxSizing: "border-box" }}>
+                    {t('apply')}
+                  </a>
+                ) : null}
+              </div>
+            )}
           </div>
         );
       })}

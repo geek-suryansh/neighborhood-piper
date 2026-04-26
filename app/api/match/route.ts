@@ -139,21 +139,24 @@ export async function POST(req: NextRequest) {
   if (error) {
     const { data: fallback } = await getSupabase()
       .from('jobs')
-      .select('id, title, category, type, salary, location, url, contact_email, lat, lng')
+      .select('id, title, category, type, salary, location, url, contact_email, description, lat, lng')
       .limit(20);
     return NextResponse.json({ jobs: fallback, warning: error.message, profileText: resumeText });
   }
 
-  // RPC doesn't return contact_email — fetch it for the matched job IDs and merge in
+  // RPC doesn't return contact_email/description — fetch them for the matched job IDs and merge in
   const ids: string[] = (jobs as { id: string }[]).map(j => j.id);
-  const { data: emails } = await getSupabase()
+  const { data: extras } = await getSupabase()
     .from('jobs')
-    .select('id, contact_email')
+    .select('id, contact_email, description')
     .in('id', ids);
 
-  const emailMap = new Map((emails ?? []).map(e => [e.id, e.contact_email]));
+  const extrasMap = new Map((extras ?? []).map(e => [e.id, e]));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const enriched = (jobs as any[]).map(j => ({ ...j, contact_email: emailMap.get(j.id) ?? null }));
+  const enriched = (jobs as any[]).map(j => {
+    const extra = extrasMap.get(j.id);
+    return { ...j, contact_email: extra?.contact_email ?? null, description: extra?.description ?? null };
+  });
 
   return NextResponse.json({ jobs: enriched, profileText: resumeText });
 }
