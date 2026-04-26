@@ -8,19 +8,25 @@ const MOCK_AUTH = true;
 
 interface EmployerUser { id: string; email: string; }
 
-const MOCK_KEY = 'junta_employer_mock';
+const MOCK_SESSION_KEY = 'junta_employer_mock_session';
+const MOCK_IDS_KEY = 'junta_employer_mock_ids'; // email → uuid, never cleared on logout
 
+function idForEmail(email: string): string {
+  try {
+    const map: Record<string, string> = JSON.parse(localStorage.getItem(MOCK_IDS_KEY) ?? '{}');
+    if (!map[email]) { map[email] = crypto.randomUUID(); localStorage.setItem(MOCK_IDS_KEY, JSON.stringify(map)); }
+    return map[email];
+  } catch { return crypto.randomUUID(); }
+}
 function loadMockSession(): EmployerUser | null {
-  try { return JSON.parse(localStorage.getItem(MOCK_KEY) ?? 'null'); } catch { return null; }
+  try { return JSON.parse(localStorage.getItem(MOCK_SESSION_KEY) ?? 'null'); } catch { return null; }
 }
 function saveMockSession(email: string): EmployerUser {
-  const existing = loadMockSession();
-  // reuse same ID for same email so posted jobs persist across sessions
-  const user: EmployerUser = (existing?.email === email) ? existing : { id: crypto.randomUUID(), email };
-  localStorage.setItem(MOCK_KEY, JSON.stringify(user));
+  const user: EmployerUser = { id: idForEmail(email), email };
+  localStorage.setItem(MOCK_SESSION_KEY, JSON.stringify(user));
   return user;
 }
-function clearMockSession() { localStorage.removeItem(MOCK_KEY); }
+function clearMockSession() { localStorage.removeItem(MOCK_SESSION_KEY); }
 
 // ── Design tokens (match the rest of the app) ──────────────────────────────
 
@@ -353,6 +359,15 @@ interface PostedJob {
   scraped_at: string;
 }
 
+interface Application {
+  id: string;
+  job_id: string;
+  candidate_name: string | null;
+  candidate_email: string;
+  message: string | null;
+  applied_at: string;
+}
+
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
@@ -365,9 +380,11 @@ function timeAgo(iso: string): string {
 
 function DashboardScreen({ user }: { user: EmployerUser }) {
   const [jobs, setJobs] = useState<PostedJob[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [expandedAppsJobId, setExpandedAppsJobId] = useState<string | null>(null);
 
   const fetchJobs = useCallback(async () => {
     setLoadingJobs(true);
@@ -376,7 +393,20 @@ function DashboardScreen({ user }: { user: EmployerUser }) {
       .select('id, title, type, salary, location, scraped_at')
       .eq('employer_id', user.id)
       .order('scraped_at', { ascending: false });
-    setJobs((data as PostedJob[]) ?? []);
+    const jobList = (data as PostedJob[]) ?? [];
+    setJobs(jobList);
+
+    if (jobList.length > 0) {
+      const jobIds = jobList.map(j => j.id);
+      const { data: appData } = await getSupabase()
+        .from('applications')
+        .select('id, job_id, candidate_name, candidate_email, message, applied_at')
+        .in('job_id', jobIds)
+        .order('applied_at', { ascending: false });
+      setApplications((appData as Application[]) ?? []);
+    } else {
+      setApplications([]);
+    }
     setLoadingJobs(false);
   }, [user.id]);
 
@@ -386,6 +416,7 @@ function DashboardScreen({ user }: { user: EmployerUser }) {
     setDeleting(id);
     await getSupabase().from('jobs').delete().eq('id', id).eq('employer_id', user.id);
     setJobs(prev => prev.filter(j => j.id !== id));
+    setApplications(prev => prev.filter(a => a.job_id !== id));
     setDeleting(null);
   }
 
@@ -455,26 +486,72 @@ function DashboardScreen({ user }: { user: EmployerUser }) {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {jobs.map(job => (
-              <div key={job.id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', borderRadius: 14, border: `1px solid ${COLORS.border}`, background: COLORS.card }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.title}</div>
-                  <div style={{ fontSize: 13, color: COLORS.textDim, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                    <span>⏰ {job.type}</span>
-                    {job.salary && <span>💶 {job.salary}</span>}
-                    <span>📍 {job.location}</span>
-                    <span>🕐 {timeAgo(job.scraped_at)}</span>
+            {jobs.map(job => {
+              const jobApps = applications.filter(a => a.job_id === job.id);
+              const isAppsExpanded = expandedAppsJobId === job.id;
+              return (
+                <div key={job.id} style={{ borderRadius: 14, border: `1px solid ${isAppsExpanded ? COLORS.accent + '44' : COLORS.border}`, background: COLORS.card, overflow: 'hidden', transition: 'border-color 0.2s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.title}</div>
+                      <div style={{ fontSize: 13, color: COLORS.textDim, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                        <span>⏰ {job.type}</span>
+                        {job.salary && <span>💶 {job.salary}</span>}
+                        <span>📍 {job.location}</span>
+                        <span>🕐 {timeAgo(job.scraped_at)}</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
+                      <button
+                        onClick={() => setExpandedAppsJobId(isAppsExpanded ? null : job.id)}
+                        style={{
+                          padding: '6px 12px', borderRadius: 8,
+                          border: `1px solid ${jobApps.length > 0 ? COLORS.accent + '66' : COLORS.border}`,
+                          background: jobApps.length > 0 ? COLORS.accentDim : 'transparent',
+                          color: jobApps.length > 0 ? COLORS.accent : COLORS.textDim,
+                          fontSize: 12, cursor: 'pointer', fontFamily: FONTS,
+                          fontWeight: jobApps.length > 0 ? 700 : 400,
+                        }}
+                      >
+                        {jobApps.length} sollicitatie{jobApps.length !== 1 ? 's' : ''} {isAppsExpanded ? '▴' : '▾'}
+                      </button>
+                      <button
+                        onClick={() => deleteJob(job.id)}
+                        disabled={deleting === job.id}
+                        style={{ padding: '6px 12px', borderRadius: 8, border: `1px solid ${COLORS.border}`, background: 'transparent', color: deleting === job.id ? COLORS.textDim : COLORS.red, fontSize: 12, cursor: deleting === job.id ? 'default' : 'pointer', fontFamily: FONTS }}
+                      >
+                        {deleting === job.id ? '…' : 'Verwijderen'}
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Applicants panel */}
+                  {isAppsExpanded && (
+                    <div style={{ borderTop: `1px solid ${COLORS.border}`, padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {jobApps.length === 0 ? (
+                        <p style={{ margin: 0, fontSize: 13, color: COLORS.textDim, fontStyle: 'italic' }}>Nog geen sollicitaties ontvangen.</p>
+                      ) : jobApps.map(app => (
+                        <div key={app.id} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, padding: '12px 16px', borderRadius: 10, border: `1px solid ${COLORS.border}`, background: COLORS.bg }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{app.candidate_name || app.candidate_email}</div>
+                            <div style={{ fontSize: 12, color: COLORS.textDim, marginBottom: app.message ? 6 : 0 }}>
+                              {app.candidate_name ? app.candidate_email + ' · ' : ''}{timeAgo(app.applied_at)}
+                            </div>
+                            {app.message && <p style={{ margin: 0, fontSize: 13, color: COLORS.text, lineHeight: 1.5 }}>{app.message}</p>}
+                          </div>
+                          <a
+                            href={`mailto:${app.candidate_email}?subject=${encodeURIComponent(`Re: Sollicitatie ${job.title}`)}`}
+                            style={{ flexShrink: 0, padding: '7px 14px', borderRadius: 8, border: '1.5px solid #0D0D0D', background: '#0D0D0D', color: '#FFFFFF', fontSize: 12, fontWeight: 700, textDecoration: 'none', fontFamily: FONTS, whiteSpace: 'nowrap' }}
+                          >
+                            Contact →
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <button
-                  onClick={() => deleteJob(job.id)}
-                  disabled={deleting === job.id}
-                  style={{ padding: '6px 12px', borderRadius: 8, border: `1px solid ${COLORS.border}`, background: 'transparent', color: deleting === job.id ? COLORS.textDim : COLORS.red, fontSize: 12, cursor: deleting === job.id ? 'default' : 'pointer', fontFamily: FONTS, flexShrink: 0 }}
-                >
-                  {deleting === job.id ? '…' : 'Verwijderen'}
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

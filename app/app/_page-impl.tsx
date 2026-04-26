@@ -942,12 +942,65 @@ interface MatchedJob {
   similarity?: number;
 }
 
+function ApplyForm({ job, profile, onSuccess, onCancel }: {
+  job: MatchedJob;
+  profile: CandidateProfile;
+  onSuccess: () => void;
+  onCancel: () => void;
+}) {
+  const [name, setName] = useState(profile.identity.displayName ?? '');
+  const [email, setEmail] = useState(profile.identity.contactEmail ?? '');
+  const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState('');
+
+  async function submit() {
+    if (!email.trim()) { setErr('Vul je e-mailadres in.'); return; }
+    setSubmitting(true);
+    const { error } = await getSupabase().from('applications').insert({
+      job_id: job.id,
+      candidate_name: name.trim() || null,
+      candidate_email: email.trim(),
+      message: message.trim() || null,
+    });
+    if (error) { setErr(error.message); setSubmitting(false); return; }
+    onSuccess();
+  }
+
+  const fieldStyle: React.CSSProperties = {
+    width: '100%', padding: '9px 12px', borderRadius: 8,
+    border: `1px solid ${COLORS.border}`, background: '#FFFFFF',
+    color: COLORS.text, fontSize: 13, fontFamily: FONTS,
+    outline: 'none', boxSizing: 'border-box',
+  };
+
+  return (
+    <div style={{ marginTop: 14, padding: 14, borderRadius: 12, border: `1px solid ${COLORS.border}`, background: '#FFFFFF', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: COLORS.text }}>Direct solliciteren bij {job.title}</p>
+      <input style={fieldStyle} placeholder="Naam" value={name} onChange={e => setName(e.target.value)} />
+      <input style={fieldStyle} type="email" placeholder="E-mailadres *" value={email} onChange={e => setEmail(e.target.value)} required />
+      <textarea style={{ ...fieldStyle, resize: 'vertical', minHeight: 72 }} placeholder="Korte motivatie (optioneel)" value={message} onChange={e => setMessage(e.target.value)} />
+      {err && <p style={{ margin: 0, fontSize: 12, color: COLORS.accent }}>{err}</p>}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={submit} disabled={submitting} style={{ flex: 1, padding: '10px', borderRadius: 10, border: 'none', background: submitting ? COLORS.border : '#0D0D0D', color: submitting ? COLORS.textDim : '#FFFFFF', fontSize: 13, fontWeight: 700, cursor: submitting ? 'default' : 'pointer', fontFamily: FONTS }}>
+          {submitting ? 'Versturen…' : 'Solliciteer →'}
+        </button>
+        <button onClick={onCancel} style={{ padding: '10px 14px', borderRadius: 10, border: `1px solid ${COLORS.border}`, background: 'transparent', color: COLORS.textDim, fontSize: 13, cursor: 'pointer', fontFamily: FONTS }}>
+          Annuleren
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function JobsTab({ profile }: { profile: CandidateProfile }) {
   const t = useTranslations('app.results');
   const [jobs, setJobs] = useState<MatchedJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [applyJobId, setApplyJobId] = useState<string | null>(null);
+  const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetch('/api/match', {
@@ -1036,18 +1089,42 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
                     Geen beschrijving beschikbaar.
                   </p>
                 )}
-                {job.contact_email ? (
-                  <a
-                    href={`mailto:${job.contact_email}?subject=${encodeURIComponent(`Sollicitatie: ${job.title}`)}&body=${encodeURIComponent(`Hallo,\n\nIk solliciteer graag naar de functie ${job.title}.\n\nMet vriendelijke groet,\n${profile.identity.displayName ?? ''}`)}`}
-                    style={{ display: "block", marginTop: 14, width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${color}`, background: "transparent", color, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONTS, textAlign: "center", textDecoration: "none", boxSizing: "border-box" }}
-                  >
-                    {t('applyEmail')}
-                  </a>
-                ) : job.url ? (
-                  <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 14, width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${color}`, background: "transparent", color, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONTS, textAlign: "center", textDecoration: "none", boxSizing: "border-box" }}>
-                    {t('apply')}
-                  </a>
-                ) : null}
+                {appliedIds.has(job.id) ? (
+                  <p style={{ marginTop: 14, fontSize: 13, fontWeight: 600, color: '#1A7A4A', textAlign: 'center' }}>
+                    ✓ Sollicitatie verstuurd!
+                  </p>
+                ) : applyJobId === job.id ? (
+                  <ApplyForm
+                    job={job}
+                    profile={profile}
+                    onSuccess={() => {
+                      setAppliedIds(prev => new Set(prev).add(job.id));
+                      setApplyJobId(null);
+                    }}
+                    onCancel={() => setApplyJobId(null)}
+                  />
+                ) : (
+                  <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <button
+                      onClick={() => setApplyJobId(job.id)}
+                      style={{ width: '100%', padding: '10px', borderRadius: 10, border: 'none', background: '#0D0D0D', color: '#FFFFFF', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: FONTS }}
+                    >
+                      Direct solliciteren →
+                    </button>
+                    {job.contact_email ? (
+                      <a
+                        href={`mailto:${job.contact_email}?subject=${encodeURIComponent(`Sollicitatie: ${job.title}`)}&body=${encodeURIComponent(`Hallo,\n\nIk solliciteer graag naar de functie ${job.title}.\n\nMet vriendelijke groet,\n${profile.identity.displayName ?? ''}`)}`}
+                        style={{ display: 'block', width: '100%', padding: '10px', borderRadius: 10, border: `1.5px solid ${color}`, background: 'transparent', color, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: FONTS, textAlign: 'center', textDecoration: 'none', boxSizing: 'border-box' }}
+                      >
+                        {t('applyEmail')}
+                      </a>
+                    ) : job.url ? (
+                      <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', width: '100%', padding: '10px', borderRadius: 10, border: `1.5px solid ${color}`, background: 'transparent', color, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: FONTS, textAlign: 'center', textDecoration: 'none', boxSizing: 'border-box' }}>
+                        {t('apply')}
+                      </a>
+                    ) : null}
+                  </div>
+                )}
               </div>
             )}
           </div>
