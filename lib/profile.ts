@@ -173,7 +173,7 @@ export function toProfile(data: AppData): CandidateProfile {
       ageRange: data.age ?? "",
       ageMin,
       ageMax,
-      city: data.location?.name ?? "Nederland",
+      city: data.location?.name ?? "Amsterdam",
       neighborhood: data.location?.name ?? null,
       lat: data.location?.lat ?? null,
       lng: data.location?.lng ?? null,

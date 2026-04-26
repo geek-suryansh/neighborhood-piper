@@ -68,9 +68,8 @@ function geocode(title: string, location: string): [number, number] {
   for (const [name, coords] of Object.entries(NEIGHBORHOOD_COORDS)) {
     if (text.includes(name)) return coords;
   }
-  // Default to geographic centre of the Netherlands
-  const jitter = () => (Math.random() - 0.5) * 0.4;
-  return [52.1326 + jitter(), 5.2913 + jitter()];
+  const jitter = () => (Math.random() - 0.5) * 0.06;
+  return [52.3702 + jitter(), 4.8952 + jitter()];
 }
 
 function formatSalary(min: string, max: string): string {
@@ -109,8 +108,8 @@ async function fetchDescription(href: string): Promise<string> {
 
 async function scrapeListingPage(page: number): Promise<{ listing: Omit<JobRow, 'description'>; href: string }[]> {
   const url = page === 1
-    ? `${YC_BASE}/vacatures`
-    : `${YC_BASE}/vacatures?page=${page}`;
+    ? `${YC_BASE}/vacatures-in/amsterdam`
+    : `${YC_BASE}/vacatures-in/amsterdam?page=${page}`;
 
   const res = await fetch(url, { headers: HEADERS });
   if (!res.ok) throw new Error(`YoungCapital page ${page} returned ${res.status}`);
@@ -127,7 +126,7 @@ async function scrapeListingPage(page: number): Promise<{ listing: Omit<JobRow, 
     const salaryMin = $el.attr('data-job-opening-salary-min') || '';
     const salaryMax = $el.attr('data-job-opening-salary-max') || '';
     const href = $el.attr('href') || '';
-    const locationText = $el.find('.nyc-icon-location').parent().find('span:last-child').text().trim() || 'Nederland';
+    const locationText = $el.find('.nyc-icon-location').parent().find('span:last-child').text().trim() || 'Amsterdam';
     if (!id || !title) return;
     const [lat, lng] = geocode(title, locationText);
     results.push({
