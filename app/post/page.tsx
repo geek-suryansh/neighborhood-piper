@@ -1,19 +1,18 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { getSupabase } from "@/lib/supabase";
 
 const COLORS = {
-  bg: "#0a0a0f",
-  card: "#12121a",
-  accent: "#00e5a0",
-  accentDim: "#00e5a033",
-  purple: "#8b5cf6",
-  purpleDim: "#8b5cf633",
-  orange: "#ff6b35",
-  text: "#e8e8f0",
-  textDim: "#8888a0",
-  border: "#22222f",
+  bg: "#F2EDE4",
+  card: "#FAFAF5",
+  accent: "#E85520",
+  accentDim: "#E8552018",
+  purple: "#1D3B6B",
+  purpleDim: "#1D3B6B18",
+  orange: "#E85520",
+  text: "#1D3B6B",
+  textDim: "#7A8FA8",
+  border: "#D4C9BA",
 };
 
 const FONTS = `'Segoe UI', system-ui, sans-serif`;
@@ -41,7 +40,7 @@ const inputStyle: React.CSSProperties = {
   padding: "10px 14px",
   borderRadius: 10,
   border: `1px solid ${COLORS.border}`,
-  background: "#0f0f18",
+  background: COLORS.card,
   color: COLORS.text,
   fontSize: 14,
   fontFamily: FONTS,
@@ -157,7 +156,7 @@ const EMPTY_FORM: FormState = { title: "", category: "", type: "Flexible", salar
 export default function PostPage() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [location, setLocation] = useState<ResolvedLocation | null>(null);
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "success-no-embed" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
   function set(key: keyof FormState, value: string) {
@@ -170,27 +169,30 @@ export default function PostPage() {
     setStatus("loading");
     setErrorMsg("");
 
-    const { error } = await getSupabase().from("jobs").insert({
-      id: crypto.randomUUID(),
-      title: form.title.trim(),
-      category: form.category.trim() || null,
-      type: form.type,
-      salary: form.salary.trim() || null,
-      location: location?.name ?? "Amsterdam",
-      lat: location?.lat ?? 52.3702,
-      lng: location?.lng ?? 4.8952,
-      url: form.url.trim() || null,
-      description: form.description.trim() || null,
-      source: "posted",
-    });
-
-    if (error) {
-      setStatus("error");
-      setErrorMsg(error.message);
-    } else {
-      setStatus("success");
+    try {
+      const res = await fetch("/api/post-job", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: form.title.trim(),
+          category: form.category.trim() || null,
+          type: form.type,
+          salary: form.salary.trim() || null,
+          location: location?.name ?? "Amsterdam",
+          lat: location?.lat ?? 52.3702,
+          lng: location?.lng ?? 4.8952,
+          url: form.url.trim() || null,
+          description: form.description.trim() || null,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Onbekende fout");
+      setStatus(json.embedded ? "success" : "success-no-embed");
       setForm(EMPTY_FORM);
       setLocation(null);
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err instanceof Error ? err.message : "Onbekende fout");
     }
   }
 
@@ -202,13 +204,12 @@ export default function PostPage() {
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 1 }}>
         {/* Header */}
         <div style={{ paddingTop: 28, paddingBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 22 }}>⚡</span>
-            <h1 style={{ fontSize: 20, fontWeight: 800, color: COLORS.accent, margin: 0 }}>STAP</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <img src="/junta-logo.png" alt="Junta" style={{ height: 36, borderRadius: 8 }} />
             <span style={{ color: COLORS.textDim, fontSize: 13, fontWeight: 600, padding: "2px 8px", border: `1px solid ${COLORS.border}`, borderRadius: 6 }}>Werkgever</span>
           </div>
-          <a href="/stap" style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${COLORS.border}`, color: COLORS.textDim, fontSize: 13, textDecoration: "none" }}>
-            ← Terug naar STAP
+          <a href="/" style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${COLORS.border}`, color: COLORS.textDim, fontSize: 13, textDecoration: "none" }}>
+            ← Home
           </a>
         </div>
 
@@ -295,18 +296,21 @@ export default function PostPage() {
               </div>
 
               {status === "error" && (
-                <p style={{ color: COLORS.orange, fontSize: 13, margin: 0 }}>{errorMsg}</p>
+                <p style={{ color: "#dc2626", fontSize: 13, margin: 0 }}>{errorMsg}</p>
               )}
               {status === "success" && (
-                <p style={{ color: COLORS.accent, fontSize: 13, margin: 0, fontWeight: 600 }}>Vacature succesvol geplaatst.</p>
+                <p style={{ color: "#16a34a", fontSize: 13, margin: 0, fontWeight: 600 }}>✓ Vacature geplaatst en direct beschikbaar voor matching.</p>
+              )}
+              {status === "success-no-embed" && (
+                <p style={{ color: COLORS.orange, fontSize: 13, margin: 0, fontWeight: 600 }}>✓ Vacature geplaatst. Embedding volgt automatisch.</p>
               )}
 
               <button
                 type="submit"
                 disabled={status === "loading"}
-                style={{ padding: "12px 24px", borderRadius: 10, border: "none", background: status === "loading" ? COLORS.accentDim : COLORS.accent, color: COLORS.bg, fontSize: 14, fontWeight: 700, cursor: status === "loading" ? "default" : "pointer", fontFamily: FONTS, transition: "opacity 0.15s" }}
+                style={{ padding: "12px 24px", borderRadius: 10, border: "none", background: status === "loading" ? COLORS.border : COLORS.accent, color: status === "loading" ? COLORS.textDim : "#fff", fontSize: 14, fontWeight: 700, cursor: status === "loading" ? "default" : "pointer", fontFamily: FONTS, transition: "all 0.15s" }}
               >
-                {status === "loading" ? "Opslaan..." : "Vacature plaatsen"}
+                {status === "loading" ? "Opslaan en embedding genereren…" : "Vacature plaatsen"}
               </button>
             </form>
           </div>
@@ -326,7 +330,7 @@ export default function PostPage() {
                         <h3 style={{ fontSize: 15, fontWeight: 700, margin: "0 0 2px" }}>Kandidaat #{c.id}</h3>
                         <p style={{ color: COLORS.textDim, fontSize: 12, margin: 0 }}>{c.age} jaar • {c.available} • {c.hours}</p>
                       </div>
-                      <div style={{ background: c.match >= 90 ? `linear-gradient(135deg, ${COLORS.accent}, #00c087)` : c.match >= 80 ? COLORS.purpleDim : `${COLORS.orange}33`, color: c.match >= 90 ? COLORS.bg : c.match >= 80 ? COLORS.purple : COLORS.orange, fontSize: 13, fontWeight: 800, padding: "4px 10px", borderRadius: 8, whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+                      <div style={{ background: c.match >= 90 ? COLORS.accent : c.match >= 80 ? COLORS.purpleDim : COLORS.accentDim, color: c.match >= 90 ? "#fff" : c.match >= 80 ? COLORS.purple : COLORS.accent, fontSize: 13, fontWeight: 800, padding: "4px 10px", borderRadius: 8, whiteSpace: "nowrap" as const, flexShrink: 0 }}>
                         {c.match}%
                       </div>
                     </div>

@@ -6,18 +6,29 @@ import type { Job } from '@/components/JobMap';
 
 const JobMap = dynamic(() => import('@/components/JobMap'), { ssr: false });
 
+const C = {
+  bg: '#F2EDE4',
+  card: '#FAFAF5',
+  accent: '#E85520',
+  navy: '#1D3B6B',
+  textDim: '#7A8FA8',
+  border: '#D4C9BA',
+  white: '#FAFAF5',
+};
+
 const TYPE_COLORS: Record<string, string> = {
-  'Full-time':             '#f97316',
-  'Part-time':             '#3b82f6',
-  'Full-time / Part-time': '#8b5cf6',
-  'Flexible':              '#10b981',
-  'Evening':               '#8b5cf6',
-  'Weekend':               '#ec4899',
-  'Traineeship':           '#0ea5e9',
-  'Temporary':             '#f59e0b',
+  'Full-time':             '#1D3B6B',
+  'Part-time':             '#E85520',
+  'Full-time / Part-time': '#2563eb',
+  'Flexible':              '#059669',
+  'Evening':               '#7c3aed',
+  'Weekend':               '#db2777',
+  'Traineeship':           '#0284c7',
+  'Temporary':             '#d97706',
 };
 
 const LEGEND = Object.entries(TYPE_COLORS);
+const FONTS = `'Segoe UI', system-ui, sans-serif`;
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -34,7 +45,6 @@ export default function JobsPage() {
       .catch(() => { setError(true); setLoading(false); });
   }, []);
 
-  // Scroll selected card into view in the sidebar
   useEffect(() => {
     if (!selectedJob) return;
     const el = cardRefs.current[selectedJob.id];
@@ -49,133 +59,174 @@ export default function JobsPage() {
   );
 
   return (
-    <div className="flex flex-col h-screen bg-white font-sans">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: C.bg, fontFamily: FONTS, color: C.navy }}>
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
-        <div className="flex items-center gap-3">
-          <a href="/" className="text-gray-400 hover:text-gray-600 transition-colors text-sm">← Home</a>
-          <span className="text-gray-200">|</span>
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🗺️</span>
-            <span className="font-bold text-gray-900">Jobs Near You</span>
+      <header style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '14px 24px', borderBottom: `1.5px solid ${C.border}`,
+        background: C.white, flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <a href="/" style={{ color: C.textDim, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>← Home</a>
+          <span style={{ color: C.border }}>|</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <img src="/junta-logo.png" alt="Junta" style={{ height: 32, borderRadius: 6 }} />
+            <span style={{ fontWeight: 800, color: C.navy, fontSize: 15 }}>Jobs in Amsterdam</span>
             {loading ? (
-              <span className="bg-gray-100 text-gray-400 text-xs font-semibold px-2 py-0.5 rounded-full animate-pulse">Loading…</span>
+              <span style={{ background: C.bg, color: C.textDim, fontSize: 11, fontWeight: 600, padding: '2px 10px', borderRadius: 20 }}>Laden…</span>
             ) : (
-              <span className="bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full">
-                {filtered.length} listings
+              <span style={{ background: `${C.accent}18`, color: C.accent, fontSize: 11, fontWeight: 700, padding: '2px 10px', borderRadius: 20 }}>
+                {filtered.length} vacatures
               </span>
             )}
           </div>
         </div>
-        <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 12, color: C.textDim }}>
           {selectedJob && (
             <button
               onClick={() => setSelectedJob(null)}
-              className="text-orange-500 font-semibold hover:underline mr-2"
+              style={{ color: C.accent, fontWeight: 700, fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', fontFamily: FONTS }}
             >
-              ✕ Clear selection
+              ✕ Deselecteer
             </button>
           )}
           <span>YoungCapital &amp; Olympia</span>
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {/* Map */}
-        <div className="flex-1 relative">
+        <div style={{ flex: 1, position: 'relative' }}>
           {loading && (
-            <div className="absolute inset-0 z-[2000] flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm gap-3">
-              <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-gray-500">Loading jobs…</p>
+            <div style={{
+              position: 'absolute', inset: 0, zIndex: 2000,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              background: 'rgba(242,237,228,0.85)', backdropFilter: 'blur(4px)', gap: 12,
+            }}>
+              <div style={{
+                width: 40, height: 40, border: `4px solid ${C.accent}`, borderTopColor: 'transparent',
+                borderRadius: '50%', animation: 'spin 0.8s linear infinite',
+              }} />
+              <p style={{ fontSize: 14, color: C.textDim, margin: 0 }}>Vacatures laden…</p>
+              <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
           )}
           {error && (
-            <div className="absolute inset-0 z-[2000] flex flex-col items-center justify-center bg-white gap-2">
-              <span className="text-4xl">⚠️</span>
-              <p className="text-gray-700 font-semibold">Could not load jobs</p>
+            <div style={{
+              position: 'absolute', inset: 0, zIndex: 2000,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              background: C.bg, gap: 8,
+            }}>
+              <span style={{ fontSize: 40 }}>⚠️</span>
+              <p style={{ color: C.navy, fontWeight: 700, margin: 0 }}>Kon vacatures niet laden</p>
               <button
-                onClick={() => { setError(false); setLoading(true); fetch('/api/jobs').then(r => r.json()).then(d => { setJobs(d.jobs || []); setLoading(false); }).catch(() => setError(true)); }}
-                className="text-sm text-orange-500 hover:underline"
+                onClick={() => {
+                  setError(false); setLoading(true);
+                  fetch('/api/jobs').then(r => r.json()).then(d => { setJobs(d.jobs || []); setLoading(false); }).catch(() => setError(true));
+                }}
+                style={{ color: C.accent, fontWeight: 600, fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', fontFamily: FONTS }}
               >
-                Try again
+                Opnieuw proberen
               </button>
             </div>
           )}
 
-          <JobMap
-            jobs={filtered}
-            selected={selectedJob}
-            onSelect={setSelectedJob}
-          />
+          <JobMap jobs={filtered} selected={selectedJob} onSelect={setSelectedJob} />
 
           {/* Legend */}
-          <div className="absolute bottom-6 left-4 z-[1000] bg-white rounded-xl shadow-lg p-4 text-xs">
-            <p className="font-semibold text-gray-700 mb-3">Job Type</p>
-            <div className="flex flex-col gap-2">
+          <div style={{
+            position: 'absolute', bottom: 24, left: 16, zIndex: 1000,
+            background: C.white, borderRadius: 14, boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+            padding: '14px 16px', border: `1px solid ${C.border}`,
+          }}>
+            <p style={{ fontWeight: 700, color: C.navy, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>Type</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
               {LEGEND.map(([type, color]) => (
-                <div key={type} className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full shrink-0" style={{ background: color }} />
-                  <span className="text-gray-600">{type}</span>
+                <div key={type} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0, display: 'inline-block' }} />
+                  <span style={{ fontSize: 12, color: C.textDim }}>{type}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {!loading && !error && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 backdrop-blur-sm rounded-full shadow px-4 py-2 text-xs text-gray-500 pointer-events-none">
-              {filtered.length} jobs · Click a pin or a card to select
+            <div style={{
+              position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)',
+              zIndex: 1000, background: 'rgba(250,250,245,0.92)', backdropFilter: 'blur(6px)',
+              borderRadius: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+              padding: '6px 16px', fontSize: 12, color: C.textDim, pointerEvents: 'none',
+              border: `1px solid ${C.border}`,
+            }}>
+              {filtered.length} vacatures · klik een pin of kaart om te selecteren
             </div>
           )}
         </div>
 
         {/* Sidebar */}
-        <aside className="hidden lg:flex flex-col w-80 border-l border-gray-100 overflow-y-auto">
-          <div className="p-4 border-b border-gray-50 sticky top-0 bg-white z-10">
+        <aside style={{
+          display: 'none',
+          width: 320, borderLeft: `1.5px solid ${C.border}`,
+          overflowY: 'auto', flexDirection: 'column', background: C.bg,
+          // visible on large screens via media query workaround: use inline flex for lg
+        }} className="sidebar-lg">
+          <div style={{
+            padding: '14px 16px', borderBottom: `1px solid ${C.border}`,
+            position: 'sticky', top: 0, background: C.white, zIndex: 10,
+          }}>
             <input
               type="text"
-              placeholder="Search jobs, locations…"
+              placeholder="Zoek vacatures, locaties…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              style={{
+                width: '100%', padding: '10px 14px', borderRadius: 10,
+                border: `1.5px solid ${C.border}`, background: C.card,
+                color: C.navy, fontSize: 14, fontFamily: FONTS, outline: 'none',
+                boxSizing: 'border-box',
+              }}
             />
           </div>
-          <div className="p-4 flex flex-col gap-3">
+          <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
             {loading ? (
               Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="border border-gray-100 rounded-xl p-4 animate-pulse">
-                  <div className="h-4 bg-gray-100 rounded mb-2 w-3/4" />
-                  <div className="h-3 bg-gray-100 rounded mb-3 w-1/2" />
-                  <div className="h-5 bg-gray-100 rounded-full w-20" />
+                <div key={i} style={{ border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, background: C.card }}>
+                  <div style={{ height: 14, background: C.border, borderRadius: 4, marginBottom: 8, width: '75%' }} />
+                  <div style={{ height: 12, background: C.border, borderRadius: 4, marginBottom: 10, width: '50%' }} />
+                  <div style={{ height: 18, background: C.border, borderRadius: 20, width: 70 }} />
                 </div>
               ))
             ) : filtered.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8">No jobs found</p>
+              <p style={{ fontSize: 13, color: C.textDim, textAlign: 'center', padding: '32px 0', margin: 0 }}>Geen vacatures gevonden</p>
             ) : (
               filtered.map((job) => {
                 const isSelected = selectedJob?.id === job.id;
+                const typeColor = TYPE_COLORS[job.type] || C.textDim;
                 return (
                   <div
                     key={job.id}
                     ref={(el) => { cardRefs.current[job.id] = el; }}
                     onClick={() => setSelectedJob(isSelected ? null : job)}
-                    className={`border rounded-xl p-4 cursor-pointer transition-all group ${
-                      isSelected
-                        ? 'border-orange-400 bg-orange-50 shadow-md'
-                        : 'border-gray-100 hover:border-orange-200 hover:shadow-sm'
-                    }`}
+                    style={{
+                      border: `1.5px solid ${isSelected ? C.accent : C.border}`,
+                      borderRadius: 12, padding: 14, cursor: 'pointer',
+                      background: isSelected ? `${C.accent}10` : C.card,
+                      transition: 'all 0.15s ease',
+                      boxShadow: isSelected ? `0 2px 12px ${C.accent}22` : 'none',
+                    }}
                   >
-                    <div className="flex items-start justify-between mb-1 gap-2">
-                      <span className={`font-semibold text-sm leading-tight transition-colors ${isSelected ? 'text-orange-600' : 'text-gray-900 group-hover:text-orange-500'}`}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4, gap: 8 }}>
+                      <span style={{ fontWeight: 700, fontSize: 13, lineHeight: 1.3, color: isSelected ? C.accent : C.navy }}>
                         {job.title}
                       </span>
-                      <span className="text-xs font-bold text-orange-500 shrink-0">{job.salary}</span>
+                      <span style={{ fontSize: 12, fontWeight: 800, color: C.accent, flexShrink: 0 }}>{job.salary}</span>
                     </div>
-                    <div className="text-xs text-gray-400 mb-2">📍 {job.location}</div>
-                    <div className="flex items-center justify-between">
-                      <span
-                        className="text-xs px-2 py-0.5 rounded-full font-medium"
-                        style={{ background: (TYPE_COLORS[job.type] || '#6b7280') + '20', color: TYPE_COLORS[job.type] || '#6b7280' }}
-                      >
+                    <div style={{ fontSize: 12, color: C.textDim, marginBottom: 8 }}>📍 {job.location}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{
+                        fontSize: 11, padding: '3px 8px', borderRadius: 20, fontWeight: 600,
+                        background: `${typeColor}18`, color: typeColor,
+                      }}>
                         {job.type}
                       </span>
                       <a
@@ -183,9 +234,9 @@ export default function JobsPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="text-xs text-orange-500 hover:underline font-medium"
+                        style={{ fontSize: 12, color: C.accent, fontWeight: 700, textDecoration: 'none' }}
                       >
-                        View →
+                        Bekijk →
                       </a>
                     </div>
                   </div>
@@ -195,6 +246,12 @@ export default function JobsPage() {
           </div>
         </aside>
       </div>
+
+      <style>{`
+        @media (min-width: 1024px) {
+          .sidebar-lg { display: flex !important; }
+        }
+      `}</style>
     </div>
   );
 }
