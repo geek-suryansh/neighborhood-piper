@@ -11,8 +11,8 @@ import { getSupabase } from "@/lib/supabase";
 const COLORS = {
   bg: "#FFFFFF",
   card: "#F9F9F9",
-  accent: "#F5C518",
-  accentDim: "#F5C51820",
+  accent: "#eb4d02",
+  accentDim: "#eb4d0220",
   purple: "#4A9FE5",
   purpleDim: "#4A9FE520",
   orange: "#F59E0B",

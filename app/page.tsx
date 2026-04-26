@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-// Design system: BG #FFFFFF · Card #FFFFFF · Accent #F5C518 · Blue #4A9FE5 · Pink #F4A0A4 · Dim #666666 · Border #E8E8E8
+// Design system: BG #FFFFFF · Card #FFFFFF · Accent #eb4d02 · Blue #4A9FE5 · Pink #F4A0A4 · Dim #666666 · Border #E8E8E8
 
 const STEPS = [
   {
@@ -77,7 +77,7 @@ export default function Home() {
             width: 120,
             height: 120,
             borderRadius: "50%",
-            background: "#F5C518",
+            background: "#eb4d02",
             opacity: 0.18,
             pointerEvents: "none",
             zIndex: 0,
@@ -120,7 +120,7 @@ export default function Home() {
           >
             Amsterdam<br />
             has your job.<br />
-            <span style={{ color: "#F5C518" }}>Let&apos;s find it.</span>
+            <span style={{ color: "#eb4d02" }}>Let&apos;s find it.</span>
           </h1>
 
           <p className="text-lg leading-relaxed mb-4 max-w-md" style={{ color: "#666666" }}>
@@ -178,7 +178,7 @@ export default function Home() {
               </span>
             </div>
             <div style={{ height: 4, background: "#F5F5F5" }}>
-              <div style={{ height: 4, background: "#F5C518", width: "40%" }} />
+              <div style={{ height: 4, background: "#eb4d02", width: "40%" }} />
             </div>
             <div className="px-5 py-6">
               <p
@@ -241,7 +241,7 @@ export default function Home() {
               <div key={s.n} className="flex flex-col gap-4">
                 <span
                   className="text-6xl font-black leading-none"
-                  style={{ color: "#F5C518", opacity: 0.7 }}
+                  style={{ color: "#eb4d02", opacity: 0.7 }}
                 >
                   {s.n}
                 </span>

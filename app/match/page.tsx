@@ -92,7 +92,7 @@ export default function MatchPage() {
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g. Yohannes"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -106,7 +106,7 @@ export default function MatchPage() {
               onChange={e => setResumeText(e.target.value)}
               placeholder={PLACEHOLDER}
               rows={7}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
               required
               minLength={10}
             />

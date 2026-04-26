@@ -61,7 +61,7 @@ export default function JobsPage() {
             {loading ? (
               <span className="bg-gray-100 text-gray-400 text-xs font-semibold px-2 py-0.5 rounded-full animate-pulse">Loading…</span>
             ) : (
-              <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded-full">
+              <span className="text-white text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: "#eb4d02" }}>
                 {filtered.length} listings
               </span>
             )}
@@ -136,7 +136,7 @@ export default function JobsPage() {
               placeholder="Search jobs, locations…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
           <div className="p-4 flex flex-col gap-3">
