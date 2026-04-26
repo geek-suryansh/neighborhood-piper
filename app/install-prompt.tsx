@@ -4,37 +4,123 @@ import { useState, useEffect } from 'react'
 
 type BIP = Event & { prompt(): Promise<void>; userChoice: Promise<{ outcome: string }> }
 
-// Module-level ref so it survives re-renders and can be set before React mounts
 let earlyPrompt: BIP | null = null
-
 export function captureInstallPrompt(e: Event) {
   e.preventDefault()
   earlyPrompt = e as BIP
 }
 
+type Platform = 'ios' | 'android' | 'desktop' | 'other'
+
+function getPlatform(): Platform {
+  const ua = navigator.userAgent
+  if (/iPad|iPhone|iPod/.test(ua)) return 'ios'
+  if (/Android/.test(ua)) return 'android'
+  if (/Chrome|Chromium/.test(ua)) return 'desktop'
+  return 'other'
+}
+
+function InstructionsModal({ onClose }: { onClose: () => void }) {
+  const platform = getPlatform()
+
+  const steps: { icon: string; label: React.ReactNode }[] =
+    platform === 'ios'
+      ? [
+          { icon: '📤', label: <>Tap the <strong>Share</strong> button at the bottom of Safari</> },
+          { icon: '➕', label: <>Scroll down and tap <strong>Add to Home Screen</strong></> },
+          { icon: '✅', label: <>Tap <strong>Add</strong> in the top-right corner</> },
+        ]
+      : platform === 'android'
+      ? [
+          { icon: '⋮', label: <>Tap the <strong>menu</strong> icon in Chrome&apos;s top-right corner</> },
+          { icon: '📱', label: <>Tap <strong>Add to Home screen</strong></> },
+          { icon: '✅', label: <>Tap <strong>Add</strong> to confirm</> },
+        ]
+      : [
+          { icon: '⊕', label: <>Click the <strong>install icon</strong> in Chrome&apos;s address bar (right side)</> },
+          { icon: '✅', label: <>Click <strong>Install</strong> in the popup</> },
+        ]
+
+  return (
+    <div
+      style={{
+        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)',
+        zIndex: 10000, display: 'flex', alignItems: 'flex-end',
+        justifyContent: 'center', padding: '0 16px 32px',
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: '#F2EDE4', borderRadius: 20, padding: '28px 24px',
+          width: '100%', maxWidth: 440,
+          fontFamily: "'Segoe UI', system-ui, sans-serif",
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
+          <img src="/junta-logo.png" alt="Junta" style={{ height: 46, borderRadius: 10 }} />
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 17, color: '#1D3B6B' }}>Add to Home Screen</div>
+            <div style={{ fontSize: 13, color: '#7A8FA8', marginTop: 2 }}>Follow these quick steps</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 26 }}>
+          {steps.map((step, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                background: '#E85520', color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 14, fontWeight: 800,
+              }}>
+                {i + 1}
+              </div>
+              <div style={{ fontSize: 14, color: '#1D3B6B', lineHeight: 1.45 }}>
+                <span style={{ fontSize: 17, marginRight: 6 }}>{step.icon}</span>
+                {step.label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={onClose}
+          style={{
+            width: '100%', padding: '14px', borderRadius: 12,
+            background: '#1D3B6B', color: '#fff', border: 'none',
+            fontSize: 15, fontWeight: 700, cursor: 'pointer',
+            fontFamily: "'Segoe UI', system-ui, sans-serif",
+          }}
+        >
+          Got it
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function InstallPrompt() {
   const [show, setShow] = useState(false)
-  const [isIOS, setIsIOS] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<BIP | null>(null)
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     if (window.matchMedia('(display-mode: standalone)').matches) return
     if (sessionStorage.getItem('junta-install-dismissed')) return
 
-    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent)
-    setIsIOS(ios)
-
-    if (ios) {
-      setShow(true)
-      return
-    }
-
-    // Event may have already fired before React mounted — check module-level
-    // cache first, then the window global set by the beforeInteractive script
+    // Grab prompt captured before React mounted
     const cached: BIP | null = earlyPrompt
       ?? ((window as Window & { __juntaBip?: BIP }).__juntaBip ?? null)
     if (cached) {
       setDeferredPrompt(cached)
+      setShow(true)
+      return
+    }
+
+    // iOS Safari never fires beforeinstallprompt — show banner anyway
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
       setShow(true)
       return
     }
@@ -53,68 +139,63 @@ export default function InstallPrompt() {
     setShow(false)
   }
 
-  async function install() {
-    if (!deferredPrompt) return
-    try {
-      await deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
-      if (outcome === 'accepted') {
-        earlyPrompt = null
-        setShow(false)
-      }
-    } catch {
-      // prompt() can throw if called outside a user gesture or already consumed
+  async function handleInstall() {
+    if (deferredPrompt) {
+      // Chrome / Android — trigger native install dialog directly
+      try {
+        await deferredPrompt.prompt()
+        const { outcome } = await deferredPrompt.userChoice
+        if (outcome === 'accepted') {
+          earlyPrompt = null
+          setShow(false)
+        }
+      } catch { /* ignore */ }
+      setDeferredPrompt(null)
+    } else {
+      // iOS or Chrome without prompt — show step-by-step instructions
+      setShowModal(true)
     }
-    setDeferredPrompt(null)
   }
 
   if (!show) return null
 
   return (
-    <div style={{
-      position: 'fixed', bottom: 24, left: 16, right: 16,
-      background: '#1D3B6B', border: '1.5px solid rgba(232,85,32,0.4)',
-      borderRadius: 16, padding: '16px 20px', zIndex: 9999,
-      display: 'flex', alignItems: 'flex-start', gap: 12,
-      boxShadow: '0 8px 32px rgba(29,59,107,0.3)',
-      fontFamily: "'Segoe UI', system-ui, sans-serif",
-    }}>
-      <img src="/junta-logo.png" alt="Junta" style={{ width: 40, height: 40, borderRadius: 8, flexShrink: 0 }} />
-      <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: 700, color: '#fff', marginBottom: 4, fontSize: 15 }}>
-          Zet Junta op je startscherm
+    <>
+      <div style={{
+        position: 'fixed', bottom: 24, left: 16, right: 16,
+        background: '#1D3B6B', borderRadius: 16,
+        border: '1.5px solid rgba(232,85,32,0.35)',
+        padding: '14px 16px', zIndex: 9999,
+        display: 'flex', alignItems: 'center', gap: 12,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+        fontFamily: "'Segoe UI', system-ui, sans-serif",
+      }}>
+        <img src="/junta-logo.png" alt="" style={{ width: 38, height: 38, borderRadius: 8, flexShrink: 0 }} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700, color: '#fff', fontSize: 14, lineHeight: 1.2 }}>Add to home screen</div>
+          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 2 }}>Open Junta like an app</div>
         </div>
-        {isIOS ? (
-          <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: 13, lineHeight: 1.5 }}>
-            Tik op <strong style={{ color: '#E85520' }}>Delen ⎋</strong> en kies{' '}
-            <strong style={{ color: '#E85520' }}>Zet op beginscherm ➕</strong>
-          </div>
-        ) : (
-          <>
-            <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: 13, marginBottom: deferredPrompt ? 10 : 0 }}>
-              Installeer de app voor snelle toegang
-            </div>
-            {deferredPrompt ? (
-              <button onClick={install} style={{
-                background: '#E85520', color: '#fff', border: 'none',
-                borderRadius: 8, padding: '8px 18px', fontSize: 13,
-                fontWeight: 700, cursor: 'pointer',
-                fontFamily: "'Segoe UI', system-ui, sans-serif",
-              }}>
-                Installeren
-              </button>
-            ) : (
-              <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 4 }}>
-                Gebruik de installatieknop in de adresbalk ↑
-              </div>
-            )}
-          </>
-        )}
+        <button
+          onClick={handleInstall}
+          style={{
+            background: '#E85520', color: '#fff', border: 'none',
+            borderRadius: 8, padding: '9px 16px', fontSize: 13,
+            fontWeight: 700, cursor: 'pointer', flexShrink: 0,
+            fontFamily: "'Segoe UI', system-ui, sans-serif",
+          }}
+        >
+          Install
+        </button>
+        <button
+          onClick={dismiss}
+          style={{
+            background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)',
+            fontSize: 20, cursor: 'pointer', padding: '0 2px', lineHeight: 1,
+          }}
+        >×</button>
       </div>
-      <button onClick={dismiss} aria-label="Sluiten" style={{
-        background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
-        fontSize: 20, cursor: 'pointer', padding: '0 4px', lineHeight: 1,
-      }}>×</button>
-    </div>
+
+      {showModal && <InstructionsModal onClose={() => setShowModal(false)} />}
+    </>
   )
 }
