@@ -13,8 +13,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "neighborhood-piper — Find your first job in Amsterdam",
-  description: "5-minute anonymous quiz that matches you to real local jobs in Amsterdam. Built for refugees and youth with migration backgrounds.",
+  title: "Junta — Find your first job in Amsterdam",
+  description: "5-minute anonymous quiz that matches you to real local jobs in Amsterdam. No documents, no Dutch required.",
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({
