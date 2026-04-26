@@ -4,6 +4,7 @@
 > Hackathon 2026 · Erwin, Jeroen, Suryansh
 >
 > Product Url - https://gojunta.vercel.app/
+> 
 > Deck Url - https://gojunta.framer.website/ (Built with Framer fully using Claude)
 
 ---
