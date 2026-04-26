@@ -19,7 +19,22 @@ export type AppData = {
   days: string[];
   hours?: string;
   dream?: string;
+  experienceTypes?: string[];
+  experienceNote?: string;
+  cvExperience?: Array<{ title: string; description: string }>;
+  profileDescription?: string;
 };
+
+export const EXPERIENCE_OPTIONS = [
+  "Bijbaantje gehad",
+  "Stage gelopen",
+  "Vrijwilligerswerk gedaan",
+  "Thuis geholpen (koken, schoonmaken, boodschappen)",
+  "Klussen voor buren of familie",
+  "In een team gesport of getraind",
+  "Eigen project of website gemaakt",
+  "Cursus of training gevolgd",
+];
 
 export const INTERESTS = [
   { id: "tech",     emoji: "💻", label: "Tech & Computers" },

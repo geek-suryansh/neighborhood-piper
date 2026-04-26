@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import {
-  INTERESTS, SKILLS_OPTIONS, LANGUAGES, EDU_LEVELS, EDU_YEARS,
+  INTERESTS, SKILLS_OPTIONS, LANGUAGES, EDU_LEVELS, EDU_YEARS, EXPERIENCE_OPTIONS,
   type AppData,
 } from "@/lib/stap-data";
 import { toProfile, type CandidateProfile } from "@/lib/profile";
@@ -22,7 +22,7 @@ const COLORS = {
 };
 
 const FONTS = `'Segoe UI', system-ui, sans-serif`;
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 11;
 
 
 const styles = {
@@ -178,6 +178,9 @@ function generateCVHTML(data: AppData): string {
   .edu strong { font-size: 11pt; }
   .edu span { display: block; color: #666; font-size: 10pt; }
   .edu .year { color: #888; font-size: 10pt; white-space: nowrap; }
+  .exp-item { margin-bottom: 10px; }
+  .exp-item strong { font-size: 10.5pt; display: block; }
+  .exp-item span { color: #555; font-size: 10pt; }
   .avail { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
   .avail span { background: #f0faf6; border: 1px solid #00e5a044; color: #007a55; padding: 5px 14px; border-radius: 20px; font-size: 9.5pt; }
   .footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #eee; color: #bbb; font-size: 8.5pt; display: flex; justify-content: space-between; }
@@ -199,7 +202,7 @@ function generateCVHTML(data: AppData): string {
 
   <div class="section">
     <h2>Profiel</h2>
-    <p>Gemotiveerde jongere van ${data.age} jaar, woonachtig in ${data.location ? `${data.location.name}, ` : ""}Amsterdam, op zoek naar een bijbaan.${data.dream ? ` Toekomstdroom: <em>${data.dream}</em>.` : ""} Beschikbaar op ${fullDays.join(", ")}${data.hours ? ` voor ${data.hours} per week` : ""}.</p>
+    <p>${data.profileDescription ?? `Gemotiveerde jongere van ${data.age} jaar, woonachtig in ${data.location ? `${data.location.name}, ` : ""}Amsterdam, op zoek naar een bijbaan.${data.dream ? ` Toekomstdroom: <em>${data.dream}</em>.` : ""} Beschikbaar op ${fullDays.join(", ")}${data.hours ? ` voor ${data.hours} per week` : ""}.`}</p>
   </div>
 
   ${(data.school || data.eduLevel) ? `
@@ -212,6 +215,16 @@ function generateCVHTML(data: AppData): string {
       </div>
       ${data.eduYear ? `<div class="year">${data.eduYear}</div>` : ""}
     </div>
+  </div>` : ""}
+
+  ${(data.cvExperience || []).length > 0 ? `
+  <div class="section">
+    <h2>Ervaring</h2>
+    ${(data.cvExperience || []).map(item => `
+    <div class="exp-item">
+      <strong>${item.title}</strong>
+      <span>${item.description}</span>
+    </div>`).join("")}
   </div>` : ""}
 
   ${(data.skills || []).length > 0 ? `
@@ -606,7 +619,205 @@ function DreamScreen({ data, setData, onNext }: { data: AppData; setData: (d: Ap
         }}
       />
       <div style={{ marginTop: 32 }}>
-        <BigButton onClick={onNext}>🚀 Bekijk mijn resultaten</BigButton>
+        <BigButton onClick={onNext}>Volgende →</BigButton>
+      </div>
+    </div>
+  );
+}
+
+function ExperienceScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  const toggle = (s: string) => {
+    const cur = data.experienceTypes || [];
+    setData({ ...data, experienceTypes: cur.includes(s) ? cur.filter(x => x !== s) : [...cur, s] });
+  };
+
+  return (
+    <div style={styles.container}>
+      <ProgressBar step={9} total={TOTAL_STEPS} />
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Wat heb je al gedaan?</h2>
+      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
+        Werk, vrijwilligerswerk, helpen thuis — alles telt. Kies wat op jou van toepassing is.
+      </p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 24 }}>
+        {EXPERIENCE_OPTIONS.map(s => (
+          <Chip key={s} selected={(data.experienceTypes || []).includes(s)} onClick={() => toggle(s)}>
+            {s}
+          </Chip>
+        ))}
+      </div>
+      <label style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 8, display: "block" }}>
+        Wil je er iets over vertellen? <span style={{ fontStyle: "italic" }}>(optioneel)</span>
+      </label>
+      <textarea
+        value={data.experienceNote || ""}
+        onChange={e => setData({ ...data, experienceNote: e.target.value })}
+        placeholder="Bijv. 'Ik heb 6 maanden bij de Albert Heijn gewerkt' of 'Ik help elke week bij een voetbalclub'..."
+        style={{
+          width: "100%", minHeight: 90, padding: "12px 14px",
+          borderRadius: 12, border: `1.5px solid ${COLORS.border}`,
+          background: COLORS.card, color: COLORS.text,
+          fontSize: 14, fontFamily: FONTS,
+          resize: "vertical", boxSizing: "border-box", outline: "none",
+          marginBottom: 32,
+        }}
+      />
+      <BigButton onClick={onNext}>Volgende →</BigButton>
+      <div style={{ marginTop: 12 }}>
+        <BigButton onClick={onNext} secondary>Overslaan</BigButton>
+      </div>
+    </div>
+  );
+}
+
+function JobPicksScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  const [pairs, setPairs] = useState<{ a: string; b: string }[]>([]);
+  const [picks, setPicks] = useState<string[]>([]);
+  const [loadingPairs, setLoadingPairs] = useState(true);
+  const [generatingCV, setGeneratingCV] = useState(false);
+  const [error, setError] = useState(false);
+
+  const round = picks.length;
+
+  useEffect(() => {
+    fetch('/api/job-pairs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+      .then(r => r.json())
+      .then(json => {
+        if (json.pairs?.length >= 3) {
+          setPairs(json.pairs);
+        } else {
+          setError(true);
+        }
+        setLoadingPairs(false);
+      })
+      .catch(() => { setError(true); setLoadingPairs(false); });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const pick = async (job: string) => {
+    const newPicks = [...picks, job];
+    setPicks(newPicks);
+
+    if (newPicks.length === 3) {
+      setGeneratingCV(true);
+      try {
+        const [profileRes, expRes] = await Promise.all([
+          fetch('/api/generate-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data, picks: newPicks }),
+          }),
+          fetch('/api/generate-experience', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              experienceTypes: data.experienceTypes,
+              experienceNote: data.experienceNote,
+            }),
+          }),
+        ]);
+        const [profileJson, expJson] = await Promise.all([profileRes.json(), expRes.json()]);
+        setData({
+          ...data,
+          profileDescription: profileJson.description || undefined,
+          cvExperience: expJson.items?.length ? expJson.items : undefined,
+        });
+      } catch { /* silently fall back to template text */ }
+      onNext();
+    }
+  };
+
+  if (loadingPairs || generatingCV) {
+    const msg = generatingCV ? "CV schrijven..." : "Even nadenken...";
+    return (
+      <div style={{ ...styles.container, paddingTop: 120, textAlign: "center" }}>
+        <div style={{ fontSize: 48, marginBottom: 24 }}>✨</div>
+        <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: 8 }}>{msg}</h2>
+        <p style={{ color: COLORS.textDim, fontSize: 15 }}>
+          {generatingCV ? "We maken jouw profieltekst op basis van je keuzes." : "We zoeken passende opties voor jou."}
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={styles.container}>
+        <ProgressBar step={10} total={TOTAL_STEPS} />
+        <p style={{ color: COLORS.orange, marginBottom: 32, fontSize: 15 }}>
+          Kon geen opties laden. Je kunt dit overslaan.
+        </p>
+        <BigButton onClick={onNext} secondary>Overslaan</BigButton>
+      </div>
+    );
+  }
+
+  const currentPair = pairs[round];
+
+  return (
+    <div style={styles.container}>
+      <ProgressBar step={10} total={TOTAL_STEPS} />
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+        <h2 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em", margin: 0 }}>Zou je liever...</h2>
+      </div>
+      <p style={{ color: COLORS.textDim, marginBottom: 8, fontSize: 15 }}>
+        Keuze {round + 1} van 3 — kies de baan die je het meeste aanspreekt.
+      </p>
+      <div style={{ display: "flex", gap: 4, marginBottom: 32 }}>
+        {[0, 1, 2].map(i => (
+          <div key={i} style={{
+            flex: 1, height: 3, borderRadius: 2,
+            background: i < round ? COLORS.accent : i === round ? COLORS.purple : COLORS.border,
+            transition: "background 0.3s ease",
+          }} />
+        ))}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {[currentPair.a, currentPair.b].map((job) => (
+          <button
+            key={job}
+            onClick={() => pick(job)}
+            style={{
+              padding: "22px 20px",
+              borderRadius: 16,
+              border: `1.5px solid ${COLORS.border}`,
+              background: COLORS.card,
+              color: COLORS.text,
+              fontSize: 17,
+              fontWeight: 600,
+              cursor: "pointer",
+              textAlign: "left",
+              fontFamily: FONTS,
+              transition: "all 0.15s ease",
+              letterSpacing: "-0.01em",
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = COLORS.accent;
+              (e.currentTarget as HTMLButtonElement).style.background = COLORS.accentDim;
+              (e.currentTarget as HTMLButtonElement).style.color = COLORS.accent;
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = COLORS.border;
+              (e.currentTarget as HTMLButtonElement).style.background = COLORS.card;
+              (e.currentTarget as HTMLButtonElement).style.color = COLORS.text;
+            }}
+          >
+            {job}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ marginTop: 20, textAlign: "center" }}>
+        <button
+          onClick={() => onNext()}
+          style={{ background: "none", border: "none", color: COLORS.textDim, fontSize: 13, cursor: "pointer", fontFamily: FONTS }}
+        >
+          Overslaan
+        </button>
       </div>
     </div>
   );
@@ -768,9 +979,13 @@ function CVTab({ data }: { data: AppData }) {
 
         <Section title="Profiel">
           <p style={{ color: COLORS.textDim, fontSize: 14, lineHeight: 1.6, margin: 0 }}>
-            Gemotiveerde jongere ({data.age} jaar) op zoek naar een bijbaan.
-            {data.dream && ` Droombaan: ${data.dream}.`}
-            {" "}Beschikbaar {(data.days || []).join(", ")} ({data.hours}).
+            {data.profileDescription ?? (
+              <>
+                Gemotiveerde jongere ({data.age} jaar) op zoek naar een bijbaan.
+                {data.dream && ` Droombaan: ${data.dream}.`}
+                {" "}Beschikbaar {(data.days || []).join(", ")} ({data.hours}).
+              </>
+            )}
           </p>
         </Section>
 
@@ -781,6 +996,19 @@ function CVTab({ data }: { data: AppData }) {
               {data.eduYear && <span style={{ color: COLORS.textDim }}> — {data.eduYear}</span>}
             </p>
             {data.eduLevel && <p style={{ color: COLORS.textDim, fontSize: 13, margin: "2px 0 0" }}>{data.eduLevel}</p>}
+          </Section>
+        )}
+
+        {(data.cvExperience || []).length > 0 && (
+          <Section title="Ervaring">
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {(data.cvExperience || []).map((item, i) => (
+                <div key={i}>
+                  <p style={{ color: COLORS.text, fontSize: 14, fontWeight: 600, margin: 0 }}>{item.title}</p>
+                  <p style={{ color: COLORS.textDim, fontSize: 13, margin: "2px 0 0" }}>{item.description}</p>
+                </div>
+              ))}
+            </div>
           </Section>
         )}
 
@@ -896,7 +1124,9 @@ export default function StapPage() {
       case "interests": return <InterestsScreen data={data} setData={setData} onNext={() => setScreen("skills")} />;
       case "skills": return <SkillsScreen data={data} setData={setData} onNext={() => setScreen("availability")} />;
       case "availability": return <AvailabilityScreen data={data} setData={setData} onNext={() => setScreen("dream")} />;
-      case "dream": return <DreamScreen data={data} setData={setData} onNext={() => setScreen("loading")} />;
+      case "dream": return <DreamScreen data={data} setData={setData} onNext={() => setScreen("experience")} />;
+      case "experience": return <ExperienceScreen data={data} setData={setData} onNext={() => setScreen("cvprofile")} />;
+      case "cvprofile": return <JobPicksScreen data={data} setData={setData} onNext={() => setScreen("loading")} />;
       case "loading": return <LoadingScreen onDone={() => {
         const built = toProfile(data);
         setProfile(built);
