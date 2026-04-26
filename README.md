@@ -1,7 +1,11 @@
 # Junta — Technical Documentation
 
-> Anonymous job-matching for underrepresented youth in Amsterdam.  
+> Anonymous job-matching for underrepresented youth in Netherlands.  
 > Hackathon 2026 · Erwin, Jeroen, Suryansh
+>
+> Product Url - https://gojunta.vercel.app/
+> 
+> Deck Url - https://gojunta.framer.website/ (Built with Framer fully using Claude)
 
 ---
 
@@ -21,7 +25,7 @@
 
 ## 1. Problem & Mission
 
-**The gap:** Amsterdam has 89,000 unemployed youth and 233,000 NEETs (not in education, employment, or training). Youth from non-European backgrounds face a 14.6% unemployment rate — more than double the 6.9% for Dutch-origin peers. A kid named Mohammed in Zuidoost gets 60% fewer callbacks than a kid named Daan with the exact same CV.
+**The gap:** Amsterdam itself has 89,000 unemployed youth and 233,000 NEETs (not in education, employment, or training). Youth from non-European backgrounds face a 14.6% unemployment rate — more than double the 6.9% for Dutch-origin peers. A kid named Mohammed in Zuidoost gets 60% fewer callbacks than a kid named Daan with the exact same CV.
 
 **The tools that exist don't serve this group:**
 - YoungCapital and Indeed require Dutch, an account, and a polished CV
