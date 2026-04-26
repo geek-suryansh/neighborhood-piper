@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import ServiceWorker from '../sw-register'
-import InstallPrompt from '../install-prompt'
+
 
 export const metadata: Metadata = {
   title: 'Junta — Find your first job in Amsterdam',
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: 'Junta',
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
   },
   icons: {
     apple: '/apple-touch-icon.png',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#E85520',
+  themeColor: '#FFFFFF',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,

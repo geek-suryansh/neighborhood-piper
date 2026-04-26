@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "Junta — Find your first job in Amsterdam",
   description: "5-minute anonymous quiz that matches you to real local jobs in Amsterdam. No documents, no Dutch required.",
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "Junta",
+    statusBarStyle: "black-translucent",
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "48x48" },

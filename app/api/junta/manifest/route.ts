@@ -9,8 +9,8 @@ export function GET() {
     scope: '/app',
     display: 'standalone',
     orientation: 'portrait',
-    background_color: '#F2EDE4',
-    theme_color: '#E85520',
+    background_color: '#FFFFFF',
+    theme_color: '#FFFFFF',
     categories: ['education', 'productivity'],
     icons: [
       {
