@@ -34,6 +34,14 @@
 
 **Junta's answer:** A 5-minute anonymous quiz → AI-generated profile → hybrid semantic job matching → downloadable CV. No name required, no documents, no Dutch. On the employer side: a dashboard to post shifts and browse anonymous candidate profiles.
 
+**Highlights**
+- Fully working end to end production ready for scale.
+- AI generated downloadable resume with a conversational flow for all age groups and backgrounds.
+- Map based local job finder with real data scraped from real job listings from multiple local websites.
+- AI based matching alogirthm, skill based.
+- Two sided marketplace, with Employers able to post and find instant matches as well.
+- On your Homescreen, so its always handy as an aspirant
+
 ---
 
 ## 2. System Overview
