@@ -1,5 +1,5 @@
-import type { AppData } from "./stap-data";
-import { INTERESTS } from "./stap-data";
+import type { AppData } from "./junta-data";
+import { INTERESTS } from "./junta-data";
 
 // ── Schema ──
 

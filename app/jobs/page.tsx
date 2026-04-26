@@ -49,9 +49,9 @@ export default function JobsPage() {
   );
 
   return (
-    <div className="flex flex-col h-screen bg-white font-sans">
+    <div className="flex flex-col h-screen font-sans bg-white">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
+      <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100 shrink-0">
         <div className="flex items-center gap-3">
           <a href="/" className="text-gray-400 hover:text-gray-600 transition-colors text-sm">← Home</a>
           <span className="text-gray-200">|</span>
@@ -61,7 +61,7 @@ export default function JobsPage() {
             {loading ? (
               <span className="bg-gray-100 text-gray-400 text-xs font-semibold px-2 py-0.5 rounded-full animate-pulse">Loading…</span>
             ) : (
-              <span className="bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full">
+              <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded-full">
                 {filtered.length} listings
               </span>
             )}
@@ -71,7 +71,7 @@ export default function JobsPage() {
           {selectedJob && (
             <button
               onClick={() => setSelectedJob(null)}
-              className="text-orange-500 font-semibold hover:underline mr-2"
+              className="text-gray-900 font-semibold hover:underline mr-2"
             >
               ✕ Clear selection
             </button>
@@ -85,7 +85,7 @@ export default function JobsPage() {
         <div className="flex-1 relative">
           {loading && (
             <div className="absolute inset-0 z-[2000] flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm gap-3">
-              <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-10 h-10 border-4 border-gray-900 border-t-transparent rounded-full animate-spin" />
               <p className="text-sm text-gray-500">Loading jobs…</p>
             </div>
           )}
@@ -95,7 +95,7 @@ export default function JobsPage() {
               <p className="text-gray-700 font-semibold">Could not load jobs</p>
               <button
                 onClick={() => { setError(false); setLoading(true); fetch('/api/jobs').then(r => r.json()).then(d => { setJobs(d.jobs || []); setLoading(false); }).catch(() => setError(true)); }}
-                className="text-sm text-orange-500 hover:underline"
+                className="text-sm text-gray-900 hover:underline"
               >
                 Try again
               </button>
@@ -136,7 +136,7 @@ export default function JobsPage() {
               placeholder="Search jobs, locations…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
           </div>
           <div className="p-4 flex flex-col gap-3">
@@ -160,15 +160,15 @@ export default function JobsPage() {
                     onClick={() => setSelectedJob(isSelected ? null : job)}
                     className={`border rounded-xl p-4 cursor-pointer transition-all group ${
                       isSelected
-                        ? 'border-orange-400 bg-orange-50 shadow-md'
-                        : 'border-gray-100 hover:border-orange-200 hover:shadow-sm'
+                        ? 'border-gray-900 bg-gray-50 shadow-md'
+                        : 'border-gray-100 hover:border-gray-400 hover:shadow-sm'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-1 gap-2">
-                      <span className={`font-semibold text-sm leading-tight transition-colors ${isSelected ? 'text-orange-600' : 'text-gray-900 group-hover:text-orange-500'}`}>
+                      <span className={`font-semibold text-sm leading-tight transition-colors ${isSelected ? 'text-gray-900 font-bold' : 'text-gray-900 group-hover:text-gray-700'}`}>
                         {job.title}
                       </span>
-                      <span className="text-xs font-bold text-orange-500 shrink-0">{job.salary}</span>
+                      <span className="text-xs font-bold text-gray-900 shrink-0">{job.salary}</span>
                     </div>
                     <div className="text-xs text-gray-400 mb-2">📍 {job.location}</div>
                     <div className="flex items-center justify-between">
@@ -194,7 +194,7 @@ export default function JobsPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="text-xs text-orange-500 hover:underline font-medium"
+                          className="text-xs text-gray-900 hover:underline font-semibold"
                         >
                           View →
                         </a>

@@ -74,7 +74,7 @@ export default function MatchPage() {
         <Link href="/" className="text-lg font-semibold text-gray-900">neighborhood-piper</Link>
         <div className="flex gap-4 text-sm text-gray-600">
           <Link href="/jobs" className="hover:text-gray-900">Job Map</Link>
-          <Link href="/match" className="text-orange-600 font-medium">Match Me</Link>
+          <Link href="/match" className="text-gray-900 font-semibold">Match Me</Link>
         </div>
       </nav>
 
@@ -92,7 +92,7 @@ export default function MatchPage() {
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g. Yohannes"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
           </div>
 
@@ -106,7 +106,7 @@ export default function MatchPage() {
               onChange={e => setResumeText(e.target.value)}
               placeholder={PLACEHOLDER}
               rows={7}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
               required
               minLength={10}
             />
@@ -117,7 +117,7 @@ export default function MatchPage() {
           <button
             type="submit"
             disabled={loading || resumeText.trim().length < 10}
-            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-medium py-3 rounded-xl transition-colors"
+            className="w-full bg-gray-950 hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 text-white font-medium py-3 rounded-xl transition-colors"
           >
             {loading ? 'Finding matches…' : 'Find matching jobs'}
           </button>
@@ -141,7 +141,7 @@ export default function MatchPage() {
                   href={job.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block bg-white rounded-xl border border-gray-200 p-4 hover:border-orange-300 hover:shadow-sm transition-all"
+                  className="block bg-white rounded-xl border border-gray-200 p-4 hover:border-gray-400 hover:shadow-sm transition-all"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
@@ -162,7 +162,7 @@ export default function MatchPage() {
                         )}
                       </div>
                     </div>
-                    <span className="text-orange-400 text-sm flex-shrink-0">→</span>
+                    <span className="text-gray-500 text-sm shrink-0">→</span>
                   </div>
                 </a>
               ))}

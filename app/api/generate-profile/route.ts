@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { AppData } from '@/lib/stap-data';
-import { INTERESTS } from '@/lib/stap-data';
+import type { AppData } from '@/lib/junta-data';
+import { INTERESTS } from '@/lib/junta-data';
 
 export async function POST(req: NextRequest) {
   const { data, picks }: { data: AppData; picks: string[] } = await req.json();

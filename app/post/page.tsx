@@ -4,16 +4,16 @@ import { useState, useEffect } from "react";
 import { getSupabase } from "@/lib/supabase";
 
 const COLORS = {
-  bg: "#0a0a0f",
-  card: "#12121a",
-  accent: "#00e5a0",
-  accentDim: "#00e5a033",
-  purple: "#8b5cf6",
-  purpleDim: "#8b5cf633",
-  orange: "#ff6b35",
-  text: "#e8e8f0",
-  textDim: "#8888a0",
-  border: "#22222f",
+  bg: "#FFFFFF",
+  card: "#F9F9F9",
+  accent: "#F5C518",
+  accentDim: "#F5C51820",
+  purple: "#4A9FE5",
+  purpleDim: "#4A9FE520",
+  orange: "#EF4444",
+  text: "#0D0D0D",
+  textDim: "#888888",
+  border: "#E8E8E8",
 };
 
 const FONTS = `'Segoe UI', system-ui, sans-serif`;
@@ -35,7 +35,7 @@ const inputStyle: React.CSSProperties = {
   padding: "10px 14px",
   borderRadius: 10,
   border: `1px solid ${COLORS.border}`,
-  background: "#0f0f18",
+  background: "#FFFFFF",
   color: COLORS.text,
   fontSize: 14,
   fontFamily: FONTS,
@@ -192,20 +192,17 @@ export default function PostPage() {
   }
 
   return (
-    <div style={{ fontFamily: FONTS, background: COLORS.bg, color: COLORS.text, minHeight: "100vh", position: "relative", overflow: "hidden" }}>
-      <div style={{ position: "fixed", width: 400, height: 400, borderRadius: "50%", background: `radial-gradient(circle, ${COLORS.accentDim} 0%, transparent 70%)`, pointerEvents: "none", zIndex: 0, top: -100, right: -100, filter: "blur(60px)" }} />
-      <div style={{ position: "fixed", width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle, ${COLORS.purpleDim} 0%, transparent 70%)`, pointerEvents: "none", zIndex: 0, bottom: -50, left: -50, filter: "blur(60px)" }} />
-
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 1 }}>
+    <div style={{ fontFamily: FONTS, background: COLORS.bg, color: COLORS.text, minHeight: "100vh" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
         {/* Header */}
         <div style={{ paddingTop: 28, paddingBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: 22 }}>⚡</span>
-            <h1 style={{ fontSize: 20, fontWeight: 800, color: COLORS.accent, margin: 0 }}>STAP</h1>
+            <h1 style={{ fontSize: 20, fontWeight: 800, color: COLORS.accent, margin: 0 }}>Junta</h1>
             <span style={{ color: COLORS.textDim, fontSize: 13, fontWeight: 600, padding: "2px 8px", border: `1px solid ${COLORS.border}`, borderRadius: 6 }}>Werkgever</span>
           </div>
-          <a href="/stap" style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${COLORS.border}`, color: COLORS.textDim, fontSize: 13, textDecoration: "none" }}>
-            ← Terug naar STAP
+          <a href="/app" style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${COLORS.border}`, color: COLORS.textDim, fontSize: 13, textDecoration: "none" }}>
+            ← Terug naar Junta
           </a>
         </div>
 
@@ -299,16 +296,16 @@ export default function PostPage() {
               </div>
 
               {status === "error" && (
-                <p style={{ color: COLORS.orange, fontSize: 13, margin: 0 }}>{errorMsg}</p>
+                <p style={{ color: "#EF4444", fontSize: 13, margin: 0 }}>{errorMsg}</p>
               )}
               {status === "success" && (
-                <p style={{ color: COLORS.accent, fontSize: 13, margin: 0, fontWeight: 600 }}>Vacature succesvol geplaatst.</p>
+                <p style={{ color: "#22C55E", fontSize: 13, margin: 0, fontWeight: 600 }}>Vacature succesvol geplaatst.</p>
               )}
 
               <button
                 type="submit"
                 disabled={status === "loading"}
-                style={{ padding: "12px 24px", borderRadius: 10, border: "none", background: status === "loading" ? COLORS.accentDim : COLORS.accent, color: COLORS.bg, fontSize: 14, fontWeight: 700, cursor: status === "loading" ? "default" : "pointer", fontFamily: FONTS, transition: "opacity 0.15s" }}
+                style={{ padding: "12px 24px", borderRadius: 10, border: "none", background: status === "loading" ? COLORS.accentDim : "#0D0D0D", color: status === "loading" ? COLORS.textDim : "#FFFFFF", fontSize: 14, fontWeight: 700, cursor: status === "loading" ? "default" : "pointer", fontFamily: FONTS, transition: "opacity 0.15s" }}
               >
                 {status === "loading" ? "Opslaan..." : "Vacature plaatsen"}
               </button>

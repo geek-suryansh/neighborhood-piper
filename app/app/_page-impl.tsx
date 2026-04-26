@@ -4,21 +4,21 @@ import { useState, useEffect } from "react";
 import {
   INTERESTS, SKILLS_OPTIONS, LANGUAGES, EDU_LEVELS, EDU_YEARS, EXPERIENCE_OPTIONS,
   type AppData,
-} from "@/lib/stap-data";
+} from "@/lib/junta-data";
 import { toProfile, type CandidateProfile } from "@/lib/profile";
 import { getSupabase } from "@/lib/supabase";
 
 const COLORS = {
-  bg: "#0a0a0f",
-  card: "#12121a",
-  accent: "#00e5a0",
-  accentDim: "#00e5a033",
-  purple: "#8b5cf6",
-  purpleDim: "#8b5cf633",
-  orange: "#ff6b35",
-  text: "#e8e8f0",
-  textDim: "#8888a0",
-  border: "#22222f",
+  bg: "#FFFFFF",
+  card: "#F9F9F9",
+  accent: "#F5C518",
+  accentDim: "#F5C51820",
+  purple: "#4A9FE5",
+  purpleDim: "#4A9FE520",
+  orange: "#F59E0B",
+  text: "#0D0D0D",
+  textDim: "#888888",
+  border: "#E8E8E8",
 };
 
 const FONTS = `'Segoe UI', system-ui, sans-serif`;
@@ -33,24 +33,6 @@ const styles = {
     minHeight: "100vh",
     position: "relative" as const,
     overflow: "hidden" as const,
-  },
-  glow: {
-    position: "fixed" as const,
-    width: 400, height: 400,
-    borderRadius: "50%",
-    background: `radial-gradient(circle, ${COLORS.accentDim} 0%, transparent 70%)`,
-    pointerEvents: "none" as const,
-    zIndex: 0, top: -100, right: -100,
-    filter: "blur(60px)",
-  },
-  glowPurple: {
-    position: "fixed" as const,
-    width: 300, height: 300,
-    borderRadius: "50%",
-    background: `radial-gradient(circle, ${COLORS.purpleDim} 0%, transparent 70%)`,
-    pointerEvents: "none" as const,
-    zIndex: 0, bottom: -50, left: -50,
-    filter: "blur(60px)",
   },
   container: {
     maxWidth: 480,
@@ -73,7 +55,7 @@ const inputStyle: React.CSSProperties = {
   padding: "14px 16px",
   borderRadius: 12,
   border: `1.5px solid ${COLORS.border}`,
-  background: COLORS.card,
+  background: "#FFFFFF",
   color: COLORS.text,
   fontSize: 16,
   fontFamily: FONTS,
@@ -103,9 +85,9 @@ function Chip({ selected, onClick, children }: { selected: boolean; onClick: () 
   return (
     <button onClick={onClick} style={{
       padding: "10px 16px", borderRadius: 12,
-      border: `1.5px solid ${selected ? COLORS.accent : COLORS.border}`,
-      background: selected ? COLORS.accentDim : "transparent",
-      color: selected ? COLORS.accent : COLORS.textDim,
+      border: `1.5px solid ${selected ? "#0D0D0D" : COLORS.border}`,
+      background: selected ? "#0D0D0D" : COLORS.card,
+      color: selected ? "#FFFFFF" : COLORS.text,
       fontSize: 14, cursor: "pointer",
       transition: "all 0.2s ease", fontFamily: FONTS,
     }}>
@@ -121,8 +103,8 @@ function BigButton({ onClick, children, secondary, disabled }: {
     <button onClick={onClick} disabled={disabled} style={{
       width: "100%", padding: "16px 24px", borderRadius: 14,
       border: secondary ? `1.5px solid ${COLORS.border}` : "none",
-      background: disabled ? COLORS.border : secondary ? "transparent" : `linear-gradient(135deg, ${COLORS.accent}, #00c087)`,
-      color: disabled ? COLORS.textDim : secondary ? COLORS.text : COLORS.bg,
+      background: disabled ? COLORS.border : secondary ? "transparent" : "#0D0D0D",
+      color: disabled ? COLORS.textDim : secondary ? COLORS.textDim : "#FFFFFF",
       fontSize: 16, fontWeight: 700,
       cursor: disabled ? "not-allowed" : "pointer",
       transition: "all 0.3s ease", fontFamily: FONTS, letterSpacing: "-0.01em",
@@ -252,7 +234,7 @@ function generateCVHTML(data: AppData): string {
   </div>
 
   <div class="footer">
-    <span>Gemaakt via STAP — Skills · Talent · Actie · Perspectief</span>
+    <span>Gemaakt via Junta</span>
     <span>Amsterdam ${new Date().getFullYear()}</span>
   </div>
 </body>
@@ -287,9 +269,9 @@ function AgeScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppD
         {["14-15", "16-17", "18-20", "21-23"].map((age) => (
           <button key={age} onClick={() => { setData({ ...data, age }); onNext(); }} style={{
             padding: "18px 20px", borderRadius: 14,
-            border: `1.5px solid ${data.age === age ? COLORS.accent : COLORS.border}`,
-            background: data.age === age ? COLORS.accentDim : COLORS.card,
-            color: COLORS.text, fontSize: 18, fontWeight: 600,
+            border: `1.5px solid ${data.age === age ? "#0D0D0D" : COLORS.border}`,
+            background: data.age === age ? "#0D0D0D" : COLORS.card,
+            color: data.age === age ? "#FFFFFF" : COLORS.text, fontSize: 18, fontWeight: 600,
             cursor: "pointer", textAlign: "left",
             transition: "all 0.2s ease", fontFamily: FONTS,
           }}>
@@ -395,9 +377,9 @@ function LocationScreen({ data, setData, onNext }: { data: AppData; setData: (d:
 
       {data.location ? (
         <div style={{ marginBottom: 32 }}>
-          <div style={{ padding: "16px 18px", borderRadius: 14, border: `1.5px solid ${COLORS.accent}`, background: COLORS.accentDim, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ padding: "16px 18px", borderRadius: 14, border: `1.5px solid ${COLORS.border}`, background: COLORS.card, display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
             <div>
-              <div style={{ color: COLORS.accent, fontWeight: 700, fontSize: 16 }}>📍 {data.location.name}</div>
+              <div style={{ color: COLORS.text, fontWeight: 700, fontSize: 16 }}>📍 {data.location.name}</div>
               <div style={{ color: COLORS.textDim, fontSize: 12, marginTop: 2 }}>{data.location.lat.toFixed(4)}, {data.location.lng.toFixed(4)}</div>
             </div>
             <button onClick={() => setData({ ...data, location: undefined })} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.border}`, background: "transparent", color: COLORS.textDim, fontSize: 12, cursor: "pointer", fontFamily: FONTS }}>
@@ -418,7 +400,7 @@ function LocationScreen({ data, setData, onNext }: { data: AppData; setData: (d:
             <div style={{ position: "absolute", right: 14, top: 16, color: COLORS.textDim, fontSize: 13 }}>…</div>
           )}
           {suggestions.length > 0 && (
-            <div style={{ marginTop: 4, borderRadius: 12, border: `1px solid ${COLORS.border}`, background: COLORS.card, overflow: "hidden" }}>
+            <div style={{ marginTop: 4, borderRadius: 12, border: `1px solid ${COLORS.border}`, background: COLORS.card, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
               {suggestions.map((doc) => (
                 <button key={doc.id} onClick={() => pick(doc)} style={{
                   width: "100%", padding: "12px 16px", border: "none", borderBottom: `1px solid ${COLORS.border}`,
@@ -517,9 +499,9 @@ function InterestsScreen({ data, setData, onNext }: { data: AppData; setData: (d
           return (
             <button key={i.id} onClick={() => toggle(i.id)} style={{
               padding: "12px 16px", borderRadius: 14,
-              border: `1.5px solid ${sel ? COLORS.accent : COLORS.border}`,
-              background: sel ? COLORS.accentDim : COLORS.card,
-              color: sel ? COLORS.accent : COLORS.text,
+              border: `1.5px solid ${sel ? "#0D0D0D" : COLORS.border}`,
+              background: sel ? "#0D0D0D" : COLORS.card,
+              color: sel ? "#FFFFFF" : COLORS.text,
               fontSize: 14, cursor: "pointer",
               transition: "all 0.2s ease", fontFamily: FONTS,
               display: "flex", alignItems: "center", gap: 8,
@@ -575,9 +557,9 @@ function AvailabilityScreen({ data, setData, onNext }: { data: AppData; setData:
           return (
             <button key={d} onClick={() => toggle(d)} style={{
               flex: 1, padding: "14px 0", borderRadius: 12,
-              border: `1.5px solid ${sel ? COLORS.accent : COLORS.border}`,
-              background: sel ? COLORS.accentDim : COLORS.card,
-              color: sel ? COLORS.accent : COLORS.textDim,
+              border: `1.5px solid ${sel ? "#0D0D0D" : COLORS.border}`,
+              background: sel ? "#0D0D0D" : COLORS.card,
+              color: sel ? "#FFFFFF" : COLORS.textDim,
               fontSize: 13, fontWeight: 600, cursor: "pointer",
               fontFamily: FONTS, transition: "all 0.2s ease",
             }}>
@@ -796,9 +778,9 @@ function JobPicksScreen({ data, setData, onNext }: { data: AppData; setData: (d:
               letterSpacing: "-0.01em",
             }}
             onMouseEnter={e => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = COLORS.accent;
-              (e.currentTarget as HTMLButtonElement).style.background = COLORS.accentDim;
-              (e.currentTarget as HTMLButtonElement).style.color = COLORS.accent;
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "#0D0D0D";
+              (e.currentTarget as HTMLButtonElement).style.background = "#0D0D0D";
+              (e.currentTarget as HTMLButtonElement).style.color = "#FFFFFF";
             }}
             onMouseLeave={e => {
               (e.currentTarget as HTMLButtonElement).style.borderColor = COLORS.border;
@@ -846,7 +828,7 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
       <div style={{ fontSize: 48, marginBottom: 24, animation: "pulse 1.5s infinite" }}>⚡</div>
       <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 32, letterSpacing: "-0.02em" }}>{msgs[msgIdx]}</h2>
       <div style={{ background: COLORS.border, borderRadius: 8, height: 6, overflow: "hidden", maxWidth: 280, margin: "0 auto" }}>
-        <div style={{ height: "100%", width: `${progress}%`, background: `linear-gradient(90deg, ${COLORS.accent}, ${COLORS.purple})`, borderRadius: 8, transition: "width 0.1s ease" }} />
+        <div style={{ height: "100%", width: `${progress}%`, background: COLORS.accent, borderRadius: 8, transition: "width 0.1s ease" }} />
       </div>
       <style>{`@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }`}</style>
     </div>
@@ -856,9 +838,9 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
 // ── Result tabs ──
 
 function scoreColor(score: number): string {
-  if (score >= 0.70) return '#00e5a0';
-  if (score >= 0.55) return '#f59e0b';
-  return '#ff6b35';
+  if (score >= 0.70) return COLORS.accent;
+  if (score >= 0.55) return COLORS.purple;
+  return COLORS.textDim;
 }
 
 interface MatchedJob {
@@ -908,7 +890,7 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
         const color = scoreColor(score);
         const rank = idx + 1;
         return (
-          <div key={job.id} style={{ padding: 18, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card }}>
+          <div key={job.id} style={{ padding: 18, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
               <div style={{ flex: 1, minWidth: 0, marginRight: 12 }}>
                 <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.01em", lineHeight: 1.3 }}>{job.title}</h3>
@@ -954,14 +936,14 @@ function CVTab({ data }: { data: AppData }) {
   return (
     <div style={{ paddingBottom: 32 }}>
       {/* Preview */}
-      <div style={{ padding: 24, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card, marginBottom: 16 }}>
+      <div style={{ padding: 24, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card, marginBottom: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
           <div style={{
             width: 48, height: 48, borderRadius: 12,
-            background: `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.purple})`,
+            background: "#0D0D0D",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 20, fontWeight: 800, color: COLORS.bg,
+            fontSize: 20, fontWeight: 800, color: "#FFFFFF",
           }}>
             {data.name ? data.name[0].toUpperCase() : "A"}
           </div>
@@ -1081,12 +1063,12 @@ function ResultsScreen({ data, onTab, activeTab, profile, onReset }: { data: App
           ↩ Opnieuw
         </button>
       </div>
-      <div style={{ display: "flex", gap: 4, marginBottom: 24, background: COLORS.card, borderRadius: 14, padding: 4 }}>
+      <div style={{ display: "flex", gap: 4, marginBottom: 24, background: COLORS.card, borderRadius: 14, padding: 4, border: `1px solid ${COLORS.border}` }}>
         {[{ id: "jobs", label: "Banen", icon: "💼" }, { id: "cv", label: "CV", icon: "📄" }].map((t) => (
           <button key={t.id} onClick={() => onTab(t.id)} style={{
             flex: 1, padding: "12px 8px", borderRadius: 10, border: "none",
-            background: activeTab === t.id ? COLORS.accentDim : "transparent",
-            color: activeTab === t.id ? COLORS.accent : COLORS.textDim,
+            background: activeTab === t.id ? "#0D0D0D" : "transparent",
+            color: activeTab === t.id ? "#FFFFFF" : COLORS.textDim,
             fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: FONTS, transition: "all 0.2s ease",
           }}>
             {t.icon} {t.label}
@@ -1101,7 +1083,7 @@ function ResultsScreen({ data, onTab, activeTab, profile, onReset }: { data: App
 
 // ── Main app ──
 
-const STORAGE_KEY = "stap_resume";
+const STORAGE_KEY = "junta_resume";
 
 function loadSaved() {
   try {
@@ -1111,7 +1093,7 @@ function loadSaved() {
   return null;
 }
 
-export default function StapPage() {
+export default function JuntaPage() {
   const [screen, setScreen] = useState(() => (loadSaved() ? "results" : "welcome"));
   const [data, setData] = useState<AppData>(() => loadSaved()?.data ?? { interests: [], skills: [], days: [], languages: [] });
   const [resultTab, setResultTab] = useState("jobs");
@@ -1177,7 +1159,6 @@ export default function StapPage() {
 
   return (
     <div style={styles.app}>
-      <div style={styles.glow} /><div style={styles.glowPurple} />
       {renderScreen()}
 
     </div>

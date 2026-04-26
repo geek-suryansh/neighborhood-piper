@@ -5,7 +5,7 @@ import InstallPrompt from '../install-prompt'
 export const metadata: Metadata = {
   title: 'Junta — Find your first job in Amsterdam',
   description: 'Find your first job in Amsterdam. 5-minute quiz, anonymous, free.',
-  manifest: '/api/stap/manifest',
+  manifest: '/api/junta/manifest',
   appleWebApp: {
     capable: true,
     title: 'Junta',
