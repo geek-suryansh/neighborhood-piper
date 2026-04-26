@@ -9,10 +9,10 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: 'Junta',
-    statusBarStyle: 'black-translucent',
+    statusBarStyle: 'default',
   },
   icons: {
-    apple: '/apple-touch-icon.png',
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
 }
 

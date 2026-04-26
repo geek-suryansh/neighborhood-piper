@@ -41,7 +41,7 @@ const COLORS = {
   green: '#22C55E',
   red: '#EF4444',
 };
-const FONTS = `'Segoe UI', system-ui, sans-serif`;
+const FONTS = `var(--font-nunito, 'Segoe UI', system-ui, sans-serif)`;
 
 const JOB_TYPES = ['Flexible', 'Full-time', 'Part-time', 'Evening', 'Weekend', 'Traineeship', 'Temporary'];
 const PDOK_BASE = 'https://api.pdok.nl/bzk/locatieserver/search/v3_1';

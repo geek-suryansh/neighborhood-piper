@@ -25,8 +25,16 @@ const COLORS = {
   border: "#E8E8E8",
 };
 
-const FONTS = `'Segoe UI', system-ui, sans-serif`;
+const FONTS = `var(--font-nunito, 'Segoe UI', system-ui, sans-serif)`;
 const TOTAL_STEPS = 11;
+
+const CARD_PASTELS = [
+  { bg: '#FFE8E0', accent: '#D94A00' },
+  { bg: '#DCEEFF', accent: '#2B82CC' },
+  { bg: '#D4F5E9', accent: '#1A8A56' },
+  { bg: '#EDE9FE', accent: '#6D4ED6' },
+  { bg: '#FFF3D4', accent: '#C47A00' },
+];
 
 
 const styles = {
@@ -921,11 +929,6 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
 
 // ── Result tabs ──
 
-function scoreColor(score: number): string {
-  if (score >= 0.70) return COLORS.accent;
-  if (score >= 0.55) return COLORS.purple;
-  return COLORS.textDim;
-}
 
 interface MatchedJob {
   id: string;
@@ -1028,45 +1031,37 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
       {jobs.map((job, idx) => {
         const score = job.score ?? job.similarity ?? 0;
         const pct = score ? Math.round(score * 100) : null;
-        const color = scoreColor(score);
+        const pastel = CARD_PASTELS[idx % CARD_PASTELS.length];
         const rank = idx + 1;
         const isExpanded = expandedId === job.id;
         return (
-          <div key={job.id} style={{ borderRadius: 16, border: `1px solid ${isExpanded ? color + "66" : COLORS.border}`, background: COLORS.card, boxShadow: "0 1px 4px rgba(0,0,0,0.05)", overflow: "hidden", transition: "border-color 0.2s" }}>
+          <div key={job.id} style={{ borderRadius: 20, background: pastel.bg, overflow: "hidden", transition: "transform 0.15s" }}>
             {/* Clickable header row */}
             <button
               onClick={() => setExpandedId(isExpanded ? null : job.id)}
-              style={{ width: "100%", padding: 18, background: "none", border: "none", cursor: "pointer", textAlign: "left", fontFamily: FONTS }}
+              style={{ width: "100%", padding: "18px 18px 14px", background: "none", border: "none", cursor: "pointer", textAlign: "left", fontFamily: FONTS }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
                 <div style={{ flex: 1, minWidth: 0, marginRight: 12 }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.01em", lineHeight: 1.3, color: COLORS.text }}>{job.title}</h3>
-                  <p style={{ color: COLORS.textDim, fontSize: 13, margin: 0 }}>{job.location}</p>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, margin: "0 0 3px", lineHeight: 1.25, color: "#0D0D0D" }}>{job.title}</h3>
+                  <p style={{ color: "#0D0D0DAA", fontSize: 13, margin: 0 }}>{job.location}</p>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                  {pct !== null && (
-                    <div style={{
-                      background: `${color}22`, color, border: `1px solid ${color}55`,
-                      fontSize: 13, fontWeight: 800, padding: "4px 10px", borderRadius: 8,
-                      display: "flex", alignItems: "center", gap: 5,
-                    }}>
-                      <span style={{ fontSize: 10, opacity: 0.7 }}>#{rank}</span>
-                      {pct}%
-                    </div>
-                  )}
-                  <span style={{ color: COLORS.textDim, fontSize: 12, lineHeight: 1, transition: "transform 0.2s", display: "inline-block", transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>
-                    ▾
-                  </span>
-                </div>
+                {pct !== null && (
+                  <div style={{ background: pastel.accent + "22", color: pastel.accent, fontSize: 12, fontWeight: 800, padding: "4px 10px", borderRadius: 99, flexShrink: 0 }}>
+                    #{rank} · {pct}%
+                  </div>
+                )}
               </div>
-              <div style={{ display: "flex", gap: 16, fontSize: 13, color: COLORS.textDim, flexWrap: "wrap" }}>
-                <span>⏰ {job.type}</span><span>💶 {job.salary}</span>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", marginTop: 8 }}>
+                <span style={{ background: "#0D0D0D14", color: "#0D0D0D", padding: "3px 10px", borderRadius: 99, fontSize: 12, fontWeight: 600 }}>⏰ {job.type}</span>
+                {job.salary && <span style={{ background: "#0D0D0D14", color: "#0D0D0D", padding: "3px 10px", borderRadius: 99, fontSize: 12, fontWeight: 600 }}>💶 {job.salary}</span>}
+                <span style={{ marginLeft: "auto", color: "#0D0D0D66", fontSize: 13, transition: "transform 0.2s", display: "inline-block", transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>▾</span>
               </div>
             </button>
 
             {/* Expanded description + apply button */}
             {isExpanded && (
-              <div style={{ padding: "0 18px 18px", borderTop: `1px solid ${COLORS.border}` }}>
+              <div style={{ padding: "0 18px 18px", borderTop: `1px solid #0D0D0D14` }}>
                 {job.description ? (() => {
                   const MAX = 480;
                   const trimmed = job.description.trim();
@@ -1078,7 +1073,7 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
                     <p style={{ color: COLORS.textDim, fontSize: 13, lineHeight: 1.7, margin: "14px 0 0" }}>
                       {excerpt}
                       {isTruncated && job.url && (
-                        <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 6, color, textDecoration: "none", fontWeight: 600 }}>
+                        <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 6, color: pastel.accent, textDecoration: "none", fontWeight: 600 }}>
                           Lees meer →
                         </a>
                       )}
@@ -1114,12 +1109,12 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
                     {job.contact_email ? (
                       <a
                         href={`mailto:${job.contact_email}?subject=${encodeURIComponent(`Sollicitatie: ${job.title}`)}&body=${encodeURIComponent(`Hallo,\n\nIk solliciteer graag naar de functie ${job.title}.\n\nMet vriendelijke groet,\n${profile.identity.displayName ?? ''}`)}`}
-                        style={{ display: 'block', width: '100%', padding: '10px', borderRadius: 10, border: `1.5px solid ${color}`, background: 'transparent', color, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: FONTS, textAlign: 'center', textDecoration: 'none', boxSizing: 'border-box' }}
+                        style={{ display: 'block', width: '100%', padding: '10px', borderRadius: 10, border: `1.5px solid ${pastel.accent}`, background: 'transparent', color: pastel.accent, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: FONTS, textAlign: 'center', textDecoration: 'none', boxSizing: 'border-box' }}
                       >
                         {t('applyEmail')}
                       </a>
                     ) : job.url ? (
-                      <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', width: '100%', padding: '10px', borderRadius: 10, border: `1.5px solid ${color}`, background: 'transparent', color, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: FONTS, textAlign: 'center', textDecoration: 'none', boxSizing: 'border-box' }}>
+                      <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', width: '100%', padding: '10px', borderRadius: 10, border: `1.5px solid ${pastel.accent}`, background: 'transparent', color: pastel.accent, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: FONTS, textAlign: 'center', textDecoration: 'none', boxSizing: 'border-box' }}>
                         {t('apply')}
                       </a>
                     ) : null}
