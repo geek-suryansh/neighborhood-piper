@@ -1,8 +1,12 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import { useTranslations, useLocale } from 'next-intl';
 import {
-  INTERESTS, SKILLS_OPTIONS, LANGUAGES, EDU_LEVELS, EDU_YEARS, EXPERIENCE_OPTIONS,
+  INTERESTS, SKILLS_OPTIONS, SKILLS_OPTIONS_EN,
+  LANGUAGES, EDU_LEVELS, EDU_LEVELS_EN, EDU_YEARS, EDU_YEARS_EN,
+  EXPERIENCE_OPTIONS, EXPERIENCE_OPTIONS_EN,
+  HOURS_OPTIONS, HOURS_OPTIONS_EN, DAYS_NL, DAYS_EN,
   type AppData,
 } from "@/lib/junta-data";
 import { toProfile, type CandidateProfile } from "@/lib/profile";
@@ -125,7 +129,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-// ── CV PDF generation ──
+// ── CV PDF generation — always Dutch ──
 
 function generateCVHTML(data: AppData): string {
   const interestLabels = (data.interests || [])
@@ -244,27 +248,29 @@ function generateCVHTML(data: AppData): string {
 // ── Screens ──
 
 function WelcomeScreen({ onStart }: { onStart: () => void }) {
+  const t = useTranslations('app.welcome');
   const [show, setShow] = useState(false);
   useEffect(() => { setTimeout(() => setShow(true), 100); }, []);
   return (
     <div style={{ ...styles.container, paddingTop: 80, textAlign: "center", opacity: show ? 1 : 0, transform: show ? "translateY(0)" : "translateY(20px)", transition: "all 0.6s ease" }}>
       <img src="/junta-logo.png" alt="Junta" style={{ height: 120, borderRadius: 16, marginBottom: 32, display: "inline-block" }} />
       <p style={{ color: COLORS.textDim, fontSize: 17, lineHeight: 1.6, maxWidth: 340, margin: "0 auto 48px" }}>
-        Ontdek wat bij je past. Vind een baan. Bouw je toekomst.<br />
-        <span style={{ color: COLORS.accent }}>In 5 minuten.</span>
+        {t('tagline')}<br />
+        <span style={{ color: COLORS.accent }}>{t('highlight')}</span>
       </p>
-      <BigButton onClick={onStart}>Let&apos;s go →</BigButton>
-      <p style={{ color: COLORS.textDim, fontSize: 12, marginTop: 16 }}>Geen account nodig • 100% anoniem</p>
+      <BigButton onClick={onStart}>{t('cta')}</BigButton>
+      <p style={{ color: COLORS.textDim, fontSize: 12, marginTop: 16 }}>{t('note')}</p>
     </div>
   );
 }
 
 function AgeScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  const t = useTranslations('app.age');
   return (
     <div style={styles.container}>
       <ProgressBar step={0} total={TOTAL_STEPS} />
-      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Hoe oud ben je?</h2>
-      <p style={{ color: COLORS.textDim, marginBottom: 32, fontSize: 15 }}>Dit bepaalt welke banen en regelingen voor jou gelden.</p>
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>{t('title')}</h2>
+      <p style={{ color: COLORS.textDim, marginBottom: 32, fontSize: 15 }}>{t('subtitle')}</p>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {["14-15", "16-17", "18-20", "21-23"].map((age) => (
           <button key={age} onClick={() => { setData({ ...data, age }); onNext(); }} style={{
@@ -275,7 +281,7 @@ function AgeScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppD
             cursor: "pointer", textAlign: "left",
             transition: "all 0.2s ease", fontFamily: FONTS,
           }}>
-            {age} jaar
+            {age} {t('suffix')}
           </button>
         ))}
       </div>
@@ -284,33 +290,34 @@ function AgeScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppD
 }
 
 function NameScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  const t = useTranslations('app.name');
   return (
     <div style={styles.container}>
       <ProgressBar step={1} total={TOTAL_STEPS} />
-      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Hoe mogen we je noemen?</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>{t('title')}</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
-        Dit komt op je CV. Een bijnaam of initialen mag ook.
+        {t('subtitle')}
       </p>
-      <label style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 6, display: "block" }}>Naam *</label>
+      <label style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 6, display: "block" }}>{t('nameLabel')}</label>
       <input
         value={data.name || ""}
         onChange={(e) => setData({ ...data, name: e.target.value })}
-        placeholder="Voornaam of bijnaam"
+        placeholder={t('namePlaceholder')}
         style={inputStyle}
       />
       <label style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 6, display: "block" }}>
-        E-mail of telefoonnummer <span style={{ fontStyle: "italic" }}>(optioneel)</span>
+        {t('contactLabel')} <span style={{ fontStyle: "italic" }}>{t('contactOptional')}</span>
       </label>
       <input
         value={data.email || ""}
         onChange={(e) => setData({ ...data, email: e.target.value })}
-        placeholder="naam@email.com of 06-..."
+        placeholder={t('contactPlaceholder')}
         style={inputStyle}
       />
       <div style={{ padding: "10px 14px", borderRadius: 10, background: `${COLORS.orange}15`, border: `1px solid ${COLORS.orange}33`, color: COLORS.orange, fontSize: 12, marginBottom: 32 }}>
-        🔒 Contactinfo wordt alleen op jouw CV gezet — we slaan niets op.
+        {t('privacyNote')}
       </div>
-      <BigButton onClick={onNext} disabled={!data.name?.trim()}>Volgende →</BigButton>
+      <BigButton onClick={onNext} disabled={!data.name?.trim()}>{t('next')}</BigButton>
     </div>
   );
 }
@@ -326,12 +333,13 @@ function parseCentroide(wkt: string): { lat: number; lng: number } | null {
 }
 
 function LocationScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  const t = useTranslations('app.location');
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<PdokDoc[]>([]);
   const [searching, setSearching] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       if (query.length < 2) { setSuggestions([]); return; }
       setSearching(true);
       try {
@@ -347,7 +355,7 @@ function LocationScreen({ data, setData, onNext }: { data: AppData; setData: (d:
       } catch { setSuggestions([]); }
       setSearching(false);
     }, query.length < 2 ? 0 : 300);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [query]);
 
   const pick = async (doc: PdokDoc) => {
@@ -365,14 +373,19 @@ function LocationScreen({ data, setData, onNext }: { data: AppData; setData: (d:
     }
   };
 
-  const typeLabel: Record<string, string> = { buurt: "Buurt", wijk: "Wijk", woonplaats: "Stad", gemeente: "Gemeente" };
+  const typeLabels: Record<string, string> = {
+    buurt: t('typeLabels.buurt'),
+    wijk: t('typeLabels.wijk'),
+    woonplaats: t('typeLabels.woonplaats'),
+    gemeente: t('typeLabels.gemeente'),
+  };
 
   return (
     <div style={styles.container}>
       <ProgressBar step={2} total={TOTAL_STEPS} />
-      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Waar woon je?</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>{t('title')}</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
-        Zoek je buurt, wijk of stad. We gebruiken dit om banen bij jou in de buurt te vinden.
+        {t('subtitle')}
       </p>
 
       {data.location ? (
@@ -383,7 +396,7 @@ function LocationScreen({ data, setData, onNext }: { data: AppData; setData: (d:
               <div style={{ color: COLORS.textDim, fontSize: 12, marginTop: 2 }}>{data.location.lat.toFixed(4)}, {data.location.lng.toFixed(4)}</div>
             </div>
             <button onClick={() => setData({ ...data, location: undefined })} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.border}`, background: "transparent", color: COLORS.textDim, fontSize: 12, cursor: "pointer", fontFamily: FONTS }}>
-              Wijzigen
+              {t('change')}
             </button>
           </div>
         </div>
@@ -392,7 +405,7 @@ function LocationScreen({ data, setData, onNext }: { data: AppData; setData: (d:
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Typ je buurt, wijk of stad…"
+            placeholder={t('placeholder')}
             autoFocus
             style={{ ...inputStyle, marginBottom: 0, paddingRight: searching ? 48 : 16 }}
           />
@@ -408,7 +421,7 @@ function LocationScreen({ data, setData, onNext }: { data: AppData; setData: (d:
                   fontFamily: FONTS, textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center",
                 }}>
                   <span>{doc.weergavenaam}</span>
-                  <span style={{ fontSize: 11, color: COLORS.textDim, marginLeft: 8, flexShrink: 0 }}>{typeLabel[doc.type] ?? doc.type}</span>
+                  <span style={{ fontSize: 11, color: COLORS.textDim, marginLeft: 8, flexShrink: 0 }}>{typeLabels[doc.type] ?? doc.type}</span>
                 </button>
               ))}
             </div>
@@ -416,52 +429,58 @@ function LocationScreen({ data, setData, onNext }: { data: AppData; setData: (d:
         </div>
       )}
 
-      <BigButton onClick={onNext} disabled={!data.location}>Volgende →</BigButton>
+      <BigButton onClick={onNext} disabled={!data.location}>{t('next')}</BigButton>
       <div style={{ marginTop: 12 }}>
-        <BigButton onClick={onNext} secondary>Overslaan</BigButton>
+        <BigButton onClick={onNext} secondary>{t('skip')}</BigButton>
       </div>
     </div>
   );
 }
 
 function EducationScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  const t = useTranslations('app.education');
+  const locale = useLocale();
+  const eduLevels = locale === 'nl' ? EDU_LEVELS : EDU_LEVELS_EN;
+  const eduYears = locale === 'nl' ? EDU_YEARS : EDU_YEARS_EN;
+
   return (
     <div style={styles.container}>
       <ProgressBar step={3} total={TOTAL_STEPS} />
-      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Jouw opleiding</h2>
-      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Helpt werkgevers jouw achtergrond begrijpen.</p>
-      <label style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 6, display: "block" }}>School of instelling</label>
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>{t('title')}</h2>
+      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>{t('subtitle')}</p>
+      <label style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 6, display: "block" }}>{t('schoolLabel')}</label>
       <input
         value={data.school || ""}
         onChange={(e) => setData({ ...data, school: e.target.value })}
-        placeholder="Bijv. ROC Amsterdam, Montessori College..."
+        placeholder={t('schoolPlaceholder')}
         style={inputStyle}
       />
-      <label style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 10, display: "block" }}>Niveau</label>
+      <label style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 10, display: "block" }}>{t('levelLabel')}</label>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
-        {EDU_LEVELS.map((level) => (
+        {EDU_LEVELS.map((level, i) => (
           <Chip key={level} selected={data.eduLevel === level} onClick={() => setData({ ...data, eduLevel: level })}>
-            {level}
+            {eduLevels[i]}
           </Chip>
         ))}
       </div>
-      <label style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 10, display: "block" }}>Jaar van afstuderen</label>
+      <label style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 10, display: "block" }}>{t('yearLabel')}</label>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 32 }}>
-        {EDU_YEARS.map((year) => (
+        {EDU_YEARS.map((year, i) => (
           <Chip key={year} selected={data.eduYear === year} onClick={() => setData({ ...data, eduYear: year })}>
-            {year}
+            {eduYears[i]}
           </Chip>
         ))}
       </div>
-      <BigButton onClick={onNext} disabled={!data.eduLevel}>Volgende →</BigButton>
+      <BigButton onClick={onNext} disabled={!data.eduLevel}>{t('next')}</BigButton>
       <div style={{ marginTop: 12 }}>
-        <BigButton onClick={onNext} secondary>Overslaan</BigButton>
+        <BigButton onClick={onNext} secondary>{t('skip')}</BigButton>
       </div>
     </div>
   );
 }
 
 function LanguagesScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  const t = useTranslations('app.languages');
   const toggle = (lang: string) => {
     const cur = data.languages || [];
     setData({ ...data, languages: cur.includes(lang) ? cur.filter(l => l !== lang) : [...cur, lang] });
@@ -469,8 +488,8 @@ function LanguagesScreen({ data, setData, onNext }: { data: AppData; setData: (d
   return (
     <div style={styles.container}>
       <ProgressBar step={4} total={TOTAL_STEPS} />
-      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Welke talen spreek je?</h2>
-      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Kies alle talen die je spreekt, verstaat of leert.</p>
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>{t('title')}</h2>
+      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>{t('subtitle')}</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 32 }}>
         {LANGUAGES.map((lang) => (
           <Chip key={lang} selected={(data.languages || []).includes(lang)} onClick={() => toggle(lang)}>
@@ -478,12 +497,14 @@ function LanguagesScreen({ data, setData, onNext }: { data: AppData; setData: (d
           </Chip>
         ))}
       </div>
-      <BigButton onClick={onNext} disabled={(data.languages || []).length < 1}>Volgende →</BigButton>
+      <BigButton onClick={onNext} disabled={(data.languages || []).length < 1}>{t('next')}</BigButton>
     </div>
   );
 }
 
 function InterestsScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  const t = useTranslations('app.interests');
+  const locale = useLocale();
   const toggle = (id: string) => {
     const cur = data.interests || [];
     setData({ ...data, interests: cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id] });
@@ -491,13 +512,14 @@ function InterestsScreen({ data, setData, onNext }: { data: AppData; setData: (d
   return (
     <div style={styles.container}>
       <ProgressBar step={5} total={TOTAL_STEPS} />
-      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Waar word je blij van?</h2>
-      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Kies er minimaal 2. Dit helpt ons banen te vinden die bij je passen.</p>
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>{t('title')}</h2>
+      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>{t('subtitle')}</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-        {INTERESTS.map((i) => {
-          const sel = (data.interests || []).includes(i.id);
+        {INTERESTS.map((interest) => {
+          const sel = (data.interests || []).includes(interest.id);
+          const label = locale === 'nl' ? interest.label : interest.labelEn;
           return (
-            <button key={i.id} onClick={() => toggle(i.id)} style={{
+            <button key={interest.id} onClick={() => toggle(interest.id)} style={{
               padding: "12px 16px", borderRadius: 14,
               border: `1.5px solid ${sel ? "#0D0D0D" : COLORS.border}`,
               background: sel ? "#0D0D0D" : COLORS.card,
@@ -506,42 +528,49 @@ function InterestsScreen({ data, setData, onNext }: { data: AppData; setData: (d
               transition: "all 0.2s ease", fontFamily: FONTS,
               display: "flex", alignItems: "center", gap: 8,
             }}>
-              <span style={{ fontSize: 20 }}>{i.emoji}</span>{i.label}
+              <span style={{ fontSize: 20 }}>{interest.emoji}</span>{label}
             </button>
           );
         })}
       </div>
       <div style={{ marginTop: 32 }}>
-        <BigButton onClick={onNext} disabled={(data.interests || []).length < 2}>Volgende →</BigButton>
+        <BigButton onClick={onNext} disabled={(data.interests || []).length < 2}>{t('next')}</BigButton>
       </div>
     </div>
   );
 }
 
 function SkillsScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
-  const toggle = (s: string) => {
+  const t = useTranslations('app.skills');
+  const locale = useLocale();
+  const toggle = (nlValue: string) => {
     const cur = data.skills || [];
-    setData({ ...data, skills: cur.includes(s) ? cur.filter(x => x !== s) : [...cur, s] });
+    setData({ ...data, skills: cur.includes(nlValue) ? cur.filter(x => x !== nlValue) : [...cur, nlValue] });
   };
   return (
     <div style={styles.container}>
       <ProgressBar step={6} total={TOTAL_STEPS} />
-      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Waar ben je goed in?</h2>
-      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Wees eerlijk — er zijn geen foute antwoorden.</p>
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>{t('title')}</h2>
+      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>{t('subtitle')}</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-        {SKILLS_OPTIONS.map((s) => (
-          <Chip key={s} selected={(data.skills || []).includes(s)} onClick={() => toggle(s)}>{s}</Chip>
+        {SKILLS_OPTIONS.map((nlSkill, i) => (
+          <Chip key={nlSkill} selected={(data.skills || []).includes(nlSkill)} onClick={() => toggle(nlSkill)}>
+            {locale === 'nl' ? nlSkill : SKILLS_OPTIONS_EN[i]}
+          </Chip>
         ))}
       </div>
       <div style={{ marginTop: 32 }}>
-        <BigButton onClick={onNext} disabled={(data.skills || []).length < 1}>Volgende →</BigButton>
+        <BigButton onClick={onNext} disabled={(data.skills || []).length < 1}>{t('next')}</BigButton>
       </div>
     </div>
   );
 }
 
 function AvailabilityScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
-  const days = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
+  const t = useTranslations('app.availability');
+  const locale = useLocale();
+  const daysDisplay = locale === 'nl' ? DAYS_NL : DAYS_EN;
+
   const toggle = (d: string) => {
     const cur = data.days || [];
     setData({ ...data, days: cur.includes(d) ? cur.filter(x => x !== d) : [...cur, d] });
@@ -549,10 +578,10 @@ function AvailabilityScreen({ data, setData, onNext }: { data: AppData; setData:
   return (
     <div style={styles.container}>
       <ProgressBar step={7} total={TOTAL_STEPS} />
-      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Wanneer kun je werken?</h2>
-      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>Tik de dagen aan waarop je beschikbaar bent.</p>
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>{t('title')}</h2>
+      <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>{t('subtitle')}</p>
       <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-        {days.map((d) => {
+        {DAYS_NL.map((d, i) => {
           const sel = (data.days || []).includes(d);
           return (
             <button key={d} onClick={() => toggle(d)} style={{
@@ -563,36 +592,39 @@ function AvailabilityScreen({ data, setData, onNext }: { data: AppData; setData:
               fontSize: 13, fontWeight: 600, cursor: "pointer",
               fontFamily: FONTS, transition: "all 0.2s ease",
             }}>
-              {d}
+              {daysDisplay[i]}
             </button>
           );
         })}
       </div>
-      <p style={{ color: COLORS.textDim, marginBottom: 16, fontSize: 15 }}>Hoeveel uur per week?</p>
+      <p style={{ color: COLORS.textDim, marginBottom: 16, fontSize: 15 }}>{t('hoursLabel')}</p>
       <div style={{ display: "flex", gap: 10 }}>
-        {["4-8 uur", "8-16 uur", "16-24 uur", "24+ uur"].map((h) => (
-          <Chip key={h} selected={data.hours === h} onClick={() => setData({ ...data, hours: h })}>{h}</Chip>
+        {HOURS_OPTIONS.map((h, i) => (
+          <Chip key={h} selected={data.hours === h} onClick={() => setData({ ...data, hours: h })}>
+            {locale === 'nl' ? h : HOURS_OPTIONS_EN[i]}
+          </Chip>
         ))}
       </div>
       <div style={{ marginTop: 32 }}>
-        <BigButton onClick={onNext} disabled={(data.days || []).length < 1 || !data.hours}>Volgende →</BigButton>
+        <BigButton onClick={onNext} disabled={(data.days || []).length < 1 || !data.hours}>{t('next')}</BigButton>
       </div>
     </div>
   );
 }
 
 function DreamScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  const t = useTranslations('app.dream');
   return (
     <div style={styles.container}>
       <ProgressBar step={8} total={TOTAL_STEPS} />
-      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Laatste vraag ✨</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>{t('title')}</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
-        Als je alles kon worden, wat zou je dan doen? Typ gewoon wat je denkt.
+        {t('subtitle')}
       </p>
       <textarea
         value={data.dream || ""}
         onChange={(e) => setData({ ...data, dream: e.target.value })}
-        placeholder="Bijv. 'Iets met muziek', 'Eigen bedrijf starten', 'Weet ik nog niet'..."
+        placeholder={t('placeholder')}
         style={{
           width: "100%", minHeight: 120, padding: 16, borderRadius: 14,
           border: `1.5px solid ${COLORS.border}`, background: COLORS.card,
@@ -601,39 +633,41 @@ function DreamScreen({ data, setData, onNext }: { data: AppData; setData: (d: Ap
         }}
       />
       <div style={{ marginTop: 32 }}>
-        <BigButton onClick={onNext}>Volgende →</BigButton>
+        <BigButton onClick={onNext}>{t('next')}</BigButton>
       </div>
     </div>
   );
 }
 
 function ExperienceScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
-  const toggle = (s: string) => {
+  const t = useTranslations('app.experience');
+  const locale = useLocale();
+  const toggle = (nlValue: string) => {
     const cur = data.experienceTypes || [];
-    setData({ ...data, experienceTypes: cur.includes(s) ? cur.filter(x => x !== s) : [...cur, s] });
+    setData({ ...data, experienceTypes: cur.includes(nlValue) ? cur.filter(x => x !== nlValue) : [...cur, nlValue] });
   };
 
   return (
     <div style={styles.container}>
       <ProgressBar step={9} total={TOTAL_STEPS} />
-      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>Wat heb je al gedaan?</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, letterSpacing: "-0.02em" }}>{t('title')}</h2>
       <p style={{ color: COLORS.textDim, marginBottom: 24, fontSize: 15 }}>
-        Werk, vrijwilligerswerk, helpen thuis — alles telt. Kies wat op jou van toepassing is.
+        {t('subtitle')}
       </p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 24 }}>
-        {EXPERIENCE_OPTIONS.map(s => (
-          <Chip key={s} selected={(data.experienceTypes || []).includes(s)} onClick={() => toggle(s)}>
-            {s}
+        {EXPERIENCE_OPTIONS.map((nlExp, i) => (
+          <Chip key={nlExp} selected={(data.experienceTypes || []).includes(nlExp)} onClick={() => toggle(nlExp)}>
+            {locale === 'nl' ? nlExp : EXPERIENCE_OPTIONS_EN[i]}
           </Chip>
         ))}
       </div>
       <label style={{ color: COLORS.textDim, fontSize: 13, marginBottom: 8, display: "block" }}>
-        Wil je er iets over vertellen? <span style={{ fontStyle: "italic" }}>(optioneel)</span>
+        {t('noteLabel')} <span style={{ fontStyle: "italic" }}>{t('noteOptional')}</span>
       </label>
       <textarea
         value={data.experienceNote || ""}
         onChange={e => setData({ ...data, experienceNote: e.target.value })}
-        placeholder="Bijv. 'Ik heb 6 maanden bij de Albert Heijn gewerkt' of 'Ik help elke week bij een voetbalclub'..."
+        placeholder={t('notePlaceholder')}
         style={{
           width: "100%", minHeight: 90, padding: "12px 14px",
           borderRadius: 12, border: `1.5px solid ${COLORS.border}`,
@@ -643,15 +677,16 @@ function ExperienceScreen({ data, setData, onNext }: { data: AppData; setData: (
           marginBottom: 32,
         }}
       />
-      <BigButton onClick={onNext}>Volgende →</BigButton>
+      <BigButton onClick={onNext}>{t('next')}</BigButton>
       <div style={{ marginTop: 12 }}>
-        <BigButton onClick={onNext} secondary>Overslaan</BigButton>
+        <BigButton onClick={onNext} secondary>{t('skip')}</BigButton>
       </div>
     </div>
   );
 }
 
 function JobPicksScreen({ data, setData, onNext }: { data: AppData; setData: (d: AppData) => void; onNext: () => void }) {
+  const t = useTranslations('app.jobPicks');
   const [pairs, setPairs] = useState<{ a: string; b: string }[]>([]);
   const [picks, setPicks] = useState<string[]>([]);
   const [loadingPairs, setLoadingPairs] = useState(true);
@@ -713,14 +748,13 @@ function JobPicksScreen({ data, setData, onNext }: { data: AppData; setData: (d:
   };
 
   if (loadingPairs || generatingCV) {
-    const msg = generatingCV ? "CV schrijven..." : "Even nadenken...";
+    const msg = generatingCV ? t('generatingCV') : t('loading');
+    const desc = generatingCV ? t('generatingDesc') : t('loadingDesc');
     return (
       <div style={{ ...styles.container, paddingTop: 120, textAlign: "center" }}>
         <div style={{ fontSize: 48, marginBottom: 24 }}>✨</div>
         <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: 8 }}>{msg}</h2>
-        <p style={{ color: COLORS.textDim, fontSize: 15 }}>
-          {generatingCV ? "We maken jouw profieltekst op basis van je keuzes." : "We zoeken passende opties voor jou."}
-        </p>
+        <p style={{ color: COLORS.textDim, fontSize: 15 }}>{desc}</p>
       </div>
     );
   }
@@ -730,9 +764,9 @@ function JobPicksScreen({ data, setData, onNext }: { data: AppData; setData: (d:
       <div style={styles.container}>
         <ProgressBar step={10} total={TOTAL_STEPS} />
         <p style={{ color: COLORS.orange, marginBottom: 32, fontSize: 15 }}>
-          Kon geen opties laden. Je kunt dit overslaan.
+          {t('error')}
         </p>
-        <BigButton onClick={onNext} secondary>Overslaan</BigButton>
+        <BigButton onClick={onNext} secondary>{t('skip')}</BigButton>
       </div>
     );
   }
@@ -743,10 +777,10 @@ function JobPicksScreen({ data, setData, onNext }: { data: AppData; setData: (d:
     <div style={styles.container}>
       <ProgressBar step={10} total={TOTAL_STEPS} />
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-        <h2 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em", margin: 0 }}>Zou je liever...</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em", margin: 0 }}>{t('title')}</h2>
       </div>
       <p style={{ color: COLORS.textDim, marginBottom: 8, fontSize: 15 }}>
-        Keuze {round + 1} van 3 — kies de baan die je het meeste aanspreekt.
+        {t('subtitle', { n: round + 1 })}
       </p>
       <div style={{ display: "flex", gap: 4, marginBottom: 32 }}>
         {[0, 1, 2].map(i => (
@@ -798,7 +832,7 @@ function JobPicksScreen({ data, setData, onNext }: { data: AppData; setData: (d:
           onClick={() => onNext()}
           style={{ background: "none", border: "none", color: COLORS.textDim, fontSize: 13, cursor: "pointer", fontFamily: FONTS }}
         >
-          Overslaan
+          {t('skip')}
         </button>
       </div>
     </div>
@@ -806,8 +840,9 @@ function JobPicksScreen({ data, setData, onNext }: { data: AppData; setData: (d:
 }
 
 function LoadingScreen({ onDone }: { onDone: () => void }) {
+  const t = useTranslations('app.loading');
   const [progress, setProgress] = useState(0);
-  const msgs = ["Profiel analyseren...", "Banen matchen...", "CV opbouwen...", "Klaar!"];
+  const msgs = [t('msgs0'), t('msgs1'), t('msgs2'), t('msgs3')];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -818,8 +853,8 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
 
   useEffect(() => {
     if (progress < 100) return;
-    const t = setTimeout(onDone, 400);
-    return () => clearTimeout(t);
+    const timer = setTimeout(onDone, 400);
+    return () => clearTimeout(timer);
   }, [progress, onDone]);
 
   const msgIdx = Math.min(Math.floor(progress / 25), 3);
@@ -857,6 +892,7 @@ interface MatchedJob {
 }
 
 function JobsTab({ profile }: { profile: CandidateProfile }) {
+  const t = useTranslations('app.results');
   const [jobs, setJobs] = useState<MatchedJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -869,13 +905,13 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
     })
       .then(r => r.json())
       .then(d => { setJobs(d.jobs || []); setLoading(false); })
-      .catch(() => { setError('Kon banen niet laden'); setLoading(false); });
-  }, [profile]);
+      .catch(() => { setError(t('jobsError')); setLoading(false); });
+  }, [profile, t]);
 
   if (loading) return (
     <div style={{ textAlign: 'center', padding: '40px 0', color: COLORS.textDim }}>
       <div style={{ fontSize: 28, marginBottom: 12 }}>⚡</div>
-      <p style={{ margin: 0, fontSize: 14 }}>Banen zoeken die bij jou passen…</p>
+      <p style={{ margin: 0, fontSize: 14 }}>{t('jobsLoading')}</p>
     </div>
   );
 
@@ -883,7 +919,7 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, paddingBottom: 32 }}>
-      <p style={{ color: COLORS.textDim, fontSize: 14, margin: "0 0 8px" }}>{jobs.length} banen gevonden die bij jou passen</p>
+      <p style={{ color: COLORS.textDim, fontSize: 14, margin: "0 0 8px" }}>{t('jobsFound', { count: jobs.length })}</p>
       {jobs.map((job, idx) => {
         const score = job.score ?? job.similarity ?? 0;
         const pct = score ? Math.round(score * 100) : null;
@@ -911,7 +947,7 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
               <span>⏰ {job.type}</span><span>💶 {job.salary}</span>
             </div>
             <a href={job.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 12, width: "100%", padding: "10px", borderRadius: 10, border: `1.5px solid ${color}`, background: "transparent", color, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: FONTS, textAlign: "center", textDecoration: "none" }}>
-              Anoniem solliciteren →
+              {t('apply')}
             </a>
           </div>
         );
@@ -921,8 +957,12 @@ function JobsTab({ profile }: { profile: CandidateProfile }) {
 }
 
 function CVTab({ data }: { data: AppData }) {
-  const interests = (data.interests || []).map(id => INTERESTS.find(i => i.id === id)?.label).filter(Boolean);
-  const [copied, setCopied] = useState(false);
+  const t = useTranslations('app.cv');
+  const locale = useLocale();
+  const interests = (data.interests || []).map(id => {
+    const interest = INTERESTS.find(i => i.id === id);
+    return locale === 'nl' ? interest?.label : interest?.labelEn;
+  }).filter(Boolean);
 
   const handleDownload = () => {
     const html = generateCVHTML(data);
@@ -932,6 +972,8 @@ function CVTab({ data }: { data: AppData }) {
     if (!win) { alert("Sta pop-ups toe om het CV te downloaden."); URL.revokeObjectURL(url); return; }
     setTimeout(() => { win.print(); URL.revokeObjectURL(url); }, 500);
   };
+
+  const tResults = useTranslations('app.results');
 
   return (
     <div style={{ paddingBottom: 32 }}>
@@ -948,7 +990,7 @@ function CVTab({ data }: { data: AppData }) {
             {data.name ? data.name[0].toUpperCase() : "A"}
           </div>
           <div>
-            <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, letterSpacing: "-0.01em" }}>{data.name || "Anoniem Profiel"}</h3>
+            <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, letterSpacing: "-0.01em" }}>{data.name || t('anonymousProfile')}</h3>
             <p style={{ color: COLORS.textDim, fontSize: 13, margin: 0 }}>
               {data.age} jaar • {data.neighborhood ? `${data.neighborhood}, ` : ""}Amsterdam{data.email && ` • ${data.email}`}
             </p>
@@ -956,25 +998,25 @@ function CVTab({ data }: { data: AppData }) {
         </div>
 
         <div style={{ padding: "8px 12px", borderRadius: 8, background: `${COLORS.orange}22`, border: `1px solid ${COLORS.orange}44`, color: COLORS.orange, fontSize: 12, marginBottom: 16 }}>
-          🔒 Naam en contactinfo worden alleen op jouw CV gezet
+          {t('privacyNote')}
         </div>
 
-        <Section title="Profiel">
+        <Section title={t('profile')}>
           <p style={{ color: COLORS.textDim, fontSize: 14, lineHeight: 1.6, margin: 0 }}>
             {data.profileDescription ?? (
               <>
-                Gemotiveerde jongere ({data.age} jaar) op zoek naar een bijbaan.
-                {data.dream && ` Droombaan: ${data.dream}.`}
-                {" "}Beschikbaar {(data.days || []).join(", ")} ({data.hours}).
+                {t('profileFallback', { age: data.age ?? '' })}
+                {data.dream && ` ${t('dreamPrefix')} ${data.dream}.`}
+                {" "}{(data.days || []).join(", ")} ({data.hours}).
               </>
             )}
           </p>
         </Section>
 
         {(data.school || data.eduLevel) && (
-          <Section title="Opleiding">
+          <Section title={t('education')}>
             <p style={{ color: COLORS.text, fontSize: 14, margin: 0 }}>
-              <strong>{data.school || "School"}</strong>
+              <strong>{data.school || t('school')}</strong>
               {data.eduYear && <span style={{ color: COLORS.textDim }}> — {data.eduYear}</span>}
             </p>
             {data.eduLevel && <p style={{ color: COLORS.textDim, fontSize: 13, margin: "2px 0 0" }}>{data.eduLevel}</p>}
@@ -982,7 +1024,7 @@ function CVTab({ data }: { data: AppData }) {
         )}
 
         {(data.cvExperience || []).length > 0 && (
-          <Section title="Ervaring">
+          <Section title={t('experience')}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {(data.cvExperience || []).map((item, i) => (
                 <div key={i}>
@@ -995,7 +1037,7 @@ function CVTab({ data }: { data: AppData }) {
         )}
 
         {(data.languages || []).length > 0 && (
-          <Section title="Talen">
+          <Section title={t('languages')}>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {(data.languages || []).map(l => (
                 <span key={l} style={{ padding: "4px 10px", borderRadius: 6, background: `${COLORS.orange}22`, color: COLORS.orange, fontSize: 12, fontWeight: 600 }}>{l}</span>
@@ -1004,7 +1046,7 @@ function CVTab({ data }: { data: AppData }) {
           </Section>
         )}
 
-        <Section title="Vaardigheden">
+        <Section title={t('skills')}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {(data.skills || []).map(s => (
               <span key={s} style={{ padding: "4px 10px", borderRadius: 6, background: COLORS.purpleDim, color: COLORS.purple, fontSize: 12, fontWeight: 600 }}>{s}</span>
@@ -1012,7 +1054,7 @@ function CVTab({ data }: { data: AppData }) {
           </div>
         </Section>
 
-        <Section title="Interesses">
+        <Section title={t('interests')}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {interests.map(i => (
               <span key={i} style={{ padding: "4px 10px", borderRadius: 6, background: `${COLORS.accentDim}`, color: COLORS.accent, fontSize: 12, fontWeight: 600 }}>{i}</span>
@@ -1020,9 +1062,9 @@ function CVTab({ data }: { data: AppData }) {
           </div>
         </Section>
 
-        <Section title="Beschikbaarheid">
+        <Section title={t('availability')}>
           <div style={{ display: "flex", gap: 6 }}>
-            {["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"].map(d => (
+            {DAYS_NL.map(d => (
               <div key={d} style={{
                 width: 36, height: 36, borderRadius: 8,
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -1038,40 +1080,32 @@ function CVTab({ data }: { data: AppData }) {
         </Section>
       </div>
 
-      <div style={{ display: "flex", gap: 10 }}>
-        <BigButton onClick={handleDownload}>📥 Download als PDF</BigButton>
-        {/* <BigButton onClick={async () => {
-          await navigator.clipboard.writeText(JSON.stringify(toProfile(data), null, 2));
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        }} secondary>
-          {copied ? "✓ Gekopieerd!" : "{ } Export JSON"}
-        </BigButton> */}
-      </div>
+      <BigButton onClick={handleDownload}>{tResults('downloadCV')}</BigButton>
     </div>
   );
 }
 
 
 function ResultsScreen({ data, onTab, activeTab, profile, onReset }: { data: AppData; onTab: (tab: string) => void; activeTab: string; profile: CandidateProfile; onReset: () => void }) {
+  const t = useTranslations('app.results');
   return (
     <div style={styles.container}>
       <div style={{ paddingTop: 24, paddingBottom: 16, display: "flex", alignItems: "center", gap: 14 }}>
         <img src="/junta-logo.png" alt="Junta" style={{ height: 48, borderRadius: 10, flexShrink: 0 }} />
-        <p style={{ color: COLORS.textDim, fontSize: 14, margin: 0, flex: 1 }}>Jouw persoonlijke resultaten</p>
+        <p style={{ color: COLORS.textDim, fontSize: 14, margin: 0, flex: 1 }}>{t('subtitle')}</p>
         <button onClick={onReset} style={{ background: "none", border: `1px solid ${COLORS.border}`, borderRadius: 8, color: COLORS.textDim, fontSize: 12, cursor: "pointer", fontFamily: FONTS, padding: "6px 10px", flexShrink: 0 }}>
-          ↩ Opnieuw
+          {t('reset')}
         </button>
       </div>
       <div style={{ display: "flex", gap: 4, marginBottom: 24, background: COLORS.card, borderRadius: 14, padding: 4, border: `1px solid ${COLORS.border}` }}>
-        {[{ id: "jobs", label: "Banen", icon: "💼" }, { id: "cv", label: "CV", icon: "📄" }].map((t) => (
-          <button key={t.id} onClick={() => onTab(t.id)} style={{
+        {[{ id: "jobs", label: t('jobsTab'), icon: "💼" }, { id: "cv", label: t('cvTab'), icon: "📄" }].map((tab) => (
+          <button key={tab.id} onClick={() => onTab(tab.id)} style={{
             flex: 1, padding: "12px 8px", borderRadius: 10, border: "none",
-            background: activeTab === t.id ? "#0D0D0D" : "transparent",
-            color: activeTab === t.id ? "#FFFFFF" : COLORS.textDim,
+            background: activeTab === tab.id ? "#0D0D0D" : "transparent",
+            color: activeTab === tab.id ? "#FFFFFF" : COLORS.textDim,
             fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: FONTS, transition: "all 0.2s ease",
           }}>
-            {t.icon} {t.label}
+            {tab.icon} {tab.label}
           </button>
         ))}
       </div>
@@ -1113,15 +1147,6 @@ export default function JuntaPage() {
     setScreen("welcome");
   };
 
-  // if (showDashboard) {
-  //   return (
-  //     <div style={styles.app}>
-  //       <div style={styles.glow} /><div style={styles.glowPurple} />
-  //       <EmployerDashboard onBack={() => setShowDashboard(false)} />
-  //     </div>
-  //   );
-  // }
-
   const renderScreen = () => {
     switch (screen) {
       case "welcome": return <WelcomeScreen onStart={() => setScreen("age")} />;
@@ -1141,7 +1166,6 @@ export default function JuntaPage() {
         setProfile(built);
         saveToStorage(data, built);
         setScreen("results");
-        // Save to DB in background for record-keeping — matching no longer depends on this
         void getSupabase().from("profiles").insert({
           id: built.profileId,
           email: built.identity.contactEmail,
@@ -1160,7 +1184,6 @@ export default function JuntaPage() {
   return (
     <div style={styles.app}>
       {renderScreen()}
-
     </div>
   );
 }

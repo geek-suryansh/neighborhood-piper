@@ -1,0 +1,239 @@
+{
+  "app": {
+    "welcome": {
+      "tagline": "Discover what suits you. Find a job. Build your future.",
+      "highlight": "In 5 minutes.",
+      "cta": "Let's go →",
+      "note": "No account needed • 100% anonymous"
+    },
+    "age": {
+      "title": "How old are you?",
+      "subtitle": "This determines which jobs and schemes apply to you.",
+      "suffix": "years"
+    },
+    "name": {
+      "title": "What should we call you?",
+      "subtitle": "This goes on your CV. A nickname or initials is fine.",
+      "nameLabel": "Name *",
+      "namePlaceholder": "First name or nickname",
+      "contactLabel": "Email or phone number",
+      "contactOptional": "(optional)",
+      "contactPlaceholder": "name@email.com or 06-...",
+      "privacyNote": "🔒 Contact info only goes on your CV — we store nothing.",
+      "next": "Next →"
+    },
+    "location": {
+      "title": "Where do you live?",
+      "subtitle": "Search your neighbourhood, district or city. We use this to find jobs near you.",
+      "placeholder": "Type your neighbourhood, district or city…",
+      "change": "Change",
+      "typeLabels": {
+        "buurt": "Neighbourhood",
+        "wijk": "District",
+        "woonplaats": "City",
+        "gemeente": "Municipality"
+      },
+      "next": "Next →",
+      "skip": "Skip"
+    },
+    "education": {
+      "title": "Your education",
+      "subtitle": "Helps employers understand your background.",
+      "schoolLabel": "School or institution",
+      "schoolPlaceholder": "E.g. ROC Amsterdam, Montessori College...",
+      "levelLabel": "Level",
+      "yearLabel": "Graduation year",
+      "next": "Next →",
+      "skip": "Skip"
+    },
+    "languages": {
+      "title": "What languages do you speak?",
+      "subtitle": "Choose all languages you speak, understand or are learning.",
+      "next": "Next →"
+    },
+    "interests": {
+      "title": "What makes you happy?",
+      "subtitle": "Choose at least 2. This helps us find jobs that suit you.",
+      "next": "Next →"
+    },
+    "skills": {
+      "title": "What are you good at?",
+      "subtitle": "Be honest — there are no wrong answers.",
+      "next": "Next →"
+    },
+    "availability": {
+      "title": "When can you work?",
+      "subtitle": "Tap the days you are available.",
+      "hoursLabel": "How many hours per week?",
+      "next": "Next →"
+    },
+    "dream": {
+      "title": "Last question ✨",
+      "subtitle": "If you could be anything, what would you do? Just type what you think.",
+      "placeholder": "E.g. 'Something with music', 'Start my own business', 'Not sure yet'...",
+      "next": "Next →"
+    },
+    "experience": {
+      "title": "What have you already done?",
+      "subtitle": "Work, volunteering, helping at home — everything counts. Choose what applies to you.",
+      "noteLabel": "Want to tell us more?",
+      "noteOptional": "(optional)",
+      "notePlaceholder": "E.g. 'I worked at a supermarket for 6 months' or 'I help at a football club every week'...",
+      "next": "Next →",
+      "skip": "Skip"
+    },
+    "jobPicks": {
+      "title": "Would you rather...",
+      "subtitle": "Choice {n} of 3 — pick the job that appeals to you most.",
+      "loading": "Thinking...",
+      "generatingCV": "Writing your CV...",
+      "loadingDesc": "Looking for suitable options for you.",
+      "generatingDesc": "We're creating your profile text based on your choices.",
+      "error": "Could not load options. You can skip this.",
+      "skip": "Skip"
+    },
+    "loading": {
+      "msgs0": "Analysing profile...",
+      "msgs1": "Matching jobs...",
+      "msgs2": "Building CV...",
+      "msgs3": "Done!"
+    },
+    "results": {
+      "subtitle": "Your personal results",
+      "reset": "↩ Start over",
+      "jobsTab": "Jobs",
+      "cvTab": "CV",
+      "jobsFound": "{count} jobs found that match you",
+      "jobsLoading": "Looking for jobs that match you…",
+      "jobsError": "Could not load jobs",
+      "apply": "Apply anonymously →",
+      "downloadCV": "📥 Download as PDF"
+    },
+    "cv": {
+      "anonymousProfile": "Anonymous Profile",
+      "privacyNote": "🔒 Name and contact info only go on your CV",
+      "profile": "Profile",
+      "education": "Education",
+      "experience": "Experience",
+      "languages": "Languages",
+      "skills": "Skills",
+      "interests": "Interests",
+      "availability": "Availability",
+      "school": "School",
+      "profileFallback": "Motivated young person ({age} years) looking for a part-time job.",
+      "dreamPrefix": "Dream job:"
+    }
+  },
+  "landing": {
+    "nav": {
+      "jobsMap": "Jobs map",
+      "findMyJob": "Find my job →"
+    },
+    "hero": {
+      "line1": "Amsterdam",
+      "line2": "has your job.",
+      "accent": "Let's find it.",
+      "desc1": "Answer 5 questions. Get matched to real local jobs near you.",
+      "desc2": "No account. No documents. We never ask where you're from or what your status is — just what you're good at.",
+      "cta": "Start — it's free",
+      "browse": "Browse the map",
+      "badge1": "🔒 Fully anonymous",
+      "badge2": "🌍 No Dutch required",
+      "badge3": "📍 Amsterdam only"
+    },
+    "howItWorks": {
+      "title": "How it works"
+    },
+    "categories": {
+      "title": "What kind of jobs?",
+      "subtitle": "Real listings from Amsterdam employers — updated every week."
+    },
+    "anonymous": {
+      "title": "We never ask who you are.",
+      "desc": "No name. No address. No documents. No questions about your residency, visa, or background. Just tell us what you're good at and what you're looking for. That's all we need."
+    },
+    "cta": {
+      "title": "Your job is out there.",
+      "desc": "Let's go find it.",
+      "button": "Start the 5-minute quiz →",
+      "note": "Free · Anonymous · Amsterdam"
+    },
+    "footer": {
+      "builtBy": "Built with ❤️ in Amsterdam by",
+      "team": "Erwin, Jeroen & Suryansh",
+      "hackathon": "Hackathon 2026"
+    },
+    "quizCard": {
+      "appName": "Find your job",
+      "step": "Step 2 of 5",
+      "interestLabel": "Interests",
+      "question": "What do you like doing?",
+      "nextButton": "Next →",
+      "footer": "Anonymous · Free · 5 minutes"
+    }
+  },
+  "jobs": {
+    "title": "Jobs Near You",
+    "loading": "Loading…",
+    "listings": "{count} listings",
+    "clearSelection": "✕ Clear selection",
+    "source": "YoungCapital & Olympia",
+    "loadingJobs": "Loading jobs…",
+    "couldNotLoad": "Could not load jobs",
+    "tryAgain": "Try again",
+    "legendTitle": "Job Type",
+    "jobsCount": "{count} jobs · Click a pin or a card to select",
+    "searchPlaceholder": "Search jobs, locations…",
+    "noJobsFound": "No jobs found",
+    "mailButton": "✉ Mail",
+    "viewButton": "View →",
+    "back": "← Home"
+  },
+  "match": {
+    "title": "Find your best-fit jobs",
+    "subtitle": "Describe your experience and skills in any language — Dutch, Arabic, English, Tigrinya. We'll find matching jobs in Amsterdam.",
+    "nameLabel": "Your name (optional)",
+    "namePlaceholder": "e.g. Yohannes",
+    "resumeLabel": "Tell us about yourself",
+    "resumeRequired": "*",
+    "resumeHint": "Skills, experience, languages, what kind of work you want. Any language is fine.",
+    "resumePlaceholder": "Example:\nI have 3 years of experience working in restaurants and cafes as a waiter and barista. I speak Arabic, English, and some Dutch. I am hardworking, friendly, and good with customers. I am looking for part-time or full-time work in Amsterdam.",
+    "submit": "Find matching jobs",
+    "loading": "Finding matches…",
+    "noMatches": "No matches found. Try adding more detail about your experience.",
+    "matchesTitle": "{count} best matches for you",
+    "navHome": "neighborhood-piper",
+    "navJobMap": "Job Map",
+    "navMatch": "Match Me"
+  },
+  "post": {
+    "header": "Junta",
+    "badge": "Employer",
+    "back": "← Back to Junta",
+    "formTitle": "Post a vacancy",
+    "titleLabel": "Job title *",
+    "titlePlaceholder": "e.g. Stock clerk, Junior Barista",
+    "categoryLabel": "Category",
+    "categoryPlaceholder": "e.g. Hospitality, Retail, Logistics",
+    "typeLabel": "Type",
+    "salaryLabel": "Salary",
+    "salaryPlaceholder": "e.g. €12.50/hr or €2,500/mo",
+    "locationLabel": "Location",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Describe the vacancy, tasks, requirements…",
+    "urlLabel": "Vacancy page URL",
+    "contactEmailLabel": "Contact email (for applications)",
+    "contactEmailPlaceholder": "applications@company.com",
+    "submit": "Post vacancy",
+    "submitting": "Saving...",
+    "success": "Vacancy posted successfully.",
+    "locationChange": "Change",
+    "locationPlaceholder": "Type a neighbourhood, district or city…",
+    "locationTypeLabels": {
+      "buurt": "Neighbourhood",
+      "wijk": "District",
+      "woonplaats": "City",
+      "gemeente": "Municipality"
+    }
+  }
+}

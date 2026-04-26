@@ -1,8 +1,7 @@
 import Link from "next/link";
+import { getLocale, getTranslations } from 'next-intl/server';
 
-// Design system: BG #FFFFFF · Card #FFFFFF · Accent #eb4d02 · Blue #4A9FE5 · Pink #F4A0A4 · Dim #666666 · Border #E8E8E8
-
-const STEPS = [
+const STEPS_EN = [
   {
     n: "01",
     title: "Tell us what you like",
@@ -11,7 +10,7 @@ const STEPS = [
   {
     n: "02",
     title: "We find your matches",
-    desc: "Our AI reads every job in Amsterdam and finds the ones that fit you — by neighborhood, by hours, by what you're good at.",
+    desc: "Our AI reads every job in Amsterdam and finds the ones that fit you — by neighbourhood, by hours, by what you're good at.",
   },
   {
     n: "03",
@@ -20,18 +19,56 @@ const STEPS = [
   },
 ];
 
-const CATEGORIES = [
+const STEPS_NL = [
+  {
+    n: "01",
+    title: "Vertel ons wat je leuk vindt",
+    desc: "Skills, interesses, hoeveel uur je wilt. Duurt 5 minuten. Geen documenten. Geen Nederlands nodig.",
+  },
+  {
+    n: "02",
+    title: "Wij vinden jouw matches",
+    desc: "Onze AI leest elke vacature in Amsterdam en vindt die welke bij jou passen — op buurt, op uren, op wat je goed kunt.",
+  },
+  {
+    n: "03",
+    title: "Solliciteer direct",
+    desc: "Echte vacatures, echte links. Ga direct naar de werkgever. Geen wachtlijst, geen tussenpersoon.",
+  },
+];
+
+const CATEGORIES_EN = [
   { emoji: "📦", label: "Warehouse & Logistics" },
-  { emoji: "🍽️", label: "Horeca & Kitchen" },
+  { emoji: "🍽️", label: "Hospitality & Kitchen" },
   { emoji: "🏪", label: "Retail & Shop" },
   { emoji: "🧹", label: "Cleaning & Facility" },
   { emoji: "💻", label: "Admin & Office" },
-  { emoji: "🏗️", label: "Building & Handwerk" },
+  { emoji: "🏗️", label: "Building & Crafts" },
   { emoji: "🤝", label: "Care & Community" },
   { emoji: "🚲", label: "Delivery & Transport" },
 ];
 
-export default function Home() {
+const CATEGORIES_NL = [
+  { emoji: "📦", label: "Warehouse & Logistiek" },
+  { emoji: "🍽️", label: "Horeca & Keuken" },
+  { emoji: "🏪", label: "Retail & Winkel" },
+  { emoji: "🧹", label: "Schoonmaak & Facilitair" },
+  { emoji: "💻", label: "Admin & Kantoor" },
+  { emoji: "🏗️", label: "Bouwen & Handwerk" },
+  { emoji: "🤝", label: "Zorg & Community" },
+  { emoji: "🚲", label: "Bezorgen & Transport" },
+];
+
+// Design system: BG #FFFFFF · Card #FFFFFF · Accent #eb4d02 · Blue #4A9FE5 · Pink #F4A0A4 · Dim #666666 · Border #E8E8E8
+
+export default async function Home() {
+  const locale = await getLocale();
+  const t = await getTranslations('landing');
+  const isNL = locale === 'nl';
+
+  const STEPS = isNL ? STEPS_NL : STEPS_EN;
+  const CATEGORIES = isNL ? CATEGORIES_NL : CATEGORIES_EN;
+
   return (
     <div
       className="min-h-screen"
@@ -53,14 +90,14 @@ export default function Home() {
             className="hidden sm:block text-sm font-semibold px-3 py-2 transition-colors"
             style={{ color: "#0D0D0D" }}
           >
-            Jobs map
+            {t('nav.jobsMap')}
           </Link>
           <Link
             href="/app"
             className="px-5 py-2 rounded-full text-sm font-bold transition-colors text-white"
             style={{ background: "#0D0D0D" }}
           >
-            Find my job →
+            {t('nav.findMyJob')}
           </Link>
         </div>
       </nav>
@@ -118,18 +155,17 @@ export default function Home() {
             className="text-5xl sm:text-6xl font-black leading-[1.05] tracking-tight mb-6"
             style={{ color: "#0D0D0D" }}
           >
-            Amsterdam<br />
-            has your job.<br />
-            <span style={{ color: "#eb4d02" }}>Let&apos;s find it.</span>
+            {t('hero.line1')}<br />
+            {t('hero.line2')}<br />
+            <span style={{ color: "#eb4d02" }}>{t('hero.accent')}</span>
           </h1>
 
           <p className="text-lg leading-relaxed mb-4 max-w-md" style={{ color: "#666666" }}>
-            Answer 5 questions. Get matched to real local jobs near you.
+            {t('hero.desc1')}
           </p>
 
           <p className="text-base leading-relaxed mb-8 max-w-md" style={{ color: "#666666" }}>
-            No account. No documents. We never ask where you&apos;re from
-            or what your status is — just what you&apos;re good at.
+            {t('hero.desc2')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 mb-10">
@@ -138,21 +174,21 @@ export default function Home() {
               className="px-7 py-3.5 rounded-full font-bold text-base transition-colors text-center text-white"
               style={{ background: "#0D0D0D" }}
             >
-              Start — it&apos;s free
+              {t('hero.cta')}
             </Link>
             <Link
               href="/jobs"
               className="px-7 py-3.5 rounded-full font-bold text-base transition-colors text-center"
               style={{ border: "2px solid #0D0D0D", color: "#0D0D0D", background: "#FFFFFF" }}
             >
-              Browse the map
+              {t('hero.browse')}
             </Link>
           </div>
 
           <div className="flex flex-wrap items-center gap-5 text-sm" style={{ color: "#666666" }}>
-            <span className="flex items-center gap-1.5">🔒 Fully anonymous</span>
-            <span className="flex items-center gap-1.5">🌍 No Dutch required</span>
-            <span className="flex items-center gap-1.5">📍 Amsterdam only</span>
+            <span className="flex items-center gap-1.5">{t('hero.badge1')}</span>
+            <span className="flex items-center gap-1.5">{t('hero.badge2')}</span>
+            <span className="flex items-center gap-1.5">{t('hero.badge3')}</span>
           </div>
         </div>
 
@@ -168,13 +204,13 @@ export default function Home() {
             >
               <div className="flex items-center gap-2">
                 <img src="/junta-logo.png" alt="Junta" className="h-6 rounded" />
-                <span className="text-sm font-bold" style={{ color: "#0D0D0D" }}>Vind je bijbaan</span>
+                <span className="text-sm font-bold" style={{ color: "#0D0D0D" }}>{t('quizCard.appName')}</span>
               </div>
               <span
                 className="text-xs px-2 py-0.5 rounded-full font-semibold"
                 style={{ background: "#F5F5F5", color: "#666666" }}
               >
-                Stap 2 van 5
+                {t('quizCard.step')}
               </span>
             </div>
             <div style={{ height: 4, background: "#F5F5F5" }}>
@@ -185,42 +221,69 @@ export default function Home() {
                 className="text-xs mb-1 font-bold uppercase tracking-widest"
                 style={{ color: "#666666" }}
               >
-                Interesses
+                {t('quizCard.interestLabel')}
               </p>
               <p className="text-lg font-black mb-5" style={{ color: "#0D0D0D" }}>
-                Wat vind je leuk om te doen?
+                {t('quizCard.question')}
               </p>
               <div className="grid grid-cols-2 gap-2 mb-5">
-                {[
-                  { e: "💻", l: "Tech" },
-                  { e: "🤝", l: "Mensen helpen" },
-                  { e: "🍕", l: "Eten & Horeca" },
-                  { e: "🔧", l: "Bouwen" },
-                  { e: "⚽", l: "Sport" },
-                  { e: "🎨", l: "Creatief" },
-                ].map(s => (
-                  <div
-                    key={s.l}
-                    className="rounded-xl px-3 py-2 text-xs text-center font-semibold cursor-pointer"
-                    style={
-                      s.l === "Eten & Horeca"
-                        ? { background: "#0D0D0D", border: "1.5px solid #0D0D0D", color: "#fff" }
-                        : { background: "#F5F5F5", border: "1.5px solid #E8E8E8", color: "#0D0D0D" }
-                    }
-                  >
-                    {s.e} {s.l}
-                  </div>
-                ))}
+                {isNL ? (
+                  <>
+                    {[
+                      { e: "💻", l: "Tech" },
+                      { e: "🤝", l: "Mensen helpen" },
+                      { e: "🍕", l: "Eten & Horeca" },
+                      { e: "🔧", l: "Bouwen" },
+                      { e: "⚽", l: "Sport" },
+                      { e: "🎨", l: "Creatief" },
+                    ].map(s => (
+                      <div
+                        key={s.l}
+                        className="rounded-xl px-3 py-2 text-xs text-center font-semibold cursor-pointer"
+                        style={
+                          s.l === "Eten & Horeca"
+                            ? { background: "#0D0D0D", border: "1.5px solid #0D0D0D", color: "#fff" }
+                            : { background: "#F5F5F5", border: "1.5px solid #E8E8E8", color: "#0D0D0D" }
+                        }
+                      >
+                        {s.e} {s.l}
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    {[
+                      { e: "💻", l: "Tech" },
+                      { e: "🤝", l: "Helping people" },
+                      { e: "🍕", l: "Food & Hospitality" },
+                      { e: "🔧", l: "Building" },
+                      { e: "⚽", l: "Sport" },
+                      { e: "🎨", l: "Creative" },
+                    ].map(s => (
+                      <div
+                        key={s.l}
+                        className="rounded-xl px-3 py-2 text-xs text-center font-semibold cursor-pointer"
+                        style={
+                          s.l === "Food & Hospitality"
+                            ? { background: "#0D0D0D", border: "1.5px solid #0D0D0D", color: "#fff" }
+                            : { background: "#F5F5F5", border: "1.5px solid #E8E8E8", color: "#0D0D0D" }
+                        }
+                      >
+                        {s.e} {s.l}
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
               <div
                 className="rounded-xl py-3 text-center text-sm font-bold text-white"
                 style={{ background: "#0D0D0D" }}
               >
-                Volgende →
+                {t('quizCard.nextButton')}
               </div>
             </div>
             <div className="px-5 pb-4 text-center">
-              <p className="text-xs" style={{ color: "#888888" }}>Anoniem · Gratis · 5 minuten</p>
+              <p className="text-xs" style={{ color: "#888888" }}>{t('quizCard.footer')}</p>
             </div>
           </div>
         </div>
@@ -234,7 +297,7 @@ export default function Home() {
       >
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-black text-center mb-16" style={{ color: "#0D0D0D" }}>
-            How it works
+            {t('howItWorks.title')}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
             {STEPS.map((s) => (
@@ -257,10 +320,10 @@ export default function Home() {
       <section className="py-20 px-6" style={{ background: "#FFFFFF" }}>
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl font-black text-center mb-3" style={{ color: "#0D0D0D" }}>
-            What kind of jobs?
+            {t('categories.title')}
           </h2>
           <p className="text-center mb-10 max-w-md mx-auto text-sm" style={{ color: "#666666" }}>
-            Real listings from Amsterdam employers — updated every week.
+            {t('categories.subtitle')}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {CATEGORIES.map((c) => (
@@ -285,12 +348,10 @@ export default function Home() {
         <div className="max-w-3xl mx-auto text-center">
           <span className="text-4xl mb-6 block">🔒</span>
           <h2 className="text-3xl sm:text-4xl font-black mb-5" style={{ color: "#0D0D0D" }}>
-            We never ask who you are.
+            {t('anonymous.title')}
           </h2>
           <p className="text-lg leading-relaxed" style={{ color: "#666666" }}>
-            No name. No address. No documents. No questions about your residency, visa, or background.
-            Just tell us what you&apos;re good at and what you&apos;re looking for.
-            That&apos;s all we need.
+            {t('anonymous.desc')}
           </p>
         </div>
       </section>
@@ -298,20 +359,20 @@ export default function Home() {
       {/* ── CTA ─────────────────────────────────────────────────── */}
       <section className="py-24 px-6 text-center" style={{ background: "#0D0D0D" }}>
         <h2 className="text-4xl sm:text-5xl font-black text-white leading-tight mb-4">
-          Your job is out there.
+          {t('cta.title')}
         </h2>
         <p className="text-lg mb-10 max-w-md mx-auto" style={{ color: "rgba(255,255,255,0.8)" }}>
-          Let&apos;s go find it.
+          {t('cta.desc')}
         </p>
         <Link
           href="/app"
           className="inline-block px-10 py-4 rounded-full text-lg font-black transition-colors"
           style={{ background: "#FFFFFF", color: "#0D0D0D" }}
         >
-          Start the 5-minute quiz →
+          {t('cta.button')}
         </Link>
         <p className="text-sm mt-5" style={{ color: "rgba(255,255,255,0.6)" }}>
-          Free · Anonymous · Amsterdam
+          {t('cta.note')}
         </p>
       </section>
 
@@ -322,10 +383,10 @@ export default function Home() {
       >
         <img src="/junta-logo.png" alt="Junta" className="h-8 rounded-md" />
         <p>
-          Built with ❤️ in Amsterdam by{" "}
-          <span className="font-bold" style={{ color: "#0D0D0D" }}>Erwin, Jeroen &amp; Suryansh</span>
+          {t('footer.builtBy')}{" "}
+          <span className="font-bold" style={{ color: "#0D0D0D" }}>{t('footer.team')}</span>
         </p>
-        <p>Hackathon 2026</p>
+        <p>{t('footer.hackathon')}</p>
       </footer>
     </div>
   );

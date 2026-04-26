@@ -1,0 +1,239 @@
+{
+  "app": {
+    "welcome": {
+      "tagline": "Ontdek wat bij je past. Vind een baan. Bouw je toekomst.",
+      "highlight": "In 5 minuten.",
+      "cta": "Let's go →",
+      "note": "Geen account nodig • 100% anoniem"
+    },
+    "age": {
+      "title": "Hoe oud ben je?",
+      "subtitle": "Dit bepaalt welke banen en regelingen voor jou gelden.",
+      "suffix": "jaar"
+    },
+    "name": {
+      "title": "Hoe mogen we je noemen?",
+      "subtitle": "Dit komt op je CV. Een bijnaam of initialen mag ook.",
+      "nameLabel": "Naam *",
+      "namePlaceholder": "Voornaam of bijnaam",
+      "contactLabel": "E-mail of telefoonnummer",
+      "contactOptional": "(optioneel)",
+      "contactPlaceholder": "naam@email.com of 06-...",
+      "privacyNote": "🔒 Contactinfo wordt alleen op jouw CV gezet — we slaan niets op.",
+      "next": "Volgende →"
+    },
+    "location": {
+      "title": "Waar woon je?",
+      "subtitle": "Zoek je buurt, wijk of stad. We gebruiken dit om banen bij jou in de buurt te vinden.",
+      "placeholder": "Typ je buurt, wijk of stad…",
+      "change": "Wijzigen",
+      "typeLabels": {
+        "buurt": "Buurt",
+        "wijk": "Wijk",
+        "woonplaats": "Stad",
+        "gemeente": "Gemeente"
+      },
+      "next": "Volgende →",
+      "skip": "Overslaan"
+    },
+    "education": {
+      "title": "Jouw opleiding",
+      "subtitle": "Helpt werkgevers jouw achtergrond begrijpen.",
+      "schoolLabel": "School of instelling",
+      "schoolPlaceholder": "Bijv. ROC Amsterdam, Montessori College...",
+      "levelLabel": "Niveau",
+      "yearLabel": "Jaar van afstuderen",
+      "next": "Volgende →",
+      "skip": "Overslaan"
+    },
+    "languages": {
+      "title": "Welke talen spreek je?",
+      "subtitle": "Kies alle talen die je spreekt, verstaat of leert.",
+      "next": "Volgende →"
+    },
+    "interests": {
+      "title": "Waar word je blij van?",
+      "subtitle": "Kies er minimaal 2. Dit helpt ons banen te vinden die bij je passen.",
+      "next": "Volgende →"
+    },
+    "skills": {
+      "title": "Waar ben je goed in?",
+      "subtitle": "Wees eerlijk — er zijn geen foute antwoorden.",
+      "next": "Volgende →"
+    },
+    "availability": {
+      "title": "Wanneer kun je werken?",
+      "subtitle": "Tik de dagen aan waarop je beschikbaar bent.",
+      "hoursLabel": "Hoeveel uur per week?",
+      "next": "Volgende →"
+    },
+    "dream": {
+      "title": "Laatste vraag ✨",
+      "subtitle": "Als je alles kon worden, wat zou je dan doen? Typ gewoon wat je denkt.",
+      "placeholder": "Bijv. 'Iets met muziek', 'Eigen bedrijf starten', 'Weet ik nog niet'...",
+      "next": "Volgende →"
+    },
+    "experience": {
+      "title": "Wat heb je al gedaan?",
+      "subtitle": "Werk, vrijwilligerswerk, helpen thuis — alles telt. Kies wat op jou van toepassing is.",
+      "noteLabel": "Wil je er iets over vertellen?",
+      "noteOptional": "(optioneel)",
+      "notePlaceholder": "Bijv. 'Ik heb 6 maanden bij de Albert Heijn gewerkt' of 'Ik help elke week bij een voetbalclub'...",
+      "next": "Volgende →",
+      "skip": "Overslaan"
+    },
+    "jobPicks": {
+      "title": "Zou je liever...",
+      "subtitle": "Keuze {n} van 3 — kies de baan die je het meeste aanspreekt.",
+      "loading": "Even nadenken...",
+      "generatingCV": "CV schrijven...",
+      "loadingDesc": "We zoeken passende opties voor jou.",
+      "generatingDesc": "We maken jouw profieltekst op basis van je keuzes.",
+      "error": "Kon geen opties laden. Je kunt dit overslaan.",
+      "skip": "Overslaan"
+    },
+    "loading": {
+      "msgs0": "Profiel analyseren...",
+      "msgs1": "Banen matchen...",
+      "msgs2": "CV opbouwen...",
+      "msgs3": "Klaar!"
+    },
+    "results": {
+      "subtitle": "Jouw persoonlijke resultaten",
+      "reset": "↩ Opnieuw",
+      "jobsTab": "Banen",
+      "cvTab": "CV",
+      "jobsFound": "{count} banen gevonden die bij jou passen",
+      "jobsLoading": "Banen zoeken die bij jou passen…",
+      "jobsError": "Kon banen niet laden",
+      "apply": "Anoniem solliciteren →",
+      "downloadCV": "📥 Download als PDF"
+    },
+    "cv": {
+      "anonymousProfile": "Anoniem Profiel",
+      "privacyNote": "🔒 Naam en contactinfo worden alleen op jouw CV gezet",
+      "profile": "Profiel",
+      "education": "Opleiding",
+      "experience": "Ervaring",
+      "languages": "Talen",
+      "skills": "Vaardigheden",
+      "interests": "Interesses",
+      "availability": "Beschikbaarheid",
+      "school": "School",
+      "profileFallback": "Gemotiveerde jongere ({age} jaar) op zoek naar een bijbaan.",
+      "dreamPrefix": "Droombaan:"
+    }
+  },
+  "landing": {
+    "nav": {
+      "jobsMap": "Banen kaart",
+      "findMyJob": "Vind mijn baan →"
+    },
+    "hero": {
+      "line1": "Amsterdam",
+      "line2": "heeft jouw baan.",
+      "accent": "Laten we hem vinden.",
+      "desc1": "Beantwoord 5 vragen. Word gematcht met echte lokale banen bij jou in de buurt.",
+      "desc2": "Geen account. Geen documenten. We vragen nooit waar je vandaan komt of wat je status is — alleen wat je goed kunt.",
+      "cta": "Begin — gratis",
+      "browse": "Bekijk de kaart",
+      "badge1": "🔒 Volledig anoniem",
+      "badge2": "🌍 Geen Nederlands nodig",
+      "badge3": "📍 Alleen Amsterdam"
+    },
+    "howItWorks": {
+      "title": "Hoe het werkt"
+    },
+    "categories": {
+      "title": "Wat voor banen?",
+      "subtitle": "Echte vacatures van Amsterdamse werkgevers — elke week bijgewerkt."
+    },
+    "anonymous": {
+      "title": "We vragen nooit wie je bent.",
+      "desc": "Geen naam. Geen adres. Geen documenten. Geen vragen over je verblijf, visum of achtergrond. Vertel ons gewoon wat je goed kunt en wat je zoekt. Dat is alles wat we nodig hebben."
+    },
+    "cta": {
+      "title": "Jouw baan is er.",
+      "desc": "Laten we hem gaan zoeken.",
+      "button": "Begin de 5-minuten quiz →",
+      "note": "Gratis · Anoniem · Amsterdam"
+    },
+    "footer": {
+      "builtBy": "Gemaakt met ❤️ in Amsterdam door",
+      "team": "Erwin, Jeroen & Suryansh",
+      "hackathon": "Hackathon 2026"
+    },
+    "quizCard": {
+      "appName": "Vind je bijbaan",
+      "step": "Stap 2 van 5",
+      "interestLabel": "Interesses",
+      "question": "Wat vind je leuk om te doen?",
+      "nextButton": "Volgende →",
+      "footer": "Anoniem · Gratis · 5 minuten"
+    }
+  },
+  "jobs": {
+    "title": "Banen bij jou in de buurt",
+    "loading": "Laden…",
+    "listings": "{count} vacatures",
+    "clearSelection": "✕ Selectie wissen",
+    "source": "YoungCapital & Olympia",
+    "loadingJobs": "Banen laden…",
+    "couldNotLoad": "Kon banen niet laden",
+    "tryAgain": "Probeer opnieuw",
+    "legendTitle": "Soort baan",
+    "jobsCount": "{count} banen · Klik een pin of kaart om te selecteren",
+    "searchPlaceholder": "Zoek banen, locaties…",
+    "noJobsFound": "Geen banen gevonden",
+    "mailButton": "✉ Mail",
+    "viewButton": "Bekijk →",
+    "back": "← Home"
+  },
+  "match": {
+    "title": "Vind jouw beste matches",
+    "subtitle": "Beschrijf je ervaring en skills in elke taal — Nederlands, Arabisch, Engels, Tigrinya. Wij vinden passende banen in Amsterdam.",
+    "nameLabel": "Jouw naam (optioneel)",
+    "namePlaceholder": "bijv. Yohannes",
+    "resumeLabel": "Vertel ons over jezelf",
+    "resumeRequired": "*",
+    "resumeHint": "Skills, ervaring, talen, wat voor werk je zoekt. Elke taal is prima.",
+    "resumePlaceholder": "Voorbeeld:\nIk heb 3 jaar ervaring als ober en barista in restaurants en cafes. Ik spreek Arabisch, Engels en wat Nederlands. Ik ben hardwerkend, vriendelijk en goed met klanten. Ik zoek parttime of fulltime werk in Amsterdam.",
+    "submit": "Vind passende banen",
+    "loading": "Matches zoeken…",
+    "noMatches": "Geen matches gevonden. Voeg meer details toe over je ervaring.",
+    "matchesTitle": "{count} beste matches voor jou",
+    "navHome": "neighborhood-piper",
+    "navJobMap": "Banen Kaart",
+    "navMatch": "Match Mij"
+  },
+  "post": {
+    "header": "Junta",
+    "badge": "Werkgever",
+    "back": "← Terug naar Junta",
+    "formTitle": "Vacature plaatsen",
+    "titleLabel": "Vacaturetitel *",
+    "titlePlaceholder": "bijv. Vakkenvuller, Junior Barista",
+    "categoryLabel": "Categorie",
+    "categoryPlaceholder": "bijv. Horeca, Retail, Logistiek",
+    "typeLabel": "Type",
+    "salaryLabel": "Salaris",
+    "salaryPlaceholder": "bijv. €12,50/hr of €2.500/mo",
+    "locationLabel": "Locatie",
+    "descriptionLabel": "Omschrijving",
+    "descriptionPlaceholder": "Beschrijf de vacature, taken, vereisten…",
+    "urlLabel": "URL vacaturepagina",
+    "contactEmailLabel": "Contact e-mail (voor sollicitaties)",
+    "contactEmailPlaceholder": "sollicitaties@bedrijf.nl",
+    "submit": "Vacature plaatsen",
+    "submitting": "Opslaan...",
+    "success": "Vacature succesvol geplaatst.",
+    "locationChange": "Wijzigen",
+    "locationPlaceholder": "Typ een buurt, wijk of stad…",
+    "locationTypeLabels": {
+      "buurt": "Buurt",
+      "wijk": "Wijk",
+      "woonplaats": "Stad",
+      "gemeente": "Gemeente"
+    }
+  }
+}

@@ -36,25 +36,42 @@ export const EXPERIENCE_OPTIONS = [
   "Cursus of training gevolgd",
 ];
 
+export const EXPERIENCE_OPTIONS_EN = [
+  "Had a part-time job",
+  "Did an internship",
+  "Did volunteer work",
+  "Helped at home (cooking, cleaning, shopping)",
+  "Did odd jobs for neighbours or family",
+  "Played or trained in a team",
+  "Created my own project or website",
+  "Followed a course or training",
+];
+
 export const INTERESTS = [
-  { id: "tech",     emoji: "💻", label: "Tech & Computers" },
-  { id: "people",   emoji: "🤝", label: "Mensen helpen" },
-  { id: "creative", emoji: "🎨", label: "Creatief werk" },
-  { id: "sport",    emoji: "⚽", label: "Sport & Bewegen" },
-  { id: "food",     emoji: "🍕", label: "Eten & Horeca" },
-  { id: "animals",  emoji: "🐕", label: "Dieren" },
-  { id: "music",    emoji: "🎵", label: "Muziek" },
-  { id: "building", emoji: "🔧", label: "Bouwen & Maken" },
-  { id: "nature",   emoji: "🌿", label: "Natuur & Buiten" },
-  { id: "fashion",  emoji: "👟", label: "Mode & Style" },
-  { id: "gaming",   emoji: "🎮", label: "Gaming" },
-  { id: "science",  emoji: "🔬", label: "Wetenschap" },
+  { id: "tech",     emoji: "💻", label: "Tech & Computers",    labelEn: "Tech & Computers" },
+  { id: "people",   emoji: "🤝", label: "Mensen helpen",       labelEn: "Helping people" },
+  { id: "creative", emoji: "🎨", label: "Creatief werk",       labelEn: "Creative work" },
+  { id: "sport",    emoji: "⚽", label: "Sport & Bewegen",     labelEn: "Sport & Exercise" },
+  { id: "food",     emoji: "🍕", label: "Eten & Horeca",       labelEn: "Food & Hospitality" },
+  { id: "animals",  emoji: "🐕", label: "Dieren",              labelEn: "Animals" },
+  { id: "music",    emoji: "🎵", label: "Muziek",              labelEn: "Music" },
+  { id: "building", emoji: "🔧", label: "Bouwen & Maken",      labelEn: "Building & Making" },
+  { id: "nature",   emoji: "🌿", label: "Natuur & Buiten",     labelEn: "Nature & Outdoors" },
+  { id: "fashion",  emoji: "👟", label: "Mode & Style",        labelEn: "Fashion & Style" },
+  { id: "gaming",   emoji: "🎮", label: "Gaming",              labelEn: "Gaming" },
+  { id: "science",  emoji: "🔬", label: "Wetenschap",          labelEn: "Science" },
 ];
 
 export const SKILLS_OPTIONS = [
   "Goed met mensen praten", "Snel leren", "Goed in teamwork",
   "Zelfstandig werken", "Creatief denken", "Handig met social media",
   "Goed organiseren", "Fysiek sterk", "Talen spreken", "Geduldig",
+];
+
+export const SKILLS_OPTIONS_EN = [
+  "Good at talking to people", "Fast learner", "Good at teamwork",
+  "Can work independently", "Creative thinking", "Good with social media",
+  "Good at organising", "Physically strong", "Speaking languages", "Patient",
 ];
 
 export const LANGUAGES = [
@@ -69,7 +86,24 @@ export const EDU_LEVELS = [
   "Buitenlands diploma",
 ];
 
+export const EDU_LEVELS_EN = [
+  "Primary school", "VMBO (pre-vocational)", "HAVO (general secondary)", "VWO (pre-university)",
+  "MBO level 1–2 (vocational)", "MBO level 3–4 (vocational)", "HBO (applied sciences)", "University",
+  "Foreign diploma",
+];
+
 export const EDU_YEARS = [
   "2019 of eerder", "2020", "2021", "2022", "2023",
   "2024", "2025", "2026", "2027", "Nog bezig",
 ];
+
+export const EDU_YEARS_EN = [
+  "2019 or earlier", "2020", "2021", "2022", "2023",
+  "2024", "2025", "2026", "2027", "Still in progress",
+];
+
+export const HOURS_OPTIONS = ["4-8 uur", "8-16 uur", "16-24 uur", "24+ uur"];
+export const HOURS_OPTIONS_EN = ["4-8 hrs", "8-16 hrs", "16-24 hrs", "24+ hrs"];
+
+export const DAYS_NL = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
+export const DAYS_EN = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];

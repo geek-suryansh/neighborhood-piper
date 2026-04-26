@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import { getSupabase } from "@/lib/supabase";
 
 const COLORS = {
@@ -54,12 +55,13 @@ const labelStyle: React.CSSProperties = {
 };
 
 function LocationPicker({ value, onChange }: { value: ResolvedLocation | null; onChange: (loc: ResolvedLocation | null) => void }) {
+  const t = useTranslations('post');
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<PdokDoc[]>([]);
   const [searching, setSearching] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       if (query.length < 2) { setSuggestions([]); return; }
       setSearching(true);
       try {
@@ -75,7 +77,7 @@ function LocationPicker({ value, onChange }: { value: ResolvedLocation | null; o
       } catch { setSuggestions([]); }
       setSearching(false);
     }, query.length < 2 ? 0 : 300);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [query]);
 
   const pick = async (doc: PdokDoc) => {
@@ -93,7 +95,12 @@ function LocationPicker({ value, onChange }: { value: ResolvedLocation | null; o
     }
   };
 
-  const typeLabel: Record<string, string> = { buurt: "Buurt", wijk: "Wijk", woonplaats: "Stad", gemeente: "Gemeente" };
+  const typeLabels: Record<string, string> = {
+    buurt: t('locationTypeLabels.buurt'),
+    wijk: t('locationTypeLabels.wijk'),
+    woonplaats: t('locationTypeLabels.woonplaats'),
+    gemeente: t('locationTypeLabels.gemeente'),
+  };
 
   if (value) {
     return (
@@ -103,7 +110,7 @@ function LocationPicker({ value, onChange }: { value: ResolvedLocation | null; o
           <div style={{ color: COLORS.textDim, fontSize: 11, marginTop: 2 }}>{value.lat.toFixed(4)}, {value.lng.toFixed(4)}</div>
         </div>
         <button type="button" onClick={() => onChange(null)} style={{ padding: "5px 10px", borderRadius: 7, border: `1px solid ${COLORS.border}`, background: "transparent", color: COLORS.textDim, fontSize: 11, cursor: "pointer", fontFamily: FONTS }}>
-          Wijzigen
+          {t('locationChange')}
         </button>
       </div>
     );
@@ -114,7 +121,7 @@ function LocationPicker({ value, onChange }: { value: ResolvedLocation | null; o
       <input
         value={query}
         onChange={e => setQuery(e.target.value)}
-        placeholder="Typ een buurt, wijk of stad…"
+        placeholder={t('locationPlaceholder')}
         style={{ ...inputStyle, paddingRight: searching ? 40 : 14 }}
       />
       {searching && <div style={{ position: "absolute", right: 14, top: 12, color: COLORS.textDim, fontSize: 13 }}>…</div>}
@@ -128,7 +135,7 @@ function LocationPicker({ value, onChange }: { value: ResolvedLocation | null; o
               style={{ width: "100%", padding: "10px 14px", border: "none", borderBottom: `1px solid ${COLORS.border}`, background: "transparent", color: COLORS.text, fontSize: 13, cursor: "pointer", textAlign: "left", fontFamily: FONTS, display: "flex", justifyContent: "space-between", alignItems: "center" }}
             >
               <span>{doc.weergavenaam}</span>
-              <span style={{ color: COLORS.textDim, fontSize: 11 }}>{typeLabel[doc.type] ?? doc.type}</span>
+              <span style={{ color: COLORS.textDim, fontSize: 11 }}>{typeLabels[doc.type] ?? doc.type}</span>
             </button>
           ))}
         </div>
@@ -150,6 +157,7 @@ type FormState = {
 const EMPTY_FORM: FormState = { title: "", category: "", type: "Flexible", salary: "", description: "", url: "", contact_email: "" };
 
 export default function PostPage() {
+  const t = useTranslations('post');
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [location, setLocation] = useState<ResolvedLocation | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -198,84 +206,70 @@ export default function PostPage() {
         <div style={{ paddingTop: 28, paddingBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: 22 }}>⚡</span>
-            <h1 style={{ fontSize: 20, fontWeight: 800, color: COLORS.accent, margin: 0 }}>Junta</h1>
-            <span style={{ color: COLORS.textDim, fontSize: 13, fontWeight: 600, padding: "2px 8px", border: `1px solid ${COLORS.border}`, borderRadius: 6 }}>Werkgever</span>
+            <h1 style={{ fontSize: 20, fontWeight: 800, color: COLORS.accent, margin: 0 }}>{t('header')}</h1>
+            <span style={{ color: COLORS.textDim, fontSize: 13, fontWeight: 600, padding: "2px 8px", border: `1px solid ${COLORS.border}`, borderRadius: 6 }}>{t('badge')}</span>
           </div>
           <a href="/app" style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${COLORS.border}`, color: COLORS.textDim, fontSize: 13, textDecoration: "none" }}>
-            ← Terug naar Junta
+            {t('back')}
           </a>
         </div>
 
-        {/* Stats */}
-        {/* <div style={{ display: "flex", gap: 12, marginBottom: 28, flexWrap: "wrap" }}>
-          {[
-            { label: "Actieve jongeren", value: "1.247", color: COLORS.accent },
-            { label: "Gemiddelde match", value: "86%", color: COLORS.purple },
-            { label: "Ingehuurd deze maand", value: "43", color: COLORS.orange },
-          ].map((s, i) => (
-            <div key={i} style={{ flex: "1 1 140px", padding: 18, borderRadius: 14, background: COLORS.card, border: `1px solid ${COLORS.border}` }}>
-              <p style={{ color: COLORS.textDim, fontSize: 12, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.label}</p>
-              <p style={{ color: s.color, fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>{s.value}</p>
-            </div>
-          ))}
-        </div> */}
-
         <div style={{ maxWidth: 560, margin: "0 auto", paddingBottom: 48 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 16px", color: COLORS.text }}>Vacature plaatsen</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 16px", color: COLORS.text }}>{t('formTitle')}</h2>
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
-                <label style={labelStyle}>Vacaturetitel *</label>
+                <label style={labelStyle}>{t('titleLabel')}</label>
                 <input
                   style={inputStyle}
-                  placeholder="bijv. Vakkenvuller, Junior Barista"
+                  placeholder={t('titlePlaceholder')}
                   value={form.title}
                   onChange={e => set("title", e.target.value)}
                   required
                 />
               </div>
               <div>
-                <label style={labelStyle}>Categorie</label>
+                <label style={labelStyle}>{t('categoryLabel')}</label>
                 <input
                   style={inputStyle}
-                  placeholder="bijv. Horeca, Retail, Logistiek"
+                  placeholder={t('categoryPlaceholder')}
                   value={form.category}
                   onChange={e => set("category", e.target.value)}
                 />
               </div>
               <div>
-                <label style={labelStyle}>Type</label>
+                <label style={labelStyle}>{t('typeLabel')}</label>
                 <select
                   style={{ ...inputStyle, cursor: "pointer" }}
                   value={form.type}
                   onChange={e => set("type", e.target.value)}
                 >
-                  {JOB_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  {JOB_TYPES.map(jobType => <option key={jobType} value={jobType}>{jobType}</option>)}
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>Salaris</label>
+                <label style={labelStyle}>{t('salaryLabel')}</label>
                 <input
                   style={inputStyle}
-                  placeholder="bijv. €12,50/hr of €2.500/mo"
+                  placeholder={t('salaryPlaceholder')}
                   value={form.salary}
                   onChange={e => set("salary", e.target.value)}
                 />
               </div>
               <div>
-                <label style={labelStyle}>Locatie</label>
+                <label style={labelStyle}>{t('locationLabel')}</label>
                 <LocationPicker value={location} onChange={setLocation} />
               </div>
               <div>
-                <label style={labelStyle}>Omschrijving</label>
+                <label style={labelStyle}>{t('descriptionLabel')}</label>
                 <textarea
                   style={{ ...inputStyle, minHeight: 120, resize: "vertical" }}
-                  placeholder="Beschrijf de vacature, taken, vereisten…"
+                  placeholder={t('descriptionPlaceholder')}
                   value={form.description}
                   onChange={e => set("description", e.target.value)}
                 />
               </div>
               <div>
-                <label style={labelStyle}>URL vacaturepagina</label>
+                <label style={labelStyle}>{t('urlLabel')}</label>
                 <input
                   style={inputStyle}
                   type="url"
@@ -285,11 +279,11 @@ export default function PostPage() {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Contact e-mail (voor sollicitaties)</label>
+                <label style={labelStyle}>{t('contactEmailLabel')}</label>
                 <input
                   style={inputStyle}
                   type="email"
-                  placeholder="sollicitaties@bedrijf.nl"
+                  placeholder={t('contactEmailPlaceholder')}
                   value={form.contact_email}
                   onChange={e => set("contact_email", e.target.value)}
                 />
@@ -299,7 +293,7 @@ export default function PostPage() {
                 <p style={{ color: "#EF4444", fontSize: 13, margin: 0 }}>{errorMsg}</p>
               )}
               {status === "success" && (
-                <p style={{ color: "#22C55E", fontSize: 13, margin: 0, fontWeight: 600 }}>Vacature succesvol geplaatst.</p>
+                <p style={{ color: "#22C55E", fontSize: 13, margin: 0, fontWeight: 600 }}>{t('success')}</p>
               )}
 
               <button
@@ -307,7 +301,7 @@ export default function PostPage() {
                 disabled={status === "loading"}
                 style={{ padding: "12px 24px", borderRadius: 10, border: "none", background: status === "loading" ? COLORS.accentDim : "#0D0D0D", color: status === "loading" ? COLORS.textDim : "#FFFFFF", fontSize: 14, fontWeight: 700, cursor: status === "loading" ? "default" : "pointer", fontFamily: FONTS, transition: "opacity 0.15s" }}
               >
-                {status === "loading" ? "Opslaan..." : "Vacature plaatsen"}
+                {status === "loading" ? t('submitting') : t('submit')}
               </button>
             </form>
         </div>

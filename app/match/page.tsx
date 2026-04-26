@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 interface MatchedJob {
   id: string;
@@ -14,10 +15,8 @@ interface MatchedJob {
   similarity?: number;
 }
 
-const PLACEHOLDER = `Example:
-I have 3 years of experience working in restaurants and cafes as a waiter and barista. I speak Arabic, English, and some Dutch. I am hardworking, friendly, and good with customers. I am looking for part-time or full-time work in Amsterdam.`;
-
 export default function MatchPage() {
+  const t = useTranslations('match');
   const [name, setName] = useState('');
   const [resumeText, setResumeText] = useState('');
   const [jobs, setJobs] = useState<MatchedJob[]>([]);
@@ -71,40 +70,40 @@ export default function MatchPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Nav */}
       <nav className="bg-white border-b px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-lg font-semibold text-gray-900">neighborhood-piper</Link>
+        <Link href="/" className="text-lg font-semibold text-gray-900">{t('navHome')}</Link>
         <div className="flex gap-4 text-sm text-gray-600">
-          <Link href="/jobs" className="hover:text-gray-900">Job Map</Link>
-          <Link href="/match" className="text-gray-900 font-semibold">Match Me</Link>
+          <Link href="/jobs" className="hover:text-gray-900">{t('navJobMap')}</Link>
+          <Link href="/match" className="text-gray-900 font-semibold">{t('navMatch')}</Link>
         </div>
       </nav>
 
       <div className="max-w-2xl mx-auto px-6 py-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Find your best-fit jobs</h1>
-          <p className="text-gray-500">Describe your experience and skills in any language — Dutch, Arabic, English, Tigrinya. We'll find matching jobs in Amsterdam.</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('title')}</h1>
+          <p className="text-gray-500">{t('subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4 mb-8">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Your name (optional)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('nameLabel')}</label>
             <input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="e.g. Yohannes"
+              placeholder={t('namePlaceholder')}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tell us about yourself <span className="text-red-500">*</span>
+              {t('resumeLabel')} <span className="text-red-500">{t('resumeRequired')}</span>
             </label>
-            <p className="text-xs text-gray-400 mb-2">Skills, experience, languages, what kind of work you want. Any language is fine.</p>
+            <p className="text-xs text-gray-400 mb-2">{t('resumeHint')}</p>
             <textarea
               value={resumeText}
               onChange={e => setResumeText(e.target.value)}
-              placeholder={PLACEHOLDER}
+              placeholder={t('resumePlaceholder')}
               rows={7}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
               required
@@ -119,7 +118,7 @@ export default function MatchPage() {
             disabled={loading || resumeText.trim().length < 10}
             className="w-full bg-gray-950 hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 text-white font-medium py-3 rounded-xl transition-colors"
           >
-            {loading ? 'Finding matches…' : 'Find matching jobs'}
+            {loading ? t('loading') : t('submit')}
           </button>
         </form>
 
@@ -128,12 +127,12 @@ export default function MatchPage() {
         )}
 
         {done && jobs.length === 0 && (
-          <p className="text-center text-gray-500 py-8">No matches found. Try adding more detail about your experience.</p>
+          <p className="text-center text-gray-500 py-8">{t('noMatches')}</p>
         )}
 
         {jobs.length > 0 && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">{jobs.length} best matches for you</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('matchesTitle', { count: jobs.length })}</h2>
             <div className="space-y-3">
               {jobs.map((job, i) => (
                 <a

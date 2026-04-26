@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { Job } from '@/components/JobMap';
 
 const JobMap = dynamic(() => import('@/components/JobMap'), { ssr: false });
@@ -20,6 +21,7 @@ const TYPE_COLORS: Record<string, string> = {
 const LEGEND = Object.entries(TYPE_COLORS);
 
 export default function JobsPage() {
+  const t = useTranslations('jobs');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -34,7 +36,6 @@ export default function JobsPage() {
       .catch(() => { setError(true); setLoading(false); });
   }, []);
 
-  // Scroll selected card into view in the sidebar
   useEffect(() => {
     if (!selectedJob) return;
     const el = cardRefs.current[selectedJob.id];
@@ -53,16 +54,16 @@ export default function JobsPage() {
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100 shrink-0">
         <div className="flex items-center gap-3">
-          <a href="/" className="text-gray-400 hover:text-gray-600 transition-colors text-sm">← Home</a>
+          <a href="/" className="text-gray-400 hover:text-gray-600 transition-colors text-sm">{t('back')}</a>
           <span className="text-gray-200">|</span>
           <div className="flex items-center gap-2">
             <span className="text-xl">🗺️</span>
-            <span className="font-bold text-gray-900">Jobs Near You</span>
+            <span className="font-bold text-gray-900">{t('title')}</span>
             {loading ? (
-              <span className="bg-gray-100 text-gray-400 text-xs font-semibold px-2 py-0.5 rounded-full animate-pulse">Loading…</span>
+              <span className="bg-gray-100 text-gray-400 text-xs font-semibold px-2 py-0.5 rounded-full animate-pulse">{t('loading')}</span>
             ) : (
               <span className="text-white text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: "#eb4d02" }}>
-                {filtered.length} listings
+                {t('listings', { count: filtered.length })}
               </span>
             )}
           </div>
@@ -73,10 +74,10 @@ export default function JobsPage() {
               onClick={() => setSelectedJob(null)}
               className="text-gray-900 font-semibold hover:underline mr-2"
             >
-              ✕ Clear selection
+              {t('clearSelection')}
             </button>
           )}
-          <span>YoungCapital &amp; Olympia</span>
+          <span>{t('source')}</span>
         </div>
       </header>
 
@@ -86,18 +87,18 @@ export default function JobsPage() {
           {loading && (
             <div className="absolute inset-0 z-[2000] flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm gap-3">
               <div className="w-10 h-10 border-4 border-gray-900 border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-gray-500">Loading jobs…</p>
+              <p className="text-sm text-gray-500">{t('loadingJobs')}</p>
             </div>
           )}
           {error && (
             <div className="absolute inset-0 z-[2000] flex flex-col items-center justify-center bg-white gap-2">
               <span className="text-4xl">⚠️</span>
-              <p className="text-gray-700 font-semibold">Could not load jobs</p>
+              <p className="text-gray-700 font-semibold">{t('couldNotLoad')}</p>
               <button
                 onClick={() => { setError(false); setLoading(true); fetch('/api/jobs').then(r => r.json()).then(d => { setJobs(d.jobs || []); setLoading(false); }).catch(() => setError(true)); }}
                 className="text-sm text-gray-900 hover:underline"
               >
-                Try again
+                {t('tryAgain')}
               </button>
             </div>
           )}
@@ -110,7 +111,7 @@ export default function JobsPage() {
 
           {/* Legend */}
           <div className="absolute bottom-6 left-4 z-[1000] bg-white rounded-xl shadow-lg p-4 text-xs">
-            <p className="font-semibold text-gray-700 mb-3">Job Type</p>
+            <p className="font-semibold text-gray-700 mb-3">{t('legendTitle')}</p>
             <div className="flex flex-col gap-2">
               {LEGEND.map(([type, color]) => (
                 <div key={type} className="flex items-center gap-2">
@@ -123,7 +124,7 @@ export default function JobsPage() {
 
           {!loading && !error && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 backdrop-blur-sm rounded-full shadow px-4 py-2 text-xs text-gray-500 pointer-events-none">
-              {filtered.length} jobs · Click a pin or a card to select
+              {t('jobsCount', { count: filtered.length })}
             </div>
           )}
         </div>
@@ -133,7 +134,7 @@ export default function JobsPage() {
           <div className="p-4 border-b border-gray-50 sticky top-0 bg-white z-10">
             <input
               type="text"
-              placeholder="Search jobs, locations…"
+              placeholder={t('searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -149,7 +150,7 @@ export default function JobsPage() {
                 </div>
               ))
             ) : filtered.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8">No jobs found</p>
+              <p className="text-sm text-gray-400 text-center py-8">{t('noJobsFound')}</p>
             ) : (
               filtered.map((job) => {
                 const isSelected = selectedJob?.id === job.id;
@@ -186,7 +187,7 @@ export default function JobsPage() {
                             className="text-xs text-blue-500 hover:underline font-medium"
                             title="Solliciteer via e-mail (voeg je cv toe als bijlage)"
                           >
-                            ✉ Mail
+                            {t('mailButton')}
                           </a>
                         )}
                         <a
@@ -196,7 +197,7 @@ export default function JobsPage() {
                           onClick={(e) => e.stopPropagation()}
                           className="text-xs text-gray-900 hover:underline font-semibold"
                         >
-                          View →
+                          {t('viewButton')}
                         </a>
                       </div>
                     </div>
