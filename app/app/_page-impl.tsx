@@ -126,47 +126,37 @@ function BigButton({ onClick, children, secondary, disabled }: {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: 16 }}>
-      <h4 style={{ fontSize: 12, fontWeight: 700, color: COLORS.textDim, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px" }}>
-        {title}
-      </h4>
-      {children}
-    </div>
-  );
-}
 
 // ── CV Style presets ──
 
 type CVColorId = 'green' | 'blue' | 'orange' | 'purple' | 'rose';
 type CVFontId = 'modern' | 'classic' | 'clean' | 'mono' | 'friendly';
 type CVSectionStyleId = 'line' | 'color' | 'block';
-interface CVColorPreset { id: CVColorId; label: string; accent: string; tagBg: string; tagText: string; tagBorder: string; }
-interface CVFontPreset { id: CVFontId; label: string; stack: string; }
+interface CVColorPreset { id: CVColorId; label: string; accent: string; tagBg: string; tagText: string; tagBorder: string; sidebarBg: string; }
+interface CVFontPreset { id: CVFontId; label: string; stack: string; googleFont: string; }
 interface CVSectionPreset { id: CVSectionStyleId; label: string; }
 interface CVStyle { colorId: CVColorId; fontId: CVFontId; sectionStyleId: CVSectionStyleId; }
 
 const CV_COLORS: CVColorPreset[] = [
-  { id: 'green',  label: 'Groen',    accent: '#00c087', tagBg: '#f0faf6', tagText: '#007a55', tagBorder: '#00c08733' },
-  { id: 'blue',   label: 'Blauw',    accent: '#2563eb', tagBg: '#eff6ff', tagText: '#1d4ed8', tagBorder: '#2563eb33' },
-  { id: 'orange', label: 'Oranje',   accent: '#f59e0b', tagBg: '#fffbeb', tagText: '#b45309', tagBorder: '#f59e0b33' },
-  { id: 'purple', label: 'Paars',    accent: '#7c3aed', tagBg: '#f5f3ff', tagText: '#6d28d9', tagBorder: '#7c3aed33' },
-  { id: 'rose',   label: 'Roze',     accent: '#ec4899', tagBg: '#fdf2f8', tagText: '#be185d', tagBorder: '#ec489933' },
+  { id: 'green',  label: 'Groen',  accent: '#059669', tagBg: '#ecfdf5', tagText: '#065f46', tagBorder: '#05966933', sidebarBg: '#d1fae5' },
+  { id: 'blue',   label: 'Blauw',  accent: '#2563eb', tagBg: '#eff6ff', tagText: '#1d4ed8', tagBorder: '#2563eb33', sidebarBg: '#dbeafe' },
+  { id: 'orange', label: 'Oranje', accent: '#d97706', tagBg: '#fffbeb', tagText: '#92400e', tagBorder: '#d9770633', sidebarBg: '#fef3c7' },
+  { id: 'purple', label: 'Paars',  accent: '#7c3aed', tagBg: '#f5f3ff', tagText: '#5b21b6', tagBorder: '#7c3aed33', sidebarBg: '#ede9fe' },
+  { id: 'rose',   label: 'Roze',   accent: '#db2777', tagBg: '#fdf2f8', tagText: '#9d174d', tagBorder: '#db277733', sidebarBg: '#fce7f3' },
 ];
 const CV_FONTS: CVFontPreset[] = [
-  { id: 'modern',   label: 'Modern',      stack: "'Segoe UI', system-ui, sans-serif" },
-  { id: 'classic',  label: 'Klassiek',    stack: "Georgia, 'Times New Roman', serif" },
-  { id: 'clean',    label: 'Clean',       stack: "Arial, Helvetica, sans-serif" },
-  { id: 'mono',     label: 'Mono',        stack: "'Courier New', Courier, monospace" },
-  { id: 'friendly', label: 'Vriendelijk', stack: "'Trebuchet MS', Tahoma, sans-serif" },
+  { id: 'modern',   label: 'Modern',      stack: "'Inter', system-ui, sans-serif",              googleFont: 'Inter:wght@400;500;600;700;800;900' },
+  { id: 'classic',  label: 'Klassiek',    stack: "'Playfair Display', Georgia, serif",           googleFont: 'Playfair+Display:wght@400;600;700;800;900' },
+  { id: 'clean',    label: 'Clean',       stack: "'DM Sans', Arial, sans-serif",                 googleFont: 'DM+Sans:wght@400;500;700;800' },
+  { id: 'mono',     label: 'Mono',        stack: "'IBM Plex Mono', 'Courier New', monospace",    googleFont: 'IBM+Plex+Mono:wght@400;500;600;700' },
+  { id: 'friendly', label: 'Vriendelijk', stack: "'Nunito', Tahoma, sans-serif",                 googleFont: 'Nunito:wght@400;600;700;800;900' },
 ];
 const CV_SECTION_STYLES: CVSectionPreset[] = [
   { id: 'line',  label: 'Lijn' },
   { id: 'color', label: 'Kleur' },
   { id: 'block', label: 'Blok' },
 ];
-const DEFAULT_CV_STYLE: CVStyle = { colorId: 'green', fontId: 'modern', sectionStyleId: 'line' };
+const DEFAULT_CV_STYLE: CVStyle = { colorId: 'blue', fontId: 'modern', sectionStyleId: 'line' };
 
 // ── CV PDF generation — always Dutch ──
 
@@ -175,23 +165,28 @@ function generateCVHTML(data: AppData, style: CVStyle = DEFAULT_CV_STYLE): strin
     .map(id => INTERESTS.find(i => i.id === id)?.label)
     .filter(Boolean);
   const dayMap: Record<string, string> = {
+    Ma: "Ma", Di: "Di", Wo: "Wo",
+    Do: "Do", Vr: "Vr", Za: "Za", Zo: "Zo",
+  };
+  const shortDays = (data.days || []).map(d => dayMap[d] || d);
+  const fullDayMap: Record<string, string> = {
     Ma: "Maandag", Di: "Dinsdag", Wo: "Woensdag",
     Do: "Donderdag", Vr: "Vrijdag", Za: "Zaterdag", Zo: "Zondag",
   };
-  const fullDays = (data.days || []).map(d => dayMap[d] || d);
+  const fullDays = (data.days || []).map(d => fullDayMap[d] || d);
 
   const colorPreset = CV_COLORS.find(c => c.id === style.colorId) ?? CV_COLORS[0];
   const fontPreset = CV_FONTS.find(f => f.id === style.fontId) ?? CV_FONTS[0];
-  const { accent, tagBg, tagText, tagBorder } = colorPreset;
+  const { accent, tagText, tagBorder, sidebarBg } = colorPreset;
   const fontStack = fontPreset.stack;
 
-  let h2CSS: string;
+  let mainHeadingCSS: string;
   if (style.sectionStyleId === 'color') {
-    h2CSS = `font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: ${accent}; margin-bottom: 10px;`;
+    mainHeadingCSS = `font-size: 8pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.16em; color: ${accent}; margin: 0 0 10px; padding-bottom: 5px; border-bottom: 2px solid ${accent};`;
   } else if (style.sectionStyleId === 'block') {
-    h2CSS = `font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: ${tagText}; background: ${tagBg}; border: 1px solid ${tagBorder}; padding: 3px 10px; border-radius: 20px; display: inline-block; margin-bottom: 10px;`;
+    mainHeadingCSS = `font-size: 7.5pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: white; background: ${accent}; padding: 4px 12px; border-radius: 4px; display: inline-block; margin: 0 0 10px;`;
   } else {
-    h2CSS = `font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #999; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #eee;`;
+    mainHeadingCSS = `font-size: 8pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.16em; color: #111827; margin: 0 0 10px; padding-bottom: 5px; border-bottom: 2px solid ${accent};`;
   }
 
   return `<!DOCTYPE html>
@@ -199,99 +194,103 @@ function generateCVHTML(data: AppData, style: CVStyle = DEFAULT_CV_STYLE): strin
 <head>
 <meta charset="utf-8">
 <title>CV — ${data.name || "Anoniem"}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=${fontPreset.googleFont}&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: ${fontStack}; color: #1a1a1a; background: white; padding: 48px 52px; font-size: 10.5pt; line-height: 1.55; max-width: 800px; margin: 0 auto; }
-  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2.5px solid ${accent}; }
-  .header h1 { font-size: 26pt; font-weight: 800; letter-spacing: -0.03em; color: #0a0a0f; line-height: 1.1; }
-  .header .sub { color: #666; font-size: 11pt; margin-top: 4px; }
-  .badge { display: inline-block; background: ${tagBg}; border: 1px solid ${tagBorder}; color: ${tagText}; font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; padding: 3px 10px; border-radius: 20px; margin-top: 8px; }
-  .contact { text-align: right; color: #555; font-size: 10pt; line-height: 1.8; }
-  .section { margin-bottom: 22px; }
-  .section h2 { ${h2CSS} }
-  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
-  .tag { background: ${tagBg}; border: 1px solid ${tagBorder}; color: ${tagText}; padding: 4px 12px; border-radius: 20px; font-size: 9.5pt; }
-  .edu { display: flex; justify-content: space-between; }
-  .edu strong { font-size: 11pt; }
-  .edu span { display: block; color: #666; font-size: 10pt; }
-  .edu .year { color: #888; font-size: 10pt; white-space: nowrap; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: ${fontStack}; color: #1a1a1a; background: white; font-size: 10pt; line-height: 1.55; }
+  .page { display: flex; width: 100%; min-height: 100vh; align-items: stretch; }
+  .sidebar { width: 210px; flex-shrink: 0; background: ${sidebarBg}; padding: 0 20px; align-self: stretch; }
+  .s-name { font-size: 18pt; font-weight: 900; letter-spacing: -0.025em; color: #0a0a0f; line-height: 1.05; margin-bottom: 5px; padding-top: 24px; }
+  .s-badge { display: inline-block; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: ${accent}; background: white; border: 1.5px solid ${tagBorder}; padding: 2px 9px; border-radius: 20px; margin-bottom: 18px; }
+  .s-section { margin-bottom: 14px; }
+  .s-heading { font-size: 7pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.16em; color: ${accent}; margin-bottom: 6px; padding-bottom: 3px; border-bottom: 1.5px solid ${accent}; }
+  .s-item { font-size: 8.5pt; color: #374151; margin-bottom: 3px; word-break: break-word; }
+  .s-tag { display: inline-block; background: white; border: 1px solid ${tagBorder}; color: ${tagText}; padding: 1px 7px; border-radius: 20px; font-size: 7.5pt; font-weight: 600; margin: 1px 2px 1px 0; }
+  .s-day { display: inline-block; font-size: 7.5pt; font-weight: 600; padding: 1px 7px; border-radius: 20px; margin: 1px 2px 1px 0; background: white; border: 1px solid ${accent}; color: ${tagText}; }
+  .main { flex: 1; padding: 24px 30px; background: white; }
+  .m-section { margin-bottom: 14px; }
+  .m-heading { ${mainHeadingCSS} }
+  .body-text { font-size: 9.5pt; color: #374151; line-height: 1.6; }
+  .edu-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .edu-name { font-size: 9.5pt; font-weight: 700; color: #111827; }
+  .edu-level { font-size: 8.5pt; color: #6b7280; margin-top: 1px; }
+  .edu-year { font-size: 8.5pt; color: #9ca3af; white-space: nowrap; }
   .exp-item { margin-bottom: 10px; }
-  .exp-item strong { font-size: 10.5pt; display: block; }
-  .exp-item span { color: #555; font-size: 10pt; }
-  .avail { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
-  .avail span { background: ${tagBg}; border: 1px solid ${tagBorder}; color: ${tagText}; padding: 5px 14px; border-radius: 20px; font-size: 9.5pt; }
-  .footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #eee; color: #bbb; font-size: 8.5pt; display: flex; justify-content: space-between; }
-  @media print { body { padding: 32px 40px; } @page { size: A4; margin: 0; } }
+  .exp-title { font-size: 9.5pt; font-weight: 700; color: #111827; }
+  .exp-desc { font-size: 8.5pt; color: #4b5563; line-height: 1.5; margin-top: 1px; }
+  @media print { .page { min-height: 297mm; } @page { size: A4; margin: 0; } }
 </style>
 </head>
 <body>
-  <div class="header">
-    <div>
-      <h1>${data.name || "Anoniem"}</h1>
-      <div class="sub">${data.age} jaar &nbsp;·&nbsp; ${data.location ? `${data.location.name}, Amsterdam` : "Amsterdam"}</div>
-      <span class="badge">⚡ Op zoek naar bijbaan</span>
+<div class="page">
+  <div class="sidebar">
+    <div class="s-name">${data.name || "Anoniem"}</div>
+    <div class="s-badge">Op zoek naar bijbaan</div>
+
+    <div class="s-section">
+      <div class="s-heading">Contact</div>
+      ${data.email ? `<div class="s-item">✉ ${data.email}</div>` : ""}
+      <div class="s-item">📍 ${data.location ? data.location.name : "Amsterdam"}</div>
+      ${data.age ? `<div class="s-item">🎂 ${data.age} jaar</div>` : ""}
     </div>
-    <div class="contact">
-      ${data.email ? `<div>${data.email}</div>` : ""}
-      <div>${data.location ? `${data.location.name}, ` : ""}Amsterdam, Nederland</div>
-    </div>
+
+    ${(data.skills || []).length > 0 ? `
+    <div class="s-section">
+      <div class="s-heading">Vaardigheden</div>
+      <div>${(data.skills || []).map(s => `<span class="s-tag">${s}</span>`).join("")}</div>
+    </div>` : ""}
+
+    ${(data.languages || []).length > 0 ? `
+    <div class="s-section">
+      <div class="s-heading">Talen</div>
+      <div>${(data.languages || []).map(l => `<span class="s-tag">${l}</span>`).join("")}</div>
+    </div>` : ""}
+
+    ${interestLabels.length > 0 ? `
+    <div class="s-section">
+      <div class="s-heading">Interesses</div>
+      <div>${interestLabels.map(i => `<span class="s-tag">${i}</span>`).join("")}</div>
+    </div>` : ""}
+
+    ${shortDays.length > 0 ? `
+    <div class="s-section">
+      <div class="s-heading">Beschikbaarheid</div>
+      <div>${shortDays.map(d => `<span class="s-day">${d}</span>`).join("")}</div>
+      ${data.hours ? `<div class="s-item" style="margin-top:6px;">${data.hours} per week</div>` : ""}
+    </div>` : ""}
   </div>
 
-  <div class="section">
-    <h2>Profiel</h2>
-    <p>${data.profileDescription ?? `Gemotiveerde jongere van ${data.age} jaar, woonachtig in ${data.location ? `${data.location.name}, ` : ""}Amsterdam, op zoek naar een bijbaan.${data.dream ? ` Toekomstdroom: <em>${data.dream}</em>.` : ""} Beschikbaar op ${fullDays.join(", ")}${data.hours ? ` voor ${data.hours} per week` : ""}.`}</p>
-  </div>
+  <div class="main">
+    <div class="m-section">
+      <div class="m-heading">Profiel</div>
+      <p class="body-text">${data.profileDescription ?? `Gemotiveerde jongere van ${data.age} jaar, woonachtig in ${data.location ? data.location.name : "Amsterdam"}, op zoek naar een bijbaan.${data.dream ? ` Toekomstdroom: <em>${data.dream}</em>.` : ""} Beschikbaar op ${fullDays.join(", ")}${data.hours ? ` voor ${data.hours} per week` : ""}.`}</p>
+    </div>
 
-  ${(data.school || data.eduLevel) ? `
-  <div class="section">
-    <h2>Opleiding</h2>
-    <div class="edu">
-      <div>
-        <strong>${data.school || "School / Instelling"}</strong>
-        ${data.eduLevel ? `<span>${data.eduLevel}</span>` : ""}
+    ${(data.school || data.eduLevel) ? `
+    <div class="m-section">
+      <div class="m-heading">Opleiding</div>
+      <div class="edu-row">
+        <div>
+          <div class="edu-name">${data.school || "School / Instelling"}</div>
+          ${data.eduLevel ? `<div class="edu-level">${data.eduLevel}</div>` : ""}
+        </div>
+        ${data.eduYear ? `<div class="edu-year">${data.eduYear}</div>` : ""}
       </div>
-      ${data.eduYear ? `<div class="year">${data.eduYear}</div>` : ""}
-    </div>
-  </div>` : ""}
+    </div>` : ""}
 
-  ${(data.cvExperience || []).length > 0 ? `
-  <div class="section">
-    <h2>Ervaring</h2>
-    ${(data.cvExperience || []).map(item => `
-    <div class="exp-item">
-      <strong>${item.title}</strong>
-      <span>${item.description}</span>
-    </div>`).join("")}
-  </div>` : ""}
-
-  ${(data.skills || []).length > 0 ? `
-  <div class="section">
-    <h2>Vaardigheden</h2>
-    <div class="tags">${(data.skills || []).map(s => `<span class="tag">${s}</span>`).join("")}</div>
-  </div>` : ""}
-
-  ${(data.languages || []).length > 0 ? `
-  <div class="section">
-    <h2>Talen</h2>
-    <div class="tags">${(data.languages || []).map(l => `<span class="tag">${l}</span>`).join("")}</div>
-  </div>` : ""}
-
-  ${interestLabels.length > 0 ? `
-  <div class="section">
-    <h2>Interesses</h2>
-    <div class="tags">${interestLabels.map(i => `<span class="tag">${i}</span>`).join("")}</div>
-  </div>` : ""}
-
-  <div class="section">
-    <h2>Beschikbaarheid</h2>
-    <div class="avail">${fullDays.map(d => `<span>${d}</span>`).join("")}</div>
-    ${data.hours ? `<p style="color:#555">${data.hours} per week</p>` : ""}
+    ${(data.cvExperience || []).length > 0 ? `
+    <div class="m-section">
+      <div class="m-heading">Ervaring</div>
+      ${(data.cvExperience || []).map(item => `
+      <div class="exp-item">
+        <div class="exp-title">${item.title}</div>
+        <div class="exp-desc">${item.description}</div>
+      </div>`).join("")}
+    </div>` : ""}
   </div>
-
-  <div class="footer">
-    <span>Gemaakt via Junta</span>
-    <span>Amsterdam ${new Date().getFullYear()}</span>
-  </div>
+</div>
 </body>
 </html>`;
 }
@@ -365,9 +364,9 @@ function NameScreen({ data, setData, onNext }: { data: AppData; setData: (d: App
         placeholder={t('contactPlaceholder')}
         style={inputStyle}
       />
-      <div style={{ padding: "10px 14px", borderRadius: 10, background: `${COLORS.orange}15`, border: `1px solid ${COLORS.orange}33`, color: COLORS.orange, fontSize: 12, marginBottom: 32 }}>
+      {/* <div style={{ padding: "10px 14px", borderRadius: 10, background: `${COLORS.orange}15`, border: `1px solid ${COLORS.orange}33`, color: COLORS.orange, fontSize: 12, marginBottom: 32 }}>
         {t('privacyNote')}
-      </div>
+      </div> */}
       <BigButton onClick={onNext} disabled={!data.name?.trim()}>{t('next')}</BigButton>
     </div>
   );
@@ -763,7 +762,7 @@ function JobPicksScreen({ data, setData, onNext }: { data: AppData; setData: (d:
         setLoadingPairs(false);
       })
       .catch(() => { setError(true); setLoadingPairs(false); });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const pick = async (job: string) => {
@@ -1188,7 +1187,9 @@ function CVTab({ data }: { data: AppData }) {
   const t = useTranslations('app.cv');
   const locale = useLocale();
   const [cvStyle, setCvStyle] = useState<CVStyle>(DEFAULT_CV_STYLE);
-  const selectedColor = CV_COLORS.find(c => c.id === cvStyle.colorId) ?? CV_COLORS[0];
+  const colorPreset = CV_COLORS.find(c => c.id === cvStyle.colorId) ?? CV_COLORS[0];
+  const { accent, tagText, tagBorder, sidebarBg } = colorPreset;
+
   const interests = (data.interests || []).map(id => {
     const interest = INTERESTS.find(i => i.id === id);
     return locale === 'nl' ? interest?.label : interest?.labelEn;
@@ -1205,113 +1206,123 @@ function CVTab({ data }: { data: AppData }) {
 
   const tResults = useTranslations('app.results');
 
+  const sidebarHeading: React.CSSProperties = {
+    fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.16em",
+    color: accent, borderBottom: `1.5px solid ${accent}`, paddingBottom: 3, marginBottom: 8,
+  };
+  const mainHeading: React.CSSProperties = {
+    fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.16em",
+    color: "#111827", borderBottom: `2px solid ${accent}`, paddingBottom: 3, marginBottom: 8,
+  };
+  const pill: React.CSSProperties = {
+    display: "inline-block", background: "white", border: `1px solid ${tagBorder}`,
+    color: tagText, padding: "2px 8px", borderRadius: 20, fontSize: 10, fontWeight: 600,
+    margin: "2px 3px 2px 0",
+  };
+
   return (
     <div style={{ paddingBottom: 32 }}>
-      {/* Preview */}
-      <div style={{ padding: 24, borderRadius: 16, border: `1px solid ${COLORS.border}`, background: COLORS.card, marginBottom: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-          <div style={{
-            width: 48, height: 48, borderRadius: 12,
-            background: "#0D0D0D",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 20, fontWeight: 800, color: "#FFFFFF",
-          }}>
-            {data.name ? data.name[0].toUpperCase() : "A"}
+      {/* Two-column CV preview */}
+      <div style={{
+        borderRadius: 14, overflow: "hidden",
+        border: `1px solid ${COLORS.border}`,
+        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+        marginBottom: 16,
+        display: "flex",
+        minHeight: 420,
+      }}>
+        {/* Sidebar */}
+        <div style={{ width: "38%", background: sidebarBg, padding: "20px 16px", flexShrink: 0, borderRight: `1px solid ${tagBorder}` }}>
+          <div style={{ fontSize: 19, fontWeight: 900, letterSpacing: "-0.025em", color: "#0a0a0f", lineHeight: 1.05, marginBottom: 4 }}>
+            {data.name || t('anonymousProfile')}
           </div>
-          <div>
-            <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, letterSpacing: "-0.01em" }}>{data.name || t('anonymousProfile')}</h3>
-            <p style={{ color: COLORS.textDim, fontSize: 13, margin: 0 }}>
-              {data.age} jaar • {data.neighborhood ? `${data.neighborhood}, ` : ""}Amsterdam{data.email && ` • ${data.email}`}
-            </p>
+          <div style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.18em", color: accent, marginBottom: 18 }}>
+            Bijbaan gezocht
           </div>
+
+          <div style={{ marginBottom: 14 }}>
+            <div style={sidebarHeading}>{t('contact') || "Contact"}</div>
+            {data.email && <div style={{ fontSize: 10, color: "#374151", marginBottom: 3, wordBreak: "break-all" as const }}>✉ {data.email}</div>}
+            <div style={{ fontSize: 10, color: "#374151", marginBottom: 3 }}>📍 {data.location ? data.location.name : "Amsterdam"}</div>
+            {data.age && <div style={{ fontSize: 10, color: "#374151" }}>🎂 {data.age} jaar</div>}
+          </div>
+
+          {(data.skills || []).length > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={sidebarHeading}>{t('skills')}</div>
+              <div>{(data.skills || []).slice(0, 6).map(s => <span key={s} style={pill}>{s}</span>)}</div>
+            </div>
+          )}
+
+          {(data.languages || []).length > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={sidebarHeading}>{t('languages')}</div>
+              <div>{(data.languages || []).map(l => <span key={l} style={pill}>{l}</span>)}</div>
+            </div>
+          )}
+
+          {interests.length > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={sidebarHeading}>{t('interests')}</div>
+              <div>{interests.slice(0, 5).map(i => <span key={i} style={pill}>{i}</span>)}</div>
+            </div>
+          )}
+
+          {(data.days || []).length > 0 && (
+            <div>
+              <div style={sidebarHeading}>{t('availability')}</div>
+              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 3 }}>
+                {DAYS_NL.map(d => (
+                  <span key={d} style={{
+                    display: "inline-block", fontSize: 9, fontWeight: 700,
+                    padding: "2px 7px", borderRadius: 20,
+                    background: (data.days || []).includes(d) ? "white" : "transparent",
+                    border: `1px solid ${(data.days || []).includes(d) ? accent : tagBorder}`,
+                    color: (data.days || []).includes(d) ? tagText : COLORS.textDim,
+                  }}>{d}</span>
+                ))}
+              </div>
+              {data.hours && <div style={{ fontSize: 10, color: "#6b7280", marginTop: 5 }}>{data.hours}/week</div>}
+            </div>
+          )}
         </div>
 
-        <div style={{ padding: "8px 12px", borderRadius: 8, background: `${COLORS.orange}22`, border: `1px solid ${COLORS.orange}44`, color: COLORS.orange, fontSize: 12, marginBottom: 16 }}>
-          {t('privacyNote')}
-        </div>
-
-        <Section title={t('profile')}>
-          <p style={{ color: COLORS.textDim, fontSize: 14, lineHeight: 1.6, margin: 0 }}>
-            {(locale === 'en' ? data.profileDescriptionEn : data.profileDescription) ?? (
-              <>
-                {t('profileFallback', { age: data.age ?? '' })}
-                {data.dream && ` ${t('dreamPrefix')} ${data.dream}.`}
-                {" "}{(data.days || []).join(", ")} ({data.hours}).
-              </>
-            )}
-          </p>
-        </Section>
-
-        {(data.school || data.eduLevel) && (
-          <Section title={t('education')}>
-            <p style={{ color: COLORS.text, fontSize: 14, margin: 0 }}>
-              <strong>{data.school || t('school')}</strong>
-              {data.eduYear && <span style={{ color: COLORS.textDim }}> — {data.eduYear}</span>}
+        {/* Main content */}
+        <div style={{ flex: 1, padding: "20px 18px", background: "white" }}>
+          <div style={{ marginBottom: 16 }}>
+            <div style={mainHeading}>{t('profile')}</div>
+            <p style={{ fontSize: 11, color: "#374151", lineHeight: 1.65, margin: 0 }}>
+              {(locale === 'en' ? data.profileDescriptionEn : data.profileDescription) ?? (
+                `Gemotiveerde jongere van ${data.age ?? "?"} jaar op zoek naar een bijbaan.${data.dream ? ` Droom: ${data.dream}.` : ""}`
+              )}
             </p>
-            {data.eduLevel && <p style={{ color: COLORS.textDim, fontSize: 13, margin: "2px 0 0" }}>{data.eduLevel}</p>}
-          </Section>
-        )}
+          </div>
 
-        {(data.cvExperience || []).length > 0 && (
-          <Section title={t('experience')}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {(data.cvExperience || []).map((item, i) => (
-                <div key={i}>
-                  <p style={{ color: COLORS.text, fontSize: 14, fontWeight: 600, margin: 0 }}>
+          {(data.school || data.eduLevel) && (
+            <div style={{ marginBottom: 16 }}>
+              <div style={mainHeading}>{t('education')}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#111827" }}>{data.school || t('school')}</div>
+              {data.eduLevel && <div style={{ fontSize: 11, color: "#6b7280", marginTop: 1 }}>{data.eduLevel}</div>}
+              {data.eduYear && <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 1 }}>{data.eduYear}</div>}
+            </div>
+          )}
+
+          {(data.cvExperience || []).length > 0 && (
+            <div style={{ marginBottom: 16 }}>
+              <div style={mainHeading}>{t('experience')}</div>
+              {(data.cvExperience || []).slice(0, 4).map((item, i) => (
+                <div key={i} style={{ marginBottom: 10 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#111827" }}>
                     {locale === 'en' ? (item.titleEn ?? item.title) : item.title}
-                  </p>
-                  <p style={{ color: COLORS.textDim, fontSize: 13, margin: "2px 0 0" }}>
+                  </div>
+                  <div style={{ fontSize: 10, color: "#4b5563", lineHeight: 1.55, marginTop: 1 }}>
                     {locale === 'en' ? (item.descriptionEn ?? item.description) : item.description}
-                  </p>
+                  </div>
                 </div>
               ))}
             </div>
-          </Section>
-        )}
-
-        {(data.languages || []).length > 0 && (
-          <Section title={t('languages')}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {(data.languages || []).map(l => (
-                <span key={l} style={{ padding: "4px 10px", borderRadius: 6, background: selectedColor.tagBg, border: `1px solid ${selectedColor.tagBorder}`, color: selectedColor.tagText, fontSize: 12, fontWeight: 600 }}>{l}</span>
-              ))}
-            </div>
-          </Section>
-        )}
-
-        <Section title={t('skills')}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {(data.skills || []).map(s => (
-              <span key={s} style={{ padding: "4px 10px", borderRadius: 6, background: selectedColor.tagBg, border: `1px solid ${selectedColor.tagBorder}`, color: selectedColor.tagText, fontSize: 12, fontWeight: 600 }}>{s}</span>
-            ))}
-          </div>
-        </Section>
-
-        <Section title={t('interests')}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {interests.map(i => (
-              <span key={i} style={{ padding: "4px 10px", borderRadius: 6, background: selectedColor.tagBg, border: `1px solid ${selectedColor.tagBorder}`, color: selectedColor.tagText, fontSize: 12, fontWeight: 600 }}>{i}</span>
-            ))}
-          </div>
-        </Section>
-
-        <Section title={t('availability')}>
-          <div style={{ display: "flex", gap: 6 }}>
-            {DAYS_NL.map(d => (
-              <div key={d} style={{
-                width: 36, height: 36, borderRadius: 8,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 11, fontWeight: 600,
-                background: (data.days || []).includes(d) ? selectedColor.tagBg : COLORS.bg,
-                color: (data.days || []).includes(d) ? selectedColor.tagText : COLORS.textDim,
-                border: `1px solid ${(data.days || []).includes(d) ? selectedColor.accent : COLORS.border}`,
-              }}>
-                {d}
-              </div>
-            ))}
-          </div>
-        </Section>
+          )}
+        </div>
       </div>
 
       <CVStylePicker style={cvStyle} onChange={setCvStyle} />
