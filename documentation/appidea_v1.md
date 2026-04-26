@@ -1,4 +1,4 @@
-60-second pitch: STAP
+60-second pitch: JUNTA
 "In Amsterdam, 46% of kids in the Bijlmer grow up below the poverty line. 1 in 15 young people between 18 and 23 are at risk of being pulled into drug crime. Not because they don't want to work — the Netherlands has the highest youth employment rate in Europe. But because nobody shows them the way.
 The Dutch government spends €143 million a year on prevention programs. But there is no app that helps a 16-year-old in Nieuw-West figure out what they want to do, builds them an anonymous CV, and shows them jobs within biking distance.
 That's STAP. In 5 minutes, we ask you a few questions — what you're into, what you're good at, when you're free. Then we generate an anonymous profile, match you to real jobs through existing vacancy APIs, and show you financial benefits you didn't know you qualified for.

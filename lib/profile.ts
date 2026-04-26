@@ -1,5 +1,5 @@
-import type { AppData } from "./stap-data";
-import { INTERESTS } from "./stap-data";
+import type { AppData } from "./junta-data";
+import { INTERESTS } from "./junta-data";
 
 // ── Schema ──
 
@@ -23,6 +23,9 @@ export type CandidateProfile = {
     ageMin: number | null;
     ageMax: number | null;
     city: string;
+    neighborhood: string | null;
+    lat: number | null;
+    lng: number | null;
   };
 
   education: {
@@ -132,11 +135,11 @@ const DAY_META: Record<string, { full: string; isoWeekday: number }> = {
   "Zo": { full: "Zondag",     isoWeekday: 7 },
 };
 
-const HOURS_BOUNDS: Record<string, [number, number | null]> = {
+const HOURS_BOUNDS: Record<string, [number, number]> = {
   "4-8 uur":   [4,  8],
   "8-16 uur":  [8,  16],
   "16-24 uur": [16, 24],
-  "24+ uur":   [24, null],
+  "24+ uur":   [24, 40], // treat as fulltime-eligible
 };
 
 // ── Converter ──
@@ -183,7 +186,10 @@ export function toProfile(data: AppData): CandidateProfile {
       ageRange: data.age ?? "",
       ageMin,
       ageMax,
-      city: "Amsterdam",
+      city: data.location?.name ?? "Amsterdam",
+      neighborhood: data.location?.name ?? null,
+      lat: data.location?.lat ?? null,
+      lng: data.location?.lng ?? null,
     },
 
     education: {
